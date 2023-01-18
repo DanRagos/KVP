@@ -108,10 +108,18 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 	}
 	//
 	public function get_contract($id) {
-		$sql = "SELECT * FROM `contract` WHERE client_id = :id";
+		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['id'=>$id]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}
+	public function get_sv($id) {
+		$sql = "SELECT * FROM `contract` WHERE contract_id = :id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['id'=>$id]);
+		$result = $stmt ->fetch(PDO::FETCH_ASSOC);
 		return $result;
 		
 	}

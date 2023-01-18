@@ -66,7 +66,7 @@
      </select>
    </div>-->
 
-                            <button type="button" class="btn btn-block bg-gradient-primary ms-3" data-bs-toggle="modal" data-bs-target="#addSchedule">
+                            <button type="button" class="btn btn-block bg-gradient-primary ms-3" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Client)</span>
                             </button>
@@ -94,33 +94,48 @@
 $(document).ready(function(){
 	displaySchedule();
 	showSchedules();
-	 $("#pmsCheck").click(function(e){
+	 $("#pmsCheck").on('change',function(e){
 		   if ($(this).is(':checked')) {
-			   $('#client_id').prop('readonly',true);
+			  $('#client_id option:not(:selected)').prop('disabled', true);
 				$('#option2').hide();
 				$('#option1').show();
 				let user_id = $('#client_id').val();
-				console.log(user_id);
+			
 				$.ajax({
 				url: '../php/process.php',
 				method : 'POST',
 				data: {user_id : user_id},
 				success: function (response){
-				document.getElementById("machine").innerHTML=response;
-				console.log(response);	
-					/*swal("Rescheduled", "", "success");
-							$("#resched-form")[0].reset();
-							$("#resched-modal").modal('hide');
-							 showSchedules(response);		*/	 
+				$('#machine').html(response);
+				
 				}
 			});
 		   }
 		   else {
-			    $('#client_id').prop('readonly',false);
+			    $('#client_id option:not(:selected)').prop('disabled', false);
 				$('#option2').show();
 				$('#option1').hide();
+			
 		   }
         });
+		
+		 $('#machine').on('change', function(){
+        var ctr = $(this).val();
+        if(ctr){
+            $.ajax({
+                url: '../php/process.php',
+				method : 'POST',
+				data: {ctr : ctr},
+                success:function(response){
+                    $('#sv_call').val(response);
+					console.log(ctr);
+                }
+            }); 
+        }else{
+            $('#city').html('<input placeholder="test">'); 
+        }
+    });
+		
 		
 			  $('select[name="view"]').on('change',function(){
    if($(this).val()==1)
@@ -134,7 +149,26 @@ $(document).ready(function(){
         $('#calendar').hide();
    }
 });
-
+/*--------------------------------------------------------------------------------------------------------*/
+//Add service Call
+$("#addScheduleBtn").click(function(e){
+		if ($("#add-sched-form")[0].checkValidity()) {
+			e.preventDefault();
+			$.ajax({
+				url:'../php/process.php',
+				method: 'post',
+				data: $("#add-sched-form").serialize()+"&action=add_sv",
+				success:function(response){
+					console.log(response);
+					$("#add-sched-form")[0].reset();
+					swal("Schedule Done!", "", "success");
+					$("#addScheduleModal").modal('hide');				
+					displaySchedule();
+					showSchedules();
+					}
+			});
+		} 
+	});
 	//Resched Schedule
 		$('#resched-btn').click(function(e) { 
 			e.preventDefault();

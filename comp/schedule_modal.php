@@ -90,7 +90,7 @@
         </div>
     </div>
 	<!-- Modal for Adding Schedule -->
-	<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="addSchedule">
+	<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="addScheduleModal">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-0">
                 <div class="modal-header rounded-0">
@@ -128,15 +128,15 @@
 	<div class="col">
 	 <div class="input-group input-group-static mb-4">
 	<label class="ms-0">Brand / Model</label>
-	<select class="form-control" name="machine_type" id="machine" required>
+	<select class="form-control" name="machine" id="machine" required>
+	<option selected>Select </option>
 	</select>
 	</div>
 	</div>
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">No. of SV Call :</label>
-        <input type="text" name="brand" class="form-control" required>
-			<input type="hidden" id="sv_call" name="sv_call" >
+        <input type="text"  name="sv_call" id="sv_call" readonly>
 			
       </div>
     </div>
@@ -147,10 +147,10 @@
 	</div>
 	<div class="row" id="option2" >
 	
-					 <div class="col">
+	<div class="col">
 	 <div class="input-group input-group-static mb-4">
 	<label class="ms-0">Option2</label>
-	<select class="form-control" name="machine_type" required>
+	<select class="form-control" name="machine_type" >
 	<option selected> Select </option>
 	<?php
 		$sql ="Select * from machine_type";
@@ -167,7 +167,7 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Brand :</label>
-        <input type="text" name="brand" class="form-control" required>
+        <input type="text" name="brand" class="form-control" >
 			<input type="hidden" id="client_id1" name="client_id1" >
 			
       </div>
@@ -175,12 +175,9 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Model :</label>
-        <input type="text"  name="model" class="form-control" required>
+        <input type="text"  name="model" class="form-control" >
       </div>
-    </div>
-	
-						
-					
+    </div>					
 	</div>
 <div class="row">
 <div class="col">
@@ -192,7 +189,7 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Service Call Date:</label>
-        <input type="text"  name="rep_problem" class="form-control" required>
+        <input type="date"  name="sv_date" class="form-control" required>
       </div>
     </div>
 </div>						

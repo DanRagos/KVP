@@ -285,21 +285,28 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_contract'){
 	}
 }
 // Edit Client Details
+
 if (isset($_POST['user_id'])){
+	$output ='';
 	$id = $_POST['user_id'];
 	$result = $client ->get_contract($id);
+	$output .= '<option> Select </option> ';
 	foreach($result as $row) {
-		echo' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
+		$output.=' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
 	}
-	exit;
+	echo $output;
+	
 }
-if (isset($_POST['user_id'])){
-	$id = $_POST['user_id'];
-	$result = $client ->get_contract($id);
-	foreach($result as $row) {
-		echo' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
-	}
-	exit;
+if (isset($_POST['ctr'])){
+	$id = $_POST['ctr'];
+	$result = $client ->get_sv($id);
+	
+	echo ($result)? $result['sv_call']:'';
+	
+}
+if (isset($_POST['action'])&& $_POST['action'] == 'add_sv'){
+	print_r($_POST);
+
 }
 
 
