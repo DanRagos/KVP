@@ -1,0 +1,156 @@
+<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade modal-lg" id="addTool"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+	  <img src="../img/line_jpg.jpg" class="img-fluid" style="width:20;height:25px;padding-right: 14px;" alt="...">
+        <h5 class="modal-title " id="staticBackdropLabel">Register Tool for Calibration / Verification</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  <div class="container">
+         <div class="row">
+    <div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">IMTE Name</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">ID No.:</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Request No.:</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Requested by: </label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+    <div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Date Request.:</label>
+        <input type="date" class="form-control" value=<?php echo date("Y-m-d") ?>>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col ">
+    <div class="form-check">
+	<label class="form-label">Request:</label>
+	<input type="checkbox" class="form-check-input" id="customCheckDisabled" >
+	<label class="custom-control-label" for="customCheckDisabled">Register</label>
+	</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Reason :</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Reference Doc.:</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+  </div>
+
+  <hr class="bg-danger border-2 border-top border-secondary">
+  <div class="row">
+     <div class="col ">
+    <div class="form-check">
+	<label class="form-label">Action Taken:</label>
+	<input type="checkbox" class="form-check-input" id="customCheckDisabled" >
+	<label class="custom-control-label" for="customCheckDisabled">Register</label>
+	</div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Date:</label>
+        <input type="date" class="form-control" value=<?php echo date("Y-m-d")?>>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+     <div class="input-group input-group-dynamic">
+      <textarea class="form-control" rows="3" placeholder="Remarks" spellcheck="false"></textarea>
+    </div>
+    </div>
+
+	<div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Reference Doc.:</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col">
+      <label class="form-label">Judgement:</label>
+	<div class="form-check ">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="customRadio1">
+  <label class="custom-control-label" for="customRadio1">FIT for Use</label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="customRadio2">
+  <label class="custom-control-label" for="customRadio2">NOT FIT for USE</label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="customRadio3">
+  <label class="custom-control-label" for="customRadio3">FOR DISPOSAL</label>
+</div>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="flexRadioDefault" id="customRadio4">
+  <label class="custom-control-label" for="customRadio4">OTHERS</label>
+</div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-outline my-3">
+        <label class="form-label">Validated by: </label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+	<div class="col">
+	<p> This is to certify that the item has been received in Good condition after request has been 
+	granted: </p>
+      <div class="input-group input-group-static mb-4">
+        <label class="form-label">Recipient:</label>
+        <input type="text" class="form-control">
+      </div>
+    </div>
+	
+  </div>
+  <div class ="row">
+  <div class="col">
+     <div class="input-group input-group-dynamic">
+      <textarea class="form-control" rows="3" placeholder="Remarks" spellcheck="false"></textarea>
+    </div>
+    </div>
+  </div>
+  
+  
+ 
+  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
