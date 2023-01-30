@@ -165,7 +165,7 @@ $pms_count = $_POST['pms_count'];
 $datefilter = $_POST['datefilter'];
 $first_pms = $_POST['first_pms'];
 $pms = $first_pms;
-
+$type= 1;
 $string=$datefilter;
 $last_space = strrpos($string, ' ');
 $last_word = substr($string, $last_space);
@@ -182,7 +182,7 @@ do {
 		$count++;
 } while($pms < $coverage);
 
-$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $count );
+$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $count, $type );
 echo $result;
 
 
@@ -286,21 +286,57 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_contract'){
 }
 // Edit Client Details
 if (isset($_POST['user_id'])){
+	$output = '';
 	$id = $_POST['user_id'];
 	$result = $client ->get_contract($id);
+	$output .= ' <option value=" " selected ></option>';
 	foreach($result as $row) {
-		echo' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
+		$output.= ' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
 	}
-	exit;
+	echo $output;
 }
-if (isset($_POST['user_id'])){
-	$id = $_POST['user_id'];
-	$result = $client ->get_contract($id);
-	foreach($result as $row) {
-		echo' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
-	}
-	exit;
+//
+//
+if (isset($_POST['ctr'])){
+	$id = $_POST['ctr'];
+	$result = $client ->get_sv($id);
+	echo ($result)? $result['sv_call']:'';
+	
 }
 
+//Add SV Call Client
+if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
+	$client_id = $_POST['client_id'];
+	$contract_id = $_POST['contract_id'];
+	//SV TYPE : 1 if client, 2 if contract, 0 if guest
+	$sv_type = 2;
+	if (!$contract_id) {
+	$sv_type = 1;	
+	$machine_type = $_POST['machine_type'];
+	$brand = $_POST['brand'];
+	$model = $_POST['model'];
+	}
+	else {
+	$machine_type = '';
+	$brand = '';
+	$model = '';
+	}
+	$rep_problem = $_POST['rep_problem'];
+	$sv_date = $_POST['sv_date'];
+	$result = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
+	print_r($_POST);
+}
+//Add sv guest
+if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
+	$gName = $_POST['gName'];
+	$gAddress = $_POST['gAddress'];
+	$machine_type = $_POST['machine_type'];
+	$brand = $_POST['brand'];
+	$model = $_POST['model'];
+	$rep_problem = $_POST['rep_problem'];
+    $sv_date = $_POST['sv_date'];
+	$result = $client->add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date);
+
+}
 
 ?>

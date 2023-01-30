@@ -124,19 +124,20 @@
 </div>
 	</div>
 	</div>
-	<div class="row" id="option1" style="display:none">
+	<div class="row" id="option1" name="option1" style="display:none">
 	<div class="col">
 	 <div class="input-group input-group-static mb-4">
 	<label class="ms-0">Brand / Model</label>
-	<select class="form-control" name="machine_type" id="machine" required>
+	<select class="form-control" name="contract_id" id="machine">
+	 <option selected value="">Select</option>
 	</select>
 	</div>
 	</div>
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">No. of SV Call :</label>
-        <input type="text" name="brand" class="form-control" required>
-			<input type="hidden" id="sv_call" name="sv_call" >
+        <input type="text" id="sv_call" class="form-control" readonly>
+			
 			
       </div>
     </div>
@@ -149,8 +150,8 @@
 	
 					 <div class="col">
 	 <div class="input-group input-group-static mb-4">
-	<label class="ms-0">Option2</label>
-	<select class="form-control" name="machine_type" required>
+	<label class="ms-0">Machine Type</label>
+	<select class="form-control" name="machine_type" >
 	<option selected> Select </option>
 	<?php
 		$sql ="Select * from machine_type";
@@ -167,15 +168,14 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Brand :</label>
-        <input type="text" name="brand" class="form-control" required>
-			<input type="hidden" id="client_id1" name="client_id1" >
+        <input type="text" name="brand" class="form-control" >
 			
       </div>
     </div>
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Model :</label>
-        <input type="text"  name="model" class="form-control" required>
+        <input type="text"  name="model" class="form-control" >
       </div>
     </div>
 	
@@ -192,7 +192,7 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">Service Call Date:</label>
-        <input type="text"  name="rep_problem" class="form-control" required>
+        <input type="date"  name="sv_date" class="form-control" required>
       </div>
     </div>
 </div>						
@@ -200,7 +200,95 @@
                 </div>
                 <div class="modal-footer rounded-0">
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary btn-sm rounded-0" id="addScheduleBtn" name="addSchedule"> Confirm</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-0" id="confirmBtn" name="addSchedule"> Confirm</button>
+                           <button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
+                    </div>
+					</form>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+<!-- Add guess sv call -->
+<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="addSvGModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-0">
+                <div class="modal-header rounded-0">
+                    <h5 class="modal-title">Add Service Call</h5>
+                </div>
+                <div class="modal-body rounded-0">
+                    <div class="container-fluid">
+					 <form action="#" method= "post" id ="add-sched-g-form">
+                      <div class="row">
+					  <div class="col">
+	 <div class="input-group input-group-static mb-4">
+	<label class="ms-0">Guest Client Name</label>
+	 <input type="text" class="form-control" name="gName" >	
+	</div>
+	</div>
+	<div class="col">
+      <div class="input-group input-group-static mb-4">
+	<label class="ms-0">Guest Client Address</label>
+	 <input type="text" class="form-control" name="gAddress" >	
+	</div>
+    </div>
+		
+
+	</div>
+	<div class="row">
+					 <div class="col">
+	 <div class="input-group input-group-static mb-4">
+	<label class="ms-0">Machine Type</label>
+	<select class="form-control" name="machine_type" >
+	<option selected> Select </option>
+	<?php
+		$sql ="Select * from machine_type";
+		$stmt = $tool->conn->prepare($sql);
+		$stmt ->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		foreach($result as $row){	
+	?>
+	   <option value = "<?php echo $row['machine_id']?>"><?php echo $row['machine_name']?></option>
+		<?php } ?>
+	</select>
+	</div>
+	</div>
+	<div class="col">
+      <div class="input-group input-group-static mb-4">
+        <label class="form-">Brand :</label>
+        <input type="text" name="brand" class="form-control" >
+			
+      </div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-static mb-4">
+        <label class="form-">Model :</label>
+        <input type="text"  name="model" class="form-control" >
+      </div>
+    </div>
+	
+						
+					
+	</div>
+<div class="row">
+<div class="col">
+      <div class="input-group input-group-static mb-4">
+        <label class="form-">Reported Problem :</label>
+        <input type="text"  name="rep_problem" class="form-control" required>
+      </div>
+    </div>
+	<div class="col">
+      <div class="input-group input-group-static mb-4">
+        <label class="form-">Service Call Date:</label>
+        <input type="date"  name="sv_date" class="form-control" required>
+      </div>
+    </div>
+</div>						
+                    </div>
+                </div>
+                <div class="modal-footer rounded-0">
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-0" id="confirmG" name="addSchedule"> Confirm</button>
                            <button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
                     </div>
 					</form>

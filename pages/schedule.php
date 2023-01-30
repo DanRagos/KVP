@@ -70,7 +70,7 @@
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Client)</span>
                             </button>
-							 <button type="button" class="btn btn-block bg-gradient-success  ml-3" data-bs-toggle="modal" data-bs-target="#addSchedule">
+							 <button type="button" class="btn btn-block bg-gradient-success  ml-3" data-bs-toggle="modal" data-bs-target="#addSvGModal">
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Guest)</span>
                             </button>
@@ -94,46 +94,55 @@
 $(document).ready(function(){
 	displaySchedule();
 	showSchedules();
-	 $("#pmsCheck").click(function(e){
+	 $("#pmsCheck").on('change',function(e){
 		   if ($(this).is(':checked')) {
-			   $('#client_id').prop('readonly',true);
+			  $('#client_id option:not(:selected)').prop('disabled', true);
+			  $('#machine').prop('required', true);
 				$('#option2').hide();
+				$('#option2').removeAttr("required");
 				$('#option1').show();
 				let user_id = $('#client_id').val();
-				console.log(user_id);
+			
 				$.ajax({
 				url: '../php/process.php',
 				method : 'POST',
 				data: {user_id : user_id},
 				success: function (response){
-				document.getElementById("machine").innerHTML=response;
-				console.log(response);	
-					/*swal("Rescheduled", "", "success");
-							$("#resched-form")[0].reset();
-							$("#resched-modal").modal('hide');
-							 showSchedules(response);		*/	 
+					console.log(response);
+				$('#machine').html(response);
+				
+				
 				}
 			});
 		   }
 		   else {
-			    $('#client_id').prop('readonly',false);
+			    $('#client_id option:not(:selected)').prop('disabled', false);
 				$('#option2').show();
 				$('#option1').hide();
+				$('#add-sched-form')[0].reset();
+				 $('#machine').prop('required', false);
+			
 		   }
         });
 		
-			  $('select[name="view"]').on('change',function(){
-   if($(this).val()==1)
-   {
-    	$('#schedTable').hide();
-        $('#calendar').show();
-   }
-   else 
-   {
-		$('#schedTable').show();
-        $('#calendar').hide();
-   }
-});
+		 $('#machine').on('change', function(){
+        var ctr = $(this).val();
+        if(ctr){
+            $.ajax({
+                url: '../php/process.php',
+				method : 'POST',
+				data: {ctr : ctr},
+                success:function(response){
+                    $('#sv_call').val(response);
+					
+                }
+            }); 
+        }else{
+            $('#city').html('<input placeholder="test">'); 
+        }
+    });
+		
+		
 
 	//Resched Schedule
 		$('#resched-btn').click(function(e) { 
@@ -217,20 +226,39 @@ $(document).ready(function(){
 		});
 	});
 	//
-	$("#confirmBtn1").click(function(e){
-		if ($("#confirm-sched-form")[0].checkValidity()) {
+	$("#confirmBtn").click(function(e){
+		if ($("#add-sched-form")[0].checkValidity()) {
 			e.preventDefault();
 			$.ajax({
 				url:'../php/process.php',
 				method: 'post',
-				data: $("#confirm-sched-form").serialize()+"&action=confirm_sched",
+				data: $("#add-sched-form").serialize()+"&action=confirm_sched",
 				success:function(response){
 					console.log(response);
 					swal("Schedule Done!", "", "success");
-					$("#confirm-sched-form")[0].reset();
-					$("#confirmSchedModal").modal('hide');
-					displaySchedule();
-					showSchedules();
+					$("#addSchedule").modal('hide');
+					$("#add-sched-form")[0].reset();
+					$('#option2').show();
+					$('#option1').hide();
+					$('#client_id option:not(:selected)').prop('disabled', false);
+					}
+			});
+		} 
+	});
+	
+		$("#confirmG").click(function(e){
+		if ($("#add-sched-g-form")[0].checkValidity()) {
+			e.preventDefault();
+			$.ajax({
+				url:'../php/process.php',
+				method: 'post',
+				data: $("#add-sched-g-form").serialize()+"&action=confirm_g_sched",
+				success:function(response){
+					console.log(response);
+					swal("SV Call Added!", "", "success");
+					$("#addSvGModal").modal('hide');
+					$("#add-sched-g-form")[0].reset();
+					
 					}
 			});
 		} 
