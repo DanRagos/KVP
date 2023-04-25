@@ -102,8 +102,8 @@ class Clients extends Db {
 		$stmt = $this->conn-> prepare($sql);
 		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
-		$add_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
-		return true;
+		$test = $add_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
+		return $test;
 	}
 	//Add SV Call Guest
 		public function add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date){
@@ -129,13 +129,81 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 	}
 	// Display Schedule
 	public function display_schedule () {
-		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, CASE WHEN service_call.guest = 0 THEN service_call.guest_name ELSE clients.client_name END AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) WHERE schedule.status != 2";
+		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type,
+COALESCE(contract.brand, service_call.brand) as brand,
+COALESCE(contract.model, service_call.model) as model,
+COALESCE(clients.client_name,
+CASE WHEN service_call.guest = 0 THEN service_call.guest_name
+END) AS client_name
+FROM schedule
+LEFT JOIN contract ON schedule.contract_id = contract.contract_id
+LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id
+LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
+WHERE schedule.status != 2;";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute();
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
 	}
-	//
+
+		public function get_schedule ($id) {
+			$sql = "SELECT schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id,
+			COALESCE(contract.brand, service_call.brand) as brand, 
+			COALESCE(contract.model, service_call.model) as model, 
+			COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END)
+			AS client_name,COALESCE(clients.client_address, service_call.guest_address) 
+			AS address, service_call.rep_problem, schedule.schedule_type, service_call.contract_id as sv_contract, contract.frequency, contract.count, contract.total, contract.sv_call FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1
+			AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON
+			(schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id)
+			LEFT JOIN clients ON (contract.client_id = clients.client_id) 
+			OR (service_call.client_id = clients.client_id) WHERE schedule.schedule_id= :id";
+			$stmt = $this->conn->prepare($sql);
+			$stmt->execute(['id'=>$id]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			return $result;
+		}
+public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby) {
+	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `service_by`)
+	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :c_sby);";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'c_sby'=>$c_sby]);
+	return true;
+}
+public function reschedule($id, $schedule_date) {
+	$sql = "UPDATE schedule SET schedule_date = :schedule_date where schedule_id = :id";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['id'=>$id, 'schedule_date'=>$schedule_date]);
+	return $schedule_date;
+}
+public function update_schedule($schedule_id, $status) {
+	$sql = "Update schedule SET status  = :status where schedule_id = :schedule_id";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['schedule_id'=>$schedule_id, 'status'=>$status]);
+	return true;
+}
+public function delete_schedule($schedule_id) {
+	$sql = "DELETE FROM schedule WHERE `schedule`.`schedule_id` = :schedule_id";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['schedule_id'=>$schedule_id]);
+	return true;
+}
+public function delete_svcall($sv_call) {
+		$sql = "DELETE FROM service_call WHERE `service_call`.`sv_id` = :sv_call";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['sv_call'=>$sv_call]);
+	return true;
+	
+}
+
+public function add_pms_sched ($contract_id, $frequency, $s_date){
+	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, '0')";
+	$stmt = $this->conn->prepare($sql);
+	$months  = ($frequency == '1') ? 3 : ($frequency == '2' ? 6 : 12);
+	$new_date = date('Y-m-d', strtotime("+$months month", strtotime($s_date)));
+	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$new_date]);
+	return true;
+	
+}
 public function get_contract($id) {
 		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2";
 		$stmt = $this ->conn ->prepare($sql);
@@ -152,7 +220,43 @@ public function get_contract($id) {
 		return $result;
 		
 	}
+public function expire_sched($contract_id){
+	$sql = "Update contract SET status = 2 where contract_id = :contract_id";
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute(['contract_id'=>$contract_id]);
+	return $stmt;
 	
+}
+public function add_pms_count($contract_id, $count){
+	$sql = "Update contract SET count = :count where contract_id = :contract_id";
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute(['contract_id'=>$contract_id, 'count'=>$count]);
+	return $stmt;
+	
+}
+public function add_sv_count($contract_id, $count){
+	$sql = "Update contract SET sv_call = :count where contract_id = :contract_id";
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute(['contract_id'=>$contract_id, 'count'=>$count]);
+	return $stmt;
+	
+}
+public function get_contract_details($id) {
+		$sql = "SELECT * FROM `contract` WHERE contract_id = :id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['id'=>$id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+	public function get_sv_details($id) {
+		$sql = "SELECT * FROM `service_call` WHERE sv_id = :id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['id'=>$id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
 }
 
 ?>

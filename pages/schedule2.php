@@ -110,9 +110,10 @@ $(document).ready(function(){
 				method : 'POST',
 				data: {user_id : user_id},
 				success: function (response){
-				
 				$('#machine').html(response);
-				let contract_id1= $('#machine').val();
+				
+				
+				
 				}
 			});
 		   }
@@ -192,54 +193,44 @@ $(document).ready(function(){
 		
 		});
 	}
-	//Resched
-		$("body").on("click",".reschedBtn", function(e) {
-	let resched_id = $(this).attr('data-id');
-	e.preventDefault();
-		$.ajax({
-			url: '../php/process.php',
-			method: 'post',
-			data: {resched_id : resched_id},
-			success: function (response) {
-			 $("#reschedModal .reschedContent").html(response);
-			 $("#reschedModal").modal("show");			 
-			}
-		});
-	});
-		//Confirm Resched
-		$("body").on("click","#reschedConfirm", function(e) {
-	let resched_cId = $(this).attr('data-id');
-	e.preventDefault();
-		$.ajax({
-			url: '../php/process.php',
-			method: 'post',
-			data: $("#resched_form").serialize()+"&action=confirm_resched",
-			success: function (response) {
-					swal("Rescheduled", "", "success");
-							$("#add-sched-form")[0].reset();
-							$("#reschedModal").modal('hide');	
-						showSchedules(response);						
-			}
-		});
-	});
-	// Confirm Schedule
-	$("body").on("click","#updateBtn", function(e) {
-	let sched_id = $(this).attr('data-id');
-	e.preventDefault();
-	var edit_id = $(this).attr('data-id');
+	//View All Schedule Details
+	$("body").on("click",".reschedBtn", function(e) {
+		
+		e.preventDefault();
+		var sched_id = $(this).attr('id');
 		$.ajax({
 			url: '../php/process.php',
 			method: 'post',
 			data: {sched_id : sched_id},
 			success: function (response) {
-			 $("#confirm-sched-modal .update_contents").html(response);
-			 $("#confirm-sched-modal").modal("show");
-
+				data = JSON.parse(response);
+				$("#tbl_id").val(data.id);
+				$("#start_d").val(data.start_date);
+				$("#last_d").val(data.deadline_date);
 			}
 		});
 	});
-	
-	
+	//Schedule Modal
+		$("body").on("click",".schedBtn", function(e) {
+		e.preventDefault();
+		var edit_id = $(this).attr('data-id');
+		$.ajax({
+			url: '../php/process.php',
+			method: 'post',
+			data: {edit_id : edit_id},
+			success: function (response) {
+				data = JSON.parse(response);
+				console.log(data);
+				$("#tool_id").val(data.id);
+				$("#sched_id").val(data.sched_id);
+				$("#start_da").val(data.start_date);
+				$("#deadline_da").val(data.deadline_date);
+				$("#inter_date").val(data.interval_date);
+				$("#sched_title").text('Confirm schedule for '+data.name);	
+			}
+		});
+	});
+	//
 	$("#confirmBtn").click(function(e){
 		if ($("#add-sched-form")[0].checkValidity()) {
 			e.preventDefault();
@@ -279,54 +270,7 @@ $(document).ready(function(){
 		} 
 	});
 		
-		$("body").on("click","#c_confirmBtn", function(e) {
-		if ($("#confirm_form")[0].checkValidity()) {
-			e.preventDefault();
-			$.ajax({
-				url:'../php/process.php',
-				method: 'post',
-				data: $("#confirm_form").serialize()+"&action=update_sched",
-				success:function(response){
-					console.log(response);
-					swal("Schedule Done!", "", "success");
-					$("#confirm-sched-modal").modal('hide');
-					$("#confirm_form")[0].reset();
-					showSchedules();
-					}
-			});
-		} 
-	});	
-	
-	//Cancel Service Call
-		$("body").on("click",".cancelSv", function(e){
-		e.preventDefault();
-		del_id = $(this).attr('data-id');
-		swal({
-			title: "Are you sure?",
-			text: "This will cancel this schedule",
-			icon: "warning",
-			buttons: true,
-			dangerMode: true,
-			})
-			.then((willDelete) => {
-			if (willDelete) {
-			$.ajax({
-				url: '../php/process.php',
-				method: 'post',
-				data: {del_id : del_id},
-				success: function(response){
-					swal("Schedule Cancelled", {
-					icon: "success",
-			});
-			$("#schedule_details_modal").modal('hide');
-				showSchedules();
-				}
-			});
-			
-			}
-			});
 		
-	});
 	//Calendar show Schedule function
 	function showSchedules(initialDate) {
 
@@ -336,6 +280,7 @@ $(document).ready(function(){
 			data: {action:'display_schedule'},
 			success: function(response){
 			var scheds = $.parseJSON(response);
+			console.log(scheds);
 			var calendar;
     var Calendar = FullCalendar.Calendar;
     var events = [];
@@ -343,7 +288,7 @@ $(document).ready(function(){
         if (!!scheds) {
             Object.keys(scheds).map(k => {
                 var row = scheds[k]
-                events.push({ id: row.schedule_id, title: row.title, start: row.schedule_date, color: row.color});
+                events.push({ id: row.schedule_id, title: row.client_name, start: row.schedule_date, color: row.color});
             })
         }
         var date = new Date()
@@ -370,6 +315,7 @@ $(document).ready(function(){
         data: { action: 'show_sched_details',
 		id: id },
         success: function(data) {
+			
 			console.log(id);
             // Set the content of the modal with the AJAX request's response data
             $("#schedule_details_modal .contents").html(data);

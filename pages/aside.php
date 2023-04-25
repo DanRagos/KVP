@@ -2,7 +2,7 @@
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xlkl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="../inc/pages/dashboard.php" target="_blank">
-        <!--<img src="../image/icon.jpg" class="navbar-brand-img h-100" alt="main_logo">-->
+      <img src="../img/icon.jpg" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold text-white">KVP Management System</span>
       </a>
     </div>
@@ -18,13 +18,34 @@
             <span class="nav-link-text ms-1">Dashboard</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>" href="../pages/clients.php">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">table_view</i>
-            </div>
-            <span class="nav-link-text ms-1">Clients</span>
-          </a>
+   
+			<li class="nav-item">
+         <a data-bs-toggle="collapse" href="#clients" class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>" role="button" aria-expanded="false">
+<i class="material-icons-round opacity-10">date_range</i>
+<span class="nav-link-text ms-2 ps-1">Clients</span>
+</a>
+<div class="collapse" id="clients" style="">
+<ul class="nav ">
+<li class="nav-item active">
+<a class="nav-link text-white  <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/clients.php">
+<span class="sidenav-mini-icon">CL</span>
+<span class="sidenav-normal  ms-2  ps-1">Clients List</span>
+</a>
+</li>
+<li class="nav-item ">
+<a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "service.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/service.php">
+<span class="sidenav-mini-icon"> S </span>
+<span class="sidenav-normal  ms-2  ps-1"> Service Done </span>
+</a>
+</li>
+<li class="nav-item ">
+<a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "contract.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/contract.php">
+<span class="sidenav-mini-icon"> P </span>
+<span class="sidenav-normal  ms-2  ps-1"> PMS Masterlsit </span>
+</a>
+</li>
+</ul>
+</div>
         </li>
 		<li class="nav-item">
          <a data-bs-toggle="collapse" href="#schedule" class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "schedule.php")?  "bg-gradient-primary active" : "";?>"" aria-controls="dashboardsExamples" role="button" aria-expanded="false">

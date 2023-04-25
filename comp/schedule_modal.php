@@ -1,16 +1,23 @@
+<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="schedule_details_modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-0 contents">
+
+            </div>
+        </div>
+    </div>
 
 <div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="event-details-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-0">
                 <div class="modal-header rounded-0">
-                    <h5 class="modal-title">Schedule Details</h5>
+                    <h5 class="modal-title" >Schedule Details</h5>
                 </div>
                 <div class="modal-body rounded-0">
                     <div class="container-fluid">
                         <dl>
                             <dt class="text-muted">ID / IMTE Name</dt>
                             <dd id="title" class="fw-bold fs-5"></dd>
-                            <dt class="text-muted">Model / Serial</dt>
+                            <dt class="text-muted">Brand / Model</dt>
                             <dd id="description" class=""></dd>
 							<dt class="text-muted">Client Address</dt>
                             <dd id="address" class=""></dd>
@@ -25,9 +32,9 @@
                 </div>
                 <div class="modal-footer rounded-0">
                     <div class="text-end">
-                        <button type="button" class="btn btn-primary btn-sm rounded-0" id="edit" data-bs-target="#confirmSched" data-bs-toggle="modal" > Confirm</button>
+                        <button type="button" class="btn btn-primary btn-sm rounded-0" id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Update</button>
                         <button type="button" class="btn btn-info btn-sm rounded-0"  data-bs-target="#resched" data-bs-toggle="modal" data-id="">Re-Schedule</button>
-                        <button type="button" class="btn btn-danger btn-sm rounded-0"  data-bs-target="#resched" data-bs-toggle="modal" data-id="">Delete</button>
+                        <button type="button" class="btn btn-danger btn-sm rounded-0"  data-bs-target="#delete" data-bs-toggle="modal" data-id="">Delete</button>
 						<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -35,57 +42,18 @@
         </div>
     </div>
 	<!-- Modal for Resched -->
-	<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="confirmSched">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-0">
-                <div class="modal-header rounded-0">
-                    <h5 class="modal-title">PM Details</h5>
-                </div>
-                <div class="modal-body rounded-0">
-                    <div class="container-fluid">
-                      
-                    </div>
-                </div>
-                <div class="modal-footer rounded-0">
-                    <div class="text-end">
-                        <button type="button" class="btn btn-primary btn-sm rounded-0" id="edit"  data-bs-target="#exampleModalToggle2" data-bs-toggle="modal"> Confirm</button>
-                        <button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-target="#event-details-modal" data-bs-toggle="modal">Back</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+	<div class="modal fade modal-lg" id="confirm-sched-modal"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content update_contents">
+
     </div>
+  </div>
+</div>
 <!-- Modal for Resched -->
-	<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="resched">
+	<div class="modal fade" tabindex="-1" data-bs-backdrop="static" id="reschedModal">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-0">
-                <div class="modal-header rounded-0">
-                    <h5 class="modal-title">Resched</h5>
-                </div>
-                <div class="modal-body rounded-0">
-                    <div class="container-fluid">
-                      <div class="row">
-						<div class="col">
-							<div class="input-group input-group-static mb-4">
-								<label>Schedule:</label>
-								<input type="date" class="form-control" value=<?php echo date("Y-m-d")?> disabled>
-							</div>
-						</div>
-			<div class="col">
-				<div class="input-group input-group-static mb-4">
-					<label>Re-sched Date</label>
-					<input type="date" class="form-control" value=<?php echo date("Y-m-d") ?> >
-				</div>
-			</div>
-						</div>	
-                    </div>
-                </div>
-                <div class="modal-footer rounded-0">
-                    <div class="text-end">
-                        <button type="button" class="btn btn-primary btn-sm rounded-0" id="edit"  data-bs-target="#exampleModalToggle2" data-bs-toggle="modal"> Confirm</button>
-                        <button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-target="#event-details-modal" data-bs-toggle="modal">Back</button>
-                    </div>
-                </div>
+            <div class="modal-content rounded-0 reschedContent">
+
             </div>
         </div>
     </div>
@@ -119,7 +87,8 @@
 	</div>
 	<div class="col">
 	<div class="form-check pt-4">
-  <input class="form-check-input" type="checkbox" value="" id="pmsCheck" >
+	<input type="hidden" name="pmsCheck" value = 0>
+  <input class="form-check-input" type="checkbox" name="pmsCheck" id="pmsCheck" >
   <label class="custom-control-label" for="pmsCheck">PMS Contract?</label>
 </div>
 	</div>

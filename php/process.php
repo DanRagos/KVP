@@ -58,7 +58,7 @@ foreach($result as $row){
     $row['edate'] =  date("F d, Y",strtotime($row['schedule_date']));
 	switch($row['status']) 
 	{case 0:
-	$row['color'] = "Blue";
+	$row['color'] = "#033268";
 	$row['status'] = "Not done";
 	break;
 	case 1: 
@@ -74,9 +74,268 @@ foreach($result as $row){
 	$row['status'] = "Unresolved";
 	break;
 	}
+	$row['title'] = $row['schedule_type'] == 1 ? 'PMS '.$row['client_name'] : 'SVC '.$row['client_name'];
     $sched_res[$row['schedule_id']] = $row;
 }
 echo json_encode($sched_res);
+}
+//show sched details
+if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
+	$id = $_POST['id'];
+	$result = $client->get_schedule($id);
+	$output ='';
+	$status = $result['status'] == 1 ? "Delayed" : ($result['status'] == 3 ? "Unresolved" : " ");
+	$output.='  <div class="modal-header rounded-0">
+                <h5 class="modal-title">Schedule Details</h5>
+                </div>
+                <div class="modal-body rounded-0">
+                    <div class="container-fluid">
+                        <dl>
+                            <dt class="text-muted">ID / IMTE Name</dt>
+                            <dd id="title" class="fw-bold fs-5">'.$result['client_name'].'</dd>
+                            <dt class="text-muted">Brand / Model</dt>
+                            <dd id="description" class="">'.$result['brand'].'/'.$result['model'].'</dd>
+							<dt class="text-muted">Client Address</dt>
+                            <dd id="address" class="">'.$result['address'].'</dd>
+                            <dt class="text-muted">Schedule</dt>
+                            <dd id="start" class="">'.$result['schedule_date'].'</dd>
+							<dt class="text-muted">Status</dt>
+                            <dd id="stats" class="">'.$status.'</dd>
+							<dt class="text-muted">Problem</dt>
+                            <dd id="" class="">'.$result['rep_problem'].'</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="modal-footer rounded-0">
+                    <div class="text-end">
+                        <button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
+                        <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>
+                        ';
+						if ($result['schedule_type'] == '2') {
+						$output .= '	
+						<button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button> ';
+						}
+						$output.='
+						<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>';
+	echo $output;
+	
+	
+}
+//Resched Btn
+if (isset($_POST['resched_id'])){
+$id = $_POST['resched_id'];
+$result = $client->get_schedule($id);
+$output ='';
+if ($result) {
+	$output .= '
+	                <div class="modal-header rounded-0">
+                    <h5 class="modal-title">Resched '.$result['client_name'].'</h5>
+                </div>
+                <div class="modal-body rounded-0">
+                    <div class="container-fluid">
+					  <form id="resched_form" action ="#" method="post" autocomplete="off">
+					  <input type="hidden" name="schedule_id" value="'.$id.'">
+                      <div class="row">
+			<div class="col">
+				<div class="input-group input-group-static mb-4">
+					<label>Re-sched Date</label>
+					<input type="date" class="form-control" name="schedule_date" value= "'.$result['schedule_date'].'" >
+				</div>
+			</div>
+						</div>	
+                    </div>
+                </div>
+                <div class="modal-footer rounded-0">
+                    <div class="text-end">
+                        <button type="button" class="btn btn-primary btn-sm rounded-0" data-id="'.$id.'" id="reschedConfirm"> Confirm</button>
+                        <button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-target="#schedule_details_modal" data-bs-toggle="modal">Back</button>
+                    </div>
+                </div>
+				</form>
+	';
+	
+}
+	echo $output;
+}
+//Confirm Reschedule 
+if (isset($_POST['action'])&& $_POST['action'] == 'confirm_resched'){
+	$id = $_POST['schedule_id'];
+	$schedule_date = $_POST['schedule_date'];
+	$resched = $client ->reschedule($id, $schedule_date) ;
+	echo $resched;
+	
+}
+//Show Confirm Schedule Form
+if (isset($_POST['sched_id'])){
+$id = $_POST['sched_id'];
+$result = $client->get_schedule($id);
+$output ='';
+if ($result) {
+	$output .= '
+	      <div class="modal-header">
+	  <img src="../img/icon.jpg" class="img-fluid" style="width:10%;height:5%;padding-right:14px;" alt="...">
+	
+        <h6 class="modal-title ">Update details for '.$result['contract_id'].'</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  <div class="container">
+	  <form id="confirm_form" action ="#" method="post" autocomplete="off">
+         <div class="row">
+  
+    <div class="col">
+      <div class="input-group input-group-static my-3">
+        <label class="form-">Schedule Date</label>
+        <input type="date" id="c_schedule" value = "'.$result['schedule_date'].'" name="c_schedule" class="form-control" readonly>
+		<input type="hidden" name="schedule_type" value="'.$result['schedule_type'].'">
+	   <input type="hidden" name="contract_id" value="'.$result['contract_id'].'">
+	   <input type="hidden" name="sv_id" value="'.$result['sv_id'].'">
+	   <input type="hidden" name="frequency" value="'.$result['frequency'].'">
+      </div>
+    </div>
+		<div class="col">
+      <div class="input-group input-group-static my-3">
+        <label for="interval_date" class="ms-0">Service Date</label>
+		<input type="hidden" value="'.$result['schedule_id'].'" name="schedule_id">
+        <input type="date" name="s_date" id="s_date" class="form-control" required>
+      </div>
+    </div>
+	
+    <div class="col">
+      <div class="input-group input-group-static my-3">
+        <label class="form-">Reported Problem</label> ';
+	$rep_problem = ($result['rep_problem'] == '')? '': $result['rep_problem'] ;
+	$output .= '	
+		 <input type="text" name="c_rep" id="c_rep"  value = "'.$rep_problem.'" class="form-control">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+  	<div class="col">
+      <div class="input-group input-group-static my-3">
+        <label class="form">Location:</label>
+        <input type="text" name="c_loc" id="c_loc" value= "'.$result['address'].'" class="form-control"readonly>
+      </div>
+    </div>
+  <div class="col">
+      <div class="input-group input-group-static my-3">
+        <label class="form">Diagnosis:</label>
+        <input type="text" name="diagnosis" class="form-control">
+      </div>
+    </div>
+	 <div class="col">
+      <div class="input-group input-group-static my-3">
+        <label class="form">Service Done:</label>
+        <input type="text" name="c_done" class="form-control">
+      </div>
+    </div>
+
+  </div>
+  <div class="row">
+	<div class="col">
+      <div class="input-group input-group-static my-0">
+        <label for="interval_date" class="ms-0">Status</label>
+       <select class="form-control" id="interval_date" name="status" >
+	    <option value=2>Resolved</option>
+       <option value= 3>Unresolved</option>
+     </select>
+      </div>
+    </div>
+	 <div class="col">
+      <div class="input-group input-group-static my-0">
+        <label class="form">Recommendation</label>
+        <input type="text" name="c_recom" class="form-control">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+	<div class="col">
+      <div class="input-group input-group-static my-0">
+        <label for="interval_date" class="ms-0">Service By:</label>
+            <input type="text" name="c_sby"  class="form-control">
+      </div>
+    </div>
+  </div>
+  </div>
+      </div>
+      <div class="modal-footer">
+	  <button type="submit" id="c_confirmBtn" name="c_button" class="btn btn-primary">Confirm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        
+      </div>
+	  </form>
+	  ';
+	
+}
+	echo $output;
+}
+//Update Schedule Details
+if (isset($_POST['action'])&& $_POST['action'] == 'update_sched'){
+print_r($_POST);
+$schedule_type = $_POST['schedule_type'];
+$contract_id = $_POST['contract_id'];
+$sv_id = $_POST['sv_id'];
+$schedule_id = $_POST['schedule_id'];
+$s_date = $_POST['s_date'];
+$c_rep = $_POST['c_rep'];
+$c_loc = $_POST['c_loc'];
+$diagnosis = $_POST['diagnosis'];
+$c_done = $_POST['c_done'];
+$status = $_POST['status'];
+$c_recom = $_POST['c_recom'];
+$c_sby = $_POST['c_sby'];
+$accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby);
+$update_schedule = $client->update_schedule($schedule_id, $status);
+if ($schedule_type == '1') {
+	$frequency = $_POST['frequency'];
+	$contract_det = $client->get_contract_details($contract_id);
+	print_r($contract_det);
+	$count = $contract_det['count'] + 1;
+	print_r($count);
+	$add_count= $client->add_pms_count($contract_id, $count);
+	if ($contract_det['total']- $count > 0) {
+	$add_pms_sched = $client->add_pms_sched ($contract_id, $frequency, $s_date);
+	if ($add_pms_sched) {
+		$remove_pms = "";
+	}
+}
+else {
+	$set_contract_expi = $client->expire_sched($contract_id);
+}
+	}
+
+else {
+	$check_sv_contract = $client->get_sv_details($sv_id);
+	print_r($check_sv_contract);
+	if ($check_sv_contract['contract_id'] > 0 ) {
+	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
+	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
+	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
+	
+	}
+	
+}
+echo 'Success';
+}
+
+//CancelSv
+if (isset($_POST['del_id'])){
+$id = $_POST['del_id'];
+$result = $client->get_schedule($id);
+$sv_call = $result['sv_id'];
+$deleteSv = $client->delete_schedule($id);
+$client->delete_svcall($sv_call);
+echo true;
+
+
+}
+
+if (isset($_GET['action'])&& $_GET['action'] == 'display_schedule2'){
+$result = $client ->display_schedule();
+  header('Content-Type: application/json');
+echo json_encode($result);
 }
 // Edit Client Details
 if (isset($_POST['edit_client'])){
@@ -291,9 +550,16 @@ if (isset($_POST['user_id'])){
 	$result = $client ->get_contract($id);
 	$output .= ' <option value=" " selected ></option>';
 	foreach($result as $row) {
-		$output.= ' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>';
+		$output.= ' <option value ="'.$row['contract_id'].'">'.$row['brand'].' '.$row['model'].'</option>				
+		';
 	}
 	echo $output;
+}
+if (isset($_POST['contract_id_1'])){
+	$output = '';
+	$id = $_POST['contract_id'];
+	$result = $client ->get_contract($id);
+	echo $result;
 }
 //
 //
@@ -306,25 +572,30 @@ if (isset($_POST['ctr'])){
 
 //Add SV Call Client
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
+	print_r($_POST);
 	$client_id = $_POST['client_id'];
 	$contract_id = $_POST['contract_id'];
 	//SV TYPE : 1 if client, 2 if contract, 0 if guest
 	$sv_type = 2;
-	if (!$contract_id) {
+	if ($_POST['pmsCheck'] == 0) {
 	$sv_type = 1;	
 	$machine_type = $_POST['machine_type'];
 	$brand = $_POST['brand'];
 	$model = $_POST['model'];
 	}
 	else {
-	$machine_type = '';
-	$brand = '';
-	$model = '';
+	$result1= $client ->get_contract_details($contract_id);
+	foreach($result1 as $row) {
+	$machine_type = $row['machine_type'];
+	$brand = $row['brand'];
+	$model = $row['model'];
+	}
+
 	}
 	$rep_problem = $_POST['rep_problem'];
 	$sv_date = $_POST['sv_date'];
 	$result = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
-	print_r($_POST);
+
 }
 //Add sv guest
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
