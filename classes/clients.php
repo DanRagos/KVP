@@ -36,6 +36,16 @@ class Clients extends Db {
 		$row = $stms -> fetch(PDO::FETCH_ASSOC);
 		return $row; 
 	}
+	
+	//Register Client
+		public function register_client($client_name,$client_address, $contact_person, $contact_email, $img_link){
+		$sql = "INSERT INTO `clients` (`client_id`, `client_name`, `client_address`, `contact_person`, `contact_email`, `imglink`)
+		VALUES (NULL, :client_name, :client_address, :contact_person, :contact_email, :img_link)";
+		$stmt = $this ->conn->prepare($sql);
+		$result = $stmt->execute(['client_name' => $client_name,'client_address' => $client_address, 'contact_person' => $contact_person,
+		'contact_email' =>$contact_email, 'img_link' => $img_link]);
+		return $result;
+	}
 	//Display all Clients
 	public function showClients () {
 		$sql = "SELECT * FROM `clients`" ;
@@ -162,6 +172,13 @@ WHERE schedule.status != 2;";
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
 		}
+		public function with_collection ($contract_id) {
+	$sql = "SELECT * from contract where contract_id = :contract_id";
+	$stmt = $this->conn->prepare($sql);
+	$stmt ->execute(['contract_id'=>$contract_id]);
+	$result = $stmt->fetch(PDO::FETCH_ASSOC);
+	return $result;
+}
 public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby) {
 	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `service_by`)
 	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :c_sby);";

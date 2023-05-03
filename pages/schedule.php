@@ -361,7 +361,7 @@ $(document).ready(function(){
             themeSystem: 'bootstrap',
 			initialDate: initialDate,
             //Random default events
-            events: events,
+            events: events, 
             eventClick: function(info) {
               var id = info.event.id;
 			      $.ajax({

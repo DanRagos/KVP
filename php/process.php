@@ -85,23 +85,32 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
 	$result = $client->get_schedule($id);
 	$output ='';
 	$status = $result['status'] == 1 ? "Delayed" : ($result['status'] == 3 ? "Unresolved" : " ");
+	$check_collection = $client->with_collection ($result['sv_contract']);
 	$output.='  <div class="modal-header rounded-0">
                 <h5 class="modal-title">Schedule Details</h5>
                 </div>
                 <div class="modal-body rounded-0">
                     <div class="container-fluid">
-                        <dl>
-                            <dt class="text-muted">ID / IMTE Name</dt>
+                        <dl> ';
+						
+						if ($check_collection && $check_collection['status'] == 2 && $check_collection['sv_call'] == 0){
+							$output .= '  <dt class="text-danger">With Collection!</dt>';
+						}
+						else {
+							
+						}
+						$output .='
+                            <dt class="text-primary">ID / IMTE Name</dt>
                             <dd id="title" class="fw-bold fs-5">'.$result['client_name'].'</dd>
-                            <dt class="text-muted">Brand / Model</dt>
+                            <dt class="text-primary">Brand / Model</dt>
                             <dd id="description" class="">'.$result['brand'].'/'.$result['model'].'</dd>
-							<dt class="text-muted">Client Address</dt>
+							<dt class="text-primary">Client Address</dt>
                             <dd id="address" class="">'.$result['address'].'</dd>
-                            <dt class="text-muted">Schedule</dt>
+                            <dt class="text-primary">Schedule</dt>
                             <dd id="start" class="">'.$result['schedule_date'].'</dd>
-							<dt class="text-muted">Status</dt>
+							<dt class="text-primary">Status</dt>
                             <dd id="stats" class="">'.$status.'</dd>
-							<dt class="text-muted">Problem</dt>
+							<dt class="text-primary">Problem</dt>
                             <dd id="" class="">'.$result['rep_problem'].'</dd>
                         </dl>
                     </div>
@@ -374,7 +383,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_clients'){
 						<td>
                          <div class="d-flex px-2 py-1">
                           <div>
-                            <img src="../image/uploads/mv santiago.webp" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
+                            <img src="'.$row['imglink'].'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
                           </div>
                           <div class="d-flex flex-column justify-content-center">
 							<input type = "hidden" name="client_id" value="'.$row['client_id'].'">
@@ -607,6 +616,68 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
 	$rep_problem = $_POST['rep_problem'];
     $sv_date = $_POST['sv_date'];
 	$result = $client->add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date);
+
+}
+
+
+if(isset($_FILES['picture']) && $_POST['action'] == 'add_client') {
+	
+    $picture = $_FILES['picture'];
+	$upload_dir = "../image/uploads/"; // specify the directory where you want to upload the file
+    $file_name = $picture['name'];
+    $file_path = $upload_dir . $file_name;
+	$allowed_pattern = '/^(CAL|VER)-\d{2}-\d{2}-\d/'; // pattern for the file name
+    // Check if file is a PDF
+    $allowed_types = array('image/jpeg');
+    if(!in_array($picture['type'], $allowed_types)) {
+         echo '<h5 class="danger">
+				<strong class="font-weight-bolder mb-0 text-center text-danger">Invalid file type. Please upload .JPG File</strong>
+		</h5>';
+		exit();
+    } else {
+        // Check the file size
+        if ($picture['size'] > 5242880) { // 1MB in bytes
+           
+		   echo '<h5 class="danger">
+				<strong class="font-weight-bolder mb-0 text-center text-danger">File is exceeded to 5MB</strong>
+		</h5>';
+		exit();
+
+        } 
+
+		else {/*
+			if ($tool->check_filename($file_name)) {
+					 echo '<h5 class="danger">
+				<strong class="font-weight-bolder mb-0 text-center text-danger">File name is already in used</strong>
+		</h5>';
+			exit();
+			} */
+            // File is a valid PDF and within size limit, do something with it
+            // ...
+      
+    if (move_uploaded_file($picture['tmp_name'], $file_path)) {
+        // File is uploaded successfully, save the file path and name in the database
+        // perform database insertion here using the $remark_id, $file_name, and $file_path variables
+		$client_name = $_POST['client_name'];
+		$client_address = $_POST['client_address'];
+		$contact_person = $_POST['contact_person'];
+		$contact_email = $_POST['email'];
+		$img_link = $file_path;
+		
+		$register_client = $client->register_client($client_name,$client_address, $contact_person,$contact_email, $img_link);
+		
+		
+	
+        echo "Valid file";
+    } else {
+         echo '<h5 class="danger">
+				<strong class="font-weight-bolder mb-0 text-center text-danger">Error! Please try again</strong>
+		</h5>';
+    }
+        }
+    }
+
+
 
 }
 

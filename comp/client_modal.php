@@ -10,11 +10,25 @@
       <div class="modal-body">
 	  <div class="container">
          <div class="row">
-		 <form id="client-form" action="#" method="POST" autocomplete="off">
+		 <form id="client-form" action="#" method="POST"  enctype="multipart/form-data" autocomplete="off">
 		 <div id="regAlert"></div>
 		  <div class="form-group">
 
-  </div>	 
+  </div>
+    <div class="row">
+	<div class="col-2">
+      <div class="input-group input-group-static my-3">
+     
+        <label class="form-">Client Picture (.JPG Only)</label>
+      </div>
+	  </div>
+	  	<div class="col-3">
+      <div class="input-group input-group-static my-3">
+        <input type="file" name="picture" class="form-control"   accept="image/jpeg" required>
+        
+      </div>
+	  </div>
+    </div>  
     <div class="col">
       <div class="input-group input-group-static my-3">
         <label class="form-">Client Name:</label>
@@ -30,7 +44,7 @@
 	<div class="col">
       <div class="input-group input-group-static my-3">
         <label class="form-">Contact Person:</label>
-        <input type="text" name="username" class="form-control"required>
+        <input type="text" name="contact_person" class="form-control"required>
       </div>
     </div>
 		<div class="col">
