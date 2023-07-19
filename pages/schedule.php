@@ -215,10 +215,13 @@ $(document).ready(function(){
 			method: 'post',
 			data: $("#resched_form").serialize()+"&action=confirm_resched",
 			success: function (response) {
-					swal("Rescheduled", "", "success");
+				var formattedDate = new Date(response).toISOString().substring(0, 10);
+
+						swal("Rescheduled", "", "success");
 							$("#add-sched-form")[0].reset();
 							$("#reschedModal").modal('hide');	
-						showSchedules(response);						
+						showSchedules(formattedDate);	
+				
 			}
 		});
 	});

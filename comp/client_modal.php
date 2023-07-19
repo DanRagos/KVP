@@ -76,7 +76,7 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-	  <img src="../img/line_jpg.jpg" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
+	  <img src=""  id="editImage" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
         <h5 class="modal-title " id="title"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>

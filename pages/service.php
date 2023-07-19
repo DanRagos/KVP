@@ -138,6 +138,48 @@ $('#tool_type').on('change', function() {
 });
 	}
 	
+		$("body").on("click",".viewPms", function(e) {
+		let accomp_id = $(this).attr('data-id');
+		e.preventDefault();
+		$.ajax({
+			url: '../php/process.php',
+			method: 'get',
+			data: {
+				accomp_id: accomp_id,
+				action: 'view_report'
+			},
+			success: function (response) {
+				console.log(response);
+	$.ajax({
+    url: '../php/export_service.php',
+    type: 'POST',
+    data: { jsonData: response },
+    xhrFields: {
+        responseType: 'blob' // Set the response type to 'blob' to handle binary data
+    },
+    success: function(pdfResponse) {
+        console.log(pdfResponse);
+
+        // Create a blob object from the binary data
+        var blob = new Blob([pdfResponse], { type: 'application/pdf' });
+
+        // Create a temporary URL for the blob
+        var blobUrl = URL.createObjectURL(blob);
+
+        // Open the PDF in a new tab or window
+        window.open(blobUrl, '_blank');
+    },
+    error: function(error) {
+        // Handle the error
+    }
+});
+	
+
+			}
+			
+		});
+	});
+	
 </script>
 </body>
 

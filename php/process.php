@@ -173,7 +173,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_resched'){
 	$id = $_POST['schedule_id'];
 	$schedule_date = $_POST['schedule_date'];
 	$resched = $client ->reschedule($id, $schedule_date) ;
-	echo $resched;
+	echo "'".$resched."'";
 	
 }
 //Show Confirm Schedule Form
@@ -242,16 +242,24 @@ if ($result) {
     </div>
 
   </div>
-  <div class="row">
+  <div class="row"> ';
+  if ($result['sv_id'] != '0') {
+	  $output .= '
 	<div class="col">
       <div class="input-group input-group-static my-0">
         <label for="interval_date" class="ms-0">Status</label>
        <select class="form-control" id="interval_date" name="status" >
-	    <option value=2>Resolved</option>
-       <option value= 3>Unresolved</option>
+	    <option value="2">Resolved</option>
+       <option value="3">Unresolved</option>
      </select>
       </div>
-    </div>
+    </div> ';
+  }
+  else {
+	  $output .= '<input type="hidden" name="status" value="2">';
+  }
+ 
+	$output .='
 	 <div class="col">
       <div class="input-group input-group-static my-0">
         <label class="form">Recommendation</label>
@@ -295,16 +303,15 @@ $c_done = $_POST['c_done'];
 $status = $_POST['status'];
 $c_recom = $_POST['c_recom'];
 $c_sby = $_POST['c_sby'];
-$accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby);
-$update_schedule = $client->update_schedule($schedule_id, $status);
+$withC = 0;
 if ($schedule_type == '1') {
 	$frequency = $_POST['frequency'];
 	$contract_det = $client->get_contract_details($contract_id);
 	print_r($contract_det);
-	$count = $contract_det['count'] + 1;
+	$count = $contract_det[0]['count'] + 1;
 	print_r($count);
 	$add_count= $client->add_pms_count($contract_id, $count);
-	if ($contract_det['total']- $count > 0) {
+	if ($contract_det[0]['total']- $count > 0) {
 	$add_pms_sched = $client->add_pms_sched ($contract_id, $frequency, $s_date);
 	if ($add_pms_sched) {
 		$remove_pms = "";
@@ -320,12 +327,20 @@ else {
 	print_r($check_sv_contract);
 	if ($check_sv_contract['contract_id'] > 0 ) {
 	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
-	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
+	print_r($contract_det);
+	$count = $contract_det[0]['sv_call'] > 0 ? $contract_det[0]['sv_call'] - 1 : 0 ;
 	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
+	$withC =  $contract_det[0]['sv_call'] > 0 ? 0 : 1;
 	
+		
 	}
 	
+
 }
+
+$accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby, $withC);
+$update_schedule = $client->update_schedule($schedule_id, $status);
+
 echo 'Success';
 }
 
@@ -399,9 +414,10 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_clients'){
                
                       </td>
 					  <td>
-					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#addContract" data-bs-toggle="modal" class="btn btn-primary addContractBtn" ><i class="material-icons">add</i></button>
-					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#editClient" data-bs-toggle="modal" class="btn btn-warning editClientBtn"><i class="material-icons">edit</i></button>
-					   <button type="button" id="'.$row['client_id'].'"  data-bs-toggle="modal"  class="btn btn-danger deleteBtn"><i class="material-icons">delete</i></button>
+					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#addContract" data-bs-toggle="modal" class="btn btn-primary no_margin addContractBtn" ><i class="material-icons">add</i></button>
+					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#editClient" data-bs-toggle="modal" class="btn btn-warning no_margin editClientBtn"><i class="material-icons">edit</i></button>
+					   <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Profile"> <button type="button" data-id="'.$row['client_id'].'" class="btn btn-secondary no_margin viewProfile"><i class="fa-solid fa-eye"></i></span></button>
+					   <button type="button" id="'.$row['client_id'].'"  data-bs-toggle="modal"  class="btn btn-danger no_margin deleteBtn"><i class="material-icons">delete</i></button>
 					  </td>
                     </tr>';
 	}
@@ -580,11 +596,13 @@ if (isset($_POST['ctr'])){
 }
 
 //Add SV Call Client
+//SV TYPE : 1 if client, 2 if contract, 0 if guest
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	print_r($_POST);
+
 	$client_id = $_POST['client_id'];
 	$contract_id = $_POST['contract_id'];
-	//SV TYPE : 1 if client, 2 if contract, 0 if guest
+	
 	$sv_type = 2;
 	if ($_POST['pmsCheck'] == 0) {
 	$sv_type = 1;	
@@ -599,8 +617,8 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	$brand = $row['brand'];
 	$model = $row['model'];
 	}
-
 	}
+	
 	$rep_problem = $_POST['rep_problem'];
 	$sv_date = $_POST['sv_date'];
 	$result = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
@@ -679,6 +697,160 @@ if(isset($_FILES['picture']) && $_POST['action'] == 'add_client') {
 
 
 
+
 }
 
+//View PDF Report PMS
+if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
+	$accomp_id = $_GET['accomp_id'];
+	$result = $client->get_pms_report($accomp_id);
+	header("Content-Type: application/json");
+	echo json_encode ($result);
+}
+
+//Display Contracts
+if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
+	$client_id = $_GET['client_id'];
+	$results = $client -> get_contracts($client_id);
+	$output = '';
+    $output .= '<div class="table-responsive" > <table class="table table-light table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Machine </th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover - Coverage</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. of SV Call</th>
+					   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody> ';
+	foreach($results as $row){
+		if ($row['frequency']==1) $frequency = 'Quarterly';
+		else if ($row['frequency']==2) $frequency = 'Semi-Annualy';
+		else $frequency = 'Annualy';
+		if ($row['status']==1) $status = 'Installation Warranty';
+		else  $status = 'PMS Contract';
+		$count = ($row['count'] / $row['total'])*100;
+		$output .= ' <tr class="table-row load-accordion">
+                      <td class="align-middle text-center text-sm">
+                        <h6 class="mb-0 text-sm">'.$row['brand'].'/'.$row['model'].'</h6>
+                        <p class="text-xs text-secondary mb-0">'.$row['machine_name'].'</p>
+                      </td>
+					    <td class="align-middle text-center text-sm">
+                        <p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['turn_over'])).'/'.date('M-d-Y',strtotime($row['coverage'])).'</p>
+                      </td>
+					  <td class="align-middle text-center text-sm">
+                        <h6 class="mb-0 text-sm">'.$frequency.'</h6>
+                        <p class="text-xs text-secondary mb-0">'.$status.'</p>
+                      </td>
+					   <td class="align-middle text-center text-sm">
+                        <p class="text-xs font-weight-bold mb-0">'.$count.'%'.'</p>
+                      </td>
+					  <td class="align-middle text-center text-sm">
+                        <p class="text-xs font-weight-bold mb-0">'.$row['sv_call'].'</p>
+                      </td>
+					  <td>				
+						<button type="button" data-id="'.$row['contract_id'].'"class="btn btn-success no_margin accordion-btn"> <i id="dropToggle_' . $row['contract_id'] . '" class="fa-solid fa-sort-down"></i></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-secondary no_margin viewContractReport "><i class="fa-solid fa-eye"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin viewMmr "><i class="fa-solid fa-edit"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-danger no_margin delContract "><i class="fa-solid fa-trash"></i></span></button>
+
+					   </td>
+                    </tr>
+					<tr class="accordion-content">
+                      <td colspan="6">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="accordion-placeholder"></div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+					';
+	}
+	$output .='</tbody> </table> </div>';			  
+				  
+				  
+				  
+
+
+    echo $output;
+}
+if (isset($_GET['action']) && $_GET['action'] == 'getAccordionContent') {
+    $contract_id = $_GET['dataId'];
+	$result = $client->viewPmsContract($contract_id);
+	$output = '';
+			
+    // Generate the accordion content based on the rowData
+// Generate the accordion content based on the rowData
+$output .= '<div class="table-responsive" >
+        <table id="" class="table testTable table-hover" style="width:100%;">
+            <thead>
+                <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Accomplished Date</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                </tr>
+            </thead>
+            <tbody>';
+foreach ($result as $row) {
+    $output .= '
+                <tr>
+                    <td>' . $row['accomp_id'] . '</td>
+                    <td>' . $row['schedule_date'] . '</td>
+                    <td>' . $row['accomp_date'] . '</td>
+                    <td class="align-middle text-center text-sm">
+                        <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-success no_margin accordion-btn">
+                            <i class="fa-solid fa-sort-down"></i>
+                        </button>
+                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
+                            <button type="button" data-id="' . $row['accomp_id'] . '"  class="btn btn-secondary no_margin viewContractPmReport ">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </span>
+                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
+                            <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-warning no_margin viewMmr ">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                        </span>
+                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
+                            <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-danger no_margin dd ">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>';
+}
+$output .= '
+            </tbody>
+        </table>
+</div>
+';
+
+
+    echo $output;
+	
+	
+}
+if(isset($_POST['viewContracts'])) {
+	echo 'ho';
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'viewSummaryDashboard') {
+$client_id = $_GET['client_id'];
+
+
+$response = array(
+ 'serviceSched' => $service_sched = $client->countSchedule ($client_id)['serviceSched'],
+  'pmSched' => $service_sched = $client->countPMS ($client_id)['pmsSched'],
+   'svSched' => $service_sched = $client->countSV ($client_id)['svSched'],
+ 
+);
+echo json_encode($response);
+
+
+}
 ?>
+

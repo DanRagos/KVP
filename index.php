@@ -123,10 +123,19 @@ $(document).ready(function(){
 				console.log(response);
 				$("#login-btn").text('Signing In..');
 					if(response === 'login') {
-						swal({
-    title: "Logged In!",
-    text: "Message!",
-    icon: "success"
+	Swal.fire({
+  position: 'center',
+  icon: 'success',
+  title: 'LoggedIn',
+  showConfirmButton: false,
+  timer: 1500,
+  timerProgressBar: true,
+  			 didOpen: () => {
+				 Swal.showLoading();
+			 },
+				willClose: () => {
+				Swal.hideLoading();
+				},
 }).then(function() {
     window.location = "pages/dashboard.php";
 });

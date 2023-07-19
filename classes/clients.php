@@ -179,11 +179,12 @@ WHERE schedule.status != 2;";
 	$result = $stmt->fetch(PDO::FETCH_ASSOC);
 	return $result;
 }
-public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby) {
-	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `service_by`)
-	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :c_sby);";
+public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby, $withC) {
+	
+	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `service_by`, `accomp_status`, `withC`)
+	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :c_sby, :aStatus, :withC)";
 	$stmt = $this->conn->prepare($sql);
-	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'c_sby'=>$c_sby]);
+	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'c_sby'=>$c_sby, 'aStatus'=>$status, 'withC'=>$withC]);
 	return true;
 }
 public function reschedule($id, $schedule_date) {
@@ -262,7 +263,7 @@ public function get_contract_details($id) {
 		$sql = "SELECT * FROM `contract` WHERE contract_id = :id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['id'=>$id]);
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
 		
 	}	
@@ -274,6 +275,103 @@ public function get_contract_details($id) {
 		return $result;
 		
 	}	
+		public function get_pms_report($accomp_id) {
+		$sql = "SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
+		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, 
+		CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
+		AS client_name,COALESCE(clients.client_address, service_call.guest_address)
+		AS address, service_call.rep_problem, accomplished_schedule.accomp_date, accomplished_schedule.diagnosis, accomplished_schedule.service_don
+, accomplished_schedule.recomm, accomplished_schedule.service_by  FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND accomplished_schedule.id = :accomp_id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['accomp_id'=>$accomp_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+			public function get_contracts($client_id) {
+		$sql = "SELECT *, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = :client_id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['client_id'=>$client_id]);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+				public function viewPmsContract($contract_id) {
+		$sql = "SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date,accomplished_schedule.service_don, accomplished_schedule.diagnosis, accomplished_schedule.recomm, accomplished_schedule.service_by  FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule
+		ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) and schedule.contract_id = :contract_id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['contract_id'=>$contract_id]);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+public function countAllSchedule() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function countAllSv() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function countAllPms() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function pendPms() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and schedule.status = 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function pendSv() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and schedule.status = 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function resolved() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.status = 2";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+
+	public function countSchedule ($client_id) {
+		$sql ="SELECT COUNT(schedule_id) as serviceSched from contract right join schedule on contract.contract_id = schedule.contract_id where contract.client_id = :client_id";
+		$stmt = $this ->conn->prepare($sql);
+		$stmt->execute(['client_id'=>$client_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+	}
+		public function countPMS ($client_id) {
+		$sql ="SELECT COUNT(schedule_id) as pmsSched from contract right join schedule on contract.contract_id = schedule.contract_id where contract.client_id = :client_id AND contract.contract_id > 0 ";
+		$stmt = $this ->conn->prepare($sql);
+		$stmt->execute(['client_id'=>$client_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+	}
+		public function countSV ($client_id) {
+		$sql ="SELECT COUNT(schedule_id) as svSched from schedule RIGHT JOIN  service_call on schedule.sv_id = service_call.sv_id WHERE service_call.client_id = :client_id";
+		$stmt = $this ->conn->prepare($sql);
+		$stmt->execute(['client_id'=>$client_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+	}
+		public function accomp_report ($accomp_id) {
+		$sql ="select * from accomplished_schedule where accomplished_schedule.id = :accomp_id";
+		$stmt = $this ->conn->prepare($sql);
+		$stmt->execute(['accomp_id'=>$accomp_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
+	}
 }
 
 ?>

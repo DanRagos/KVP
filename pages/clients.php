@@ -26,6 +26,12 @@
     <title>
     Dashboard
   </title>
+      <style>
+        .no_margin {
+            margin-bottom: 0rem;
+        }
+
+    </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">
@@ -86,6 +92,15 @@
   <!--   Core JS Files   -->
   <?php include 'scripts.php' ?>
   <script>
+  $(document).ready(function() {
+  		$(document).on("click", ".viewProfile", function(e){
+      // Get the client ID from the data-id attribute
+      var clientId = $(this).data('id');
+      
+      // Redirect to s profile page with the client ID as a query parameter
+       window.open('summary.php?client_id=' + clientId, '_blank');
+	
+    });
 $(".freq").click(function(){
 if ($(this).val()=='2') {
 $('#inp_reason').attr('required', true); 
@@ -129,6 +144,7 @@ $(this).val('');
 				method: 'post',
 				data: {edit_client : edit_client},
 				success: function (response){
+				console.log(response);
 				data = JSON.parse(response);
 				$("#client_id").val(edit_client);
 				$("#client_name").val(data.client_name);
@@ -137,6 +153,7 @@ $(this).val('');
 				$("#email").val(data.contact_email);
 				$("#title").text('Edit details for '+data.client_name);
 				$("#title1").text('Add details for '+data.client_name);
+				$("#editImage").attr("src", data.imglink);
 				console.log($("#title1").text());
 	
 				}
@@ -230,7 +247,8 @@ $("body").on("click",".addContractBtn", function(e) {
 		
 		});
 	}
-	
+	//View Profile
+
 		$("#client-register-btn").click(function(e){
 		if ($("#client-form")[0].checkValidity()) {
   e.preventDefault();
@@ -265,6 +283,7 @@ $("body").on("click",".addContractBtn", function(e) {
 		} 
 	});
 });
+  });
   </script>
 
   <script>

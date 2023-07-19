@@ -81,8 +81,8 @@ array(
 'formatter' => function( $d, $row) {
 return
 '<div class ="align-middle text-center text-sm">
-<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Report"> <button type="button" data-id="'.$row['accomp_id'].'"data-bs-target = "#viewMmrModal" data-bs-toggle="modal" class="btn btn-secondary viewMmr"><i class="fa-solid fa-eye"></i></span></button>
-<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit tool details"> <button type="button" id="'.$row['accomp_id'].'"data-bs-target = "#editTool" data-bs-toggle="modal" class="btn btn-warning editBtn"><i class="fa-solid fa-edit"></i></span></button>
+<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Report"> <button type="button" data-id="'.$row['accomp_id'].'" class="btn btn-secondary no_margin viewPms"><i class="fa-solid fa-eye"></i></span></button>
+<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit tool details"> <button type="button" id="'.$row['accomp_id'].'"data-bs-target = "#editTool" data-bs-toggle="modal" class="btn btn-warning no_margin editBtn"><i class="fa-solid fa-edit"></i></span></button>
 </div>';
 }
 ),
