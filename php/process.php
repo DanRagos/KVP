@@ -476,6 +476,12 @@ print_r($_POST);
 	echo json_encode($row);*/
 }
 
+if (isset($_GET['action'])&& $_GET['action'] == 'del_Contract'){
+	$contract_id = $_GET['contract_id'];
+	$del_contract = $client->delete_contract($contract_id);
+	return $del_contract;
+}
+
 //Add Schedules 
 if (isset($_POST['action'])&& $_POST['action'] == 'add_schedule'){
 $title = $_POST['title'];
@@ -708,15 +714,21 @@ if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
 	echo json_encode ($result);
 }
 
+if (isset($_POST['formDataArray'])){
+	print_r($_POST);
+}
+
+
 //Display Contracts
 if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 	$client_id = $_GET['client_id'];
-	$results = $client -> get_contracts($client_id);
+	$isActive = $_GET['isActive'];
+	$results = $client -> get_contracts($client_id, $isActive);
 	$output = '';
     $output .= '<div class="table-responsive" > <table class="table table-light table-striped table-hover">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Machine </th>
+                      <th class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">Machine </th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover - Coverage</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
@@ -750,10 +762,11 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 					  <td class="align-middle text-center text-sm">
                         <p class="text-xs font-weight-bold mb-0">'.$row['sv_call'].'</p>
                       </td>
-					  <td>				
+					  <td class="text-center">				
 						<button type="button" data-id="'.$row['contract_id'].'"class="btn btn-success no_margin accordion-btn"> <i id="dropToggle_' . $row['contract_id'] . '" class="fa-solid fa-sort-down"></i></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-secondary no_margin viewContractReport "><i class="fa-solid fa-eye"></i></span></button>
-		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin viewMmr "><i class="fa-solid fa-edit"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS"> <button type="button" data-id="'.$row['contract_id'].'" data-bs-toggle="modal" data-bs-target = "#exampleModal" data-id="'.$row['contract_id'].'" data-sv="'.$row['sv_call'].'" data-frequency = "'.$row['frequency'].'" class="btn btn-primary no_margin addPms "><i class="fa-solid fa-add"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract"> <button type="button" data-bs-toggle="modal" data-bs-target = "#editContractModal" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin editContract "><i class="fa-solid fa-edit"></i></span></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-danger no_margin delContract "><i class="fa-solid fa-trash"></i></span></button>
 
 					   </td>
@@ -776,6 +789,76 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 
 
     echo $output;
+}
+
+if (isset($_GET['action'])&& $_GET['action'] == 'last_pm'){
+	$contract_id = $_GET['contract_no'];
+	echo json_encode($client->last_pm($contract_id));
+}
+if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
+	$contract_id = $_GET['contract_id'];
+	$result = $client->get_contract_details($contract_id);
+	$output = '';
+	$output .= '<div class="modal-header">
+	<img src="../img/line_jpg.jpg" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
+	  <h5 class="modal-title ">Edit Contract</h5>
+	  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	</div>
+	<div class="modal-body">
+	<div class="container">
+	<form action="#" method="POST" id="add-contract-form" autocomplete="off">
+	<input type="hidden" name="contract_id" value = '.$result[0]['contract_id'].'>
+   <div class="row">
+	 <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Brand :</label>
+	  <input type="text" name="brand" class="form-control" required value='.$result[0]['brand'].'>
+	</div>
+  </div>
+  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Model :</label>
+	  <input type="text"  name="model" class="form-control" required value='.$result[0]['model'].'> 
+	</div>
+  </div>
+  
+   </div>
+<div class="row">
+	  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Turn Over</label>
+	  <input type="date" class="form-control"name="turn_over" readonly value='.$result[0]['turn_over'].'>
+	</div>
+  </div>
+  <div class="col">
+  <div class="input-group input-group-static mb-4">
+	<label class="form-">Coverage:</label>
+	<input type="date" class="form-control"name="coverage" required value='.$result[0]['coverage'].' min = '.$result[0]['coverage'].'>
+  </div>
+</div>
+</div>';
+if ($result[0]['status'] != '1') {
+$output .='  <div class="row">
+<div class="col">
+<div class="input-group input-group-outline is-filled" >
+<label class="form-label">PMS Count:</label>
+<input type="number" min=1 name="pms_count"  value = '.$result[0]['sv_call'].' class="form-control" required>
+</div>
+</div></div>';
+}
+  $output .= '
+ </div>
+
+</div>
+	</div>
+	<div class="modal-footer">
+	<button type="submit" class="btn btn-primary" id="add-contract-btn" >Confirm</button>
+	  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+	  
+	</div>
+	</form>';
+
+echo $output;
 }
 if (isset($_GET['action']) && $_GET['action'] == 'getAccordionContent') {
     $contract_id = $_GET['dataId'];
