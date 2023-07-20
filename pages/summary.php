@@ -399,7 +399,7 @@ $client_img =$row['imglink'];
                 '<div class="col">' +
                 '<div class="input-group input-group-outline my-3 is-filled">' +
                 '<label class="form-label">Schedule Date</label>' +
-                '<input type="date" class="form-control" value="'+last_sched+ '" name="sched_date" max="<?php echo date('Y-m-d');?>" required>' +
+                '<input type="date" class="form-control" value="'+last_sched+ '" name="sched_date" max="<?php echo date('Y-m-d');?>" readonly>' +
                 '</div>' +
                 '</div>' +
                 '<div class="col">' +
@@ -451,14 +451,20 @@ $client_img =$row['imglink'];
             $('#pms_no').val(pm_no);
         $('#last_pms').val(last_sched);
             }
+			else {
+			Swal.fire({
+  icon: 'error',
+  title: 'Oops...',
+  text: 'No of PMS Reached!!',
+})
+			}
         });
        
 
-        $(document).on('click', '.addChanges', function(){
+   $(document).on('click', '.addChanges', function() {
+	  let contract_id =  $('#pms_contract_id').val();
   var modalBody = $(this).closest('.modal-content').find('.modal-body');
-
-  // Collect form data from the specific modal-body
-  var formDataArray = [];
+  var formDataArray = []; // Step 1: Initialize the formDataArray
 
   modalBody.find('.row').each(function() {
     var formData = {};
@@ -467,46 +473,60 @@ $client_img =$row['imglink'];
       var fieldValue = $(this).val();
       formData[fieldName] = fieldValue;
     });
-    formDataArray.push(formData);
+
+    // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
+    // If yes, add it to the formDataArray
+    if (
+      formData.hasOwnProperty('sched_date') &&
+      formData.hasOwnProperty('serv_date') &&
+      formData.hasOwnProperty('problem') &&
+      formData.hasOwnProperty('diagnosis') &&
+      formData.hasOwnProperty('service_done') &&
+      formData.hasOwnProperty('recomm') &&
+      formData.hasOwnProperty('service_by')
+    ) {
+      formDataArray.push(formData);
+    }
   });
 
-  // Send the form data via AJAX
-  
+  // Step 3: Send the form data via AJAX
   swal.fire({
     title: 'Confirm changes',
     confirmButtonText: 'Save',
-    showCancelButton:true,
-
+    showCancelButton: true,
   }).then((result) => {
-      if (result.isConfirmed){
-        $.ajax({
-    url: '../php/process.php',
-    type: 'POST',
-    data: { formDataArray: JSON.stringify(formDataArray) },
-    success: function(response) {
-      // Handle the AJAX response
-      $('#pms-forms').empty();
-      $('#exampleModal').modal('hide')
-      console.log(response);
-      
-      
-      Swal.fire({
-			 icon: 'success',
-			 title: 'Saved',
-			 timer : 1500,
-			 timerProgressBar: true,
-			 didOpen: () => {
-				 Swal.showLoading();
-			 },
-				willClose: () => {
-				Swal.hideLoading();
+    if (result.isConfirmed) {
+      $.ajax({
+        url: '../php/process.php',
+        type: 'POST',
+        data: { formDataArray: JSON.stringify(formDataArray),
+				contract_id:contract_id,
 				},
-		  });
+        success: function(response) {
+			console.log(response);
+          // Handle the AJAX response
+          $('#pms-forms').empty();
+          $('#exampleModal').modal('hide');
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Saved',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+        },
+        error: function(xhr, status, error) {
+          console.log(error);
+        },
+      });
     }
   });
-      } 
-  });
-
 });
 
         $(document).on('click', '.addPms', function() {

@@ -715,7 +715,31 @@ if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
 }
 
 if (isset($_POST['formDataArray'])){
-	print_r($_POST);
+	$formDataArray = json_decode($_POST['formDataArray'], true);
+
+
+// Loop through each item in the $formDataArray and insert it into the database
+foreach ($formDataArray as $formData) {
+    // Ensure all the required fields are present in the formData
+    if (
+        isset($formData['sched_date']) &&
+        isset($formData['serv_date']) &&
+        isset($formData['problem']) &&
+        isset($formData['diagnosis']) &&
+        isset($formData['service_done']) &&
+        isset($formData['recomm']) &&
+        isset($formData['service_by'])
+    ) {
+        $sched_date = $formData['sched_date'];
+        $contract_id = $_POST['contract_id']; // Assuming you have the contract_id from somewhere else
+         // Assuming you have the frequency from somewhere else
+
+        // Call the add_pms_sched function to insert the data into the database
+        $results =$client-> add_pms_bulk($contract_id, $sched_date);
+    }
+}
+echo $results;
+	
 }
 
 
@@ -765,7 +789,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 					  <td class="text-center">				
 						<button type="button" data-id="'.$row['contract_id'].'"class="btn btn-success no_margin accordion-btn"> <i id="dropToggle_' . $row['contract_id'] . '" class="fa-solid fa-sort-down"></i></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-secondary no_margin viewContractReport "><i class="fa-solid fa-eye"></i></span></button>
-		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS"> <button type="button" data-id="'.$row['contract_id'].'" data-bs-toggle="modal" data-bs-target = "#exampleModal" data-id="'.$row['contract_id'].'" data-sv="'.$row['sv_call'].'" data-frequency = "'.$row['frequency'].'" class="btn btn-primary no_margin addPms "><i class="fa-solid fa-add"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS"> <button type="button" data-id="'.$row['contract_id'].'" data-bs-toggle="modal" data-bs-target = "#exampleModal" data-id="'.$row['contract_id'].'" data-sv="'.$row['count'].'" data-frequency = "'.$row['frequency'].'" class="btn btn-primary no_margin addPms "><i class="fa-solid fa-add"></i></span></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract"> <button type="button" data-bs-toggle="modal" data-bs-target = "#editContractModal" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin editContract "><i class="fa-solid fa-edit"></i></span></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-danger no_margin delContract "><i class="fa-solid fa-trash"></i></span></button>
 

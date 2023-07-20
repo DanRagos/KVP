@@ -219,8 +219,13 @@ public function add_pms_sched ($contract_id, $frequency, $s_date){
 	$months  = ($frequency == '1') ? 3 : ($frequency == '2' ? 6 : 12);
 	$new_date = date('Y-m-d', strtotime("+$months month", strtotime($s_date)));
 	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$new_date]);
-	return true;
-	
+	return true;	
+}
+public function add_pms_bulk ($contract_id, $s_date){
+	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, '2')";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$s_date]);
+	return true;	
 }
 public function get_contract($id) {
 		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2";
@@ -265,7 +270,7 @@ public function add_sv_count($contract_id, $count){
 	
 }
 public function get_contract_details($id) {
-		$sql = "SELECT schedule_date FROM `contract` WHERE contract_id = :id";
+		$sql = "SELECT * FROM `contract` WHERE contract_id = :id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['id'=>$id]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
