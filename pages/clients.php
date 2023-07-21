@@ -131,7 +131,7 @@ $(this).val('');
 });
 
 });
-    $(document).ready(function(){
+   
 		
 		    displayAllclients();
 
@@ -208,7 +208,18 @@ $("body").on("click",".addContractBtn", function(e) {
 				data: $("#add-contract-form").serialize()+"&action=add_contract",
 				success: function (response){
 				console.log(response);
-					swal("Contract Added!", "", "success");
+				Swal.fire({
+            icon: 'success',
+            title: 'Contract Added',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
 					$("#add-contract-form")[0].reset();
 					$("#addContract").modal('hide');
 				/*data = JSON.parse(response);
@@ -249,40 +260,49 @@ $("body").on("click",".addContractBtn", function(e) {
 	}
 	//View Profile
 
-		$("#client-register-btn").click(function(e){
-		if ($("#client-form")[0].checkValidity()) {
-  e.preventDefault();
+	$("#client-register-btn").click(function (e) {
+  if ($("#client-form")[0].checkValidity()) {
+    e.preventDefault();
     var formData = new FormData($("#client-form")[0]);
     formData.append('action', 'add_client');
     $.ajax({
-      url:'../php/process.php',
+      url: '../php/process.php',
       method: 'post',
       data: formData,
       contentType: false,
       processData: false,
-      success:function(response){    
-          console.log(response);
-		  if  (response ==='Valid file'){
-        swal("Schedule Done!", "", "success");
-        $("#client-form")[0].reset();
-        $("#createClient").modal('hide');
-		 $('#regAlert').hide();
-  
-     displayAllclients();
-	  }
-	  	  else {
-			   $('#regAlert').show();
-			 $('#regAlert').html(response);
-			  setTimeout(function() {
-              $('#regAlert').hide();
-            }, 3000);
-	  }
+      success: function (response) {
+        response = response.trim();
+        if (response === 'Valid') {
+          $("#client-form")[0].reset();
+          $("#createClient").modal('hide');
+          $('#regAlert').hide();
+          displayAllclients();
+          Swal.fire({
+            icon: 'success',
+            title: 'Client Added',
+            text: 'The client has been added successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+        } else {
+          $('#regAlert').show();
+          $('#regAlert').html(response);
+          setTimeout(function () {
+            $('#regAlert').hide();
+          }, 3000);
+        }
       }
-
     });
-		} 
-	});
+  }
 });
+
   });
   </script>
 

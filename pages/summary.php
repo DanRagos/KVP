@@ -463,6 +463,7 @@ $client_img =$row['imglink'];
 
    $(document).on('click', '.addChanges', function() {
 	  let contract_id =  $('#pms_contract_id').val();
+      let frequency = $('#frequency').val()
   var modalBody = $(this).closest('.modal-content').find('.modal-body');
   var formDataArray = []; // Step 1: Initialize the formDataArray
 
@@ -501,13 +502,14 @@ $client_img =$row['imglink'];
         type: 'POST',
         data: { formDataArray: JSON.stringify(formDataArray),
 				contract_id:contract_id,
+                frequency:frequency
 				},
         success: function(response) {
 			console.log(response);
           // Handle the AJAX response
           $('#pms-forms').empty();
           $('#exampleModal').modal('hide');
-
+          displayContracts();
           Swal.fire({
             icon: 'success',
             title: 'Saved',

@@ -76,10 +76,10 @@ class Clients extends Db {
 		//Add Contract to Clients 
 	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $count, $type ) {
 		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `status`, `count`, `total`, `sv_call`)
-		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :status, '', :total, :sv_call);";
+		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :status, :count, :total, :sv_call);";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['client_id'=>$client_id,'machine_type' =>$machine_type,'brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency,
-		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'status' =>$contract_type,'total'=>$count, 'sv_call'=>$pms_count]);
+		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count]);
 		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
 		$last_id = $this->conn->lastInsertId();
 		$add_sched = $this->add_schedule_contract($last_id, $first_pms, $type);
@@ -221,11 +221,11 @@ public function add_pms_sched ($contract_id, $frequency, $s_date){
 	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$new_date]);
 	return true;	
 }
-public function add_pms_bulk ($contract_id, $s_date){
-	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, '2')";
+public function add_pms_bulk ($contract_id, $s_date, $status){
+	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, :status)";
 	$stmt = $this->conn->prepare($sql);
-	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$s_date]);
-	return true;	
+	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$s_date, 'status'=>$status]);
+	return $this->conn->lastInsertId();
 }
 public function get_contract($id) {
 		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2";
@@ -260,7 +260,12 @@ public function add_pms_count($contract_id, $count){
 	$stmt = $this ->conn ->prepare($sql);
 	$stmt -> execute(['contract_id'=>$contract_id, 'count'=>$count]);
 	return $stmt;
-	
+}
+public function add_pms_count_1($contract_id){
+	$sql = "Update contract SET count = count - 1 where contract_id = :contract_id";
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute(['contract_id'=>$contract_id]);
+	return $stmt;
 }
 public function add_sv_count($contract_id, $count){
 	$sql = "Update contract SET sv_call = :count where contract_id = :contract_id";
@@ -284,6 +289,20 @@ public function get_contract_details($id) {
 		$result = $stmt->fetch();
 		return $result;
 	}
+	public function delete_last($schedule_id){
+		$sql = "DELETE from schedule where schedule.schedule_id = :schedule_id";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['schedule_id'=>$schedule_id]);
+		return true;
+	}
+	public function check_pms($contract_id) {
+		$sql = "SELECT count FROM contract WHERE contract_id = :contract_id";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['contract_id' => $contract_id]);
+		$result = $stmt->fetchColumn();
+		return $result > 0;
+	}
+	
 	
 	public function get_sv_details($id) {
 		$sql = "SELECT * FROM `service_call` WHERE sv_id = :id";

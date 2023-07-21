@@ -308,9 +308,7 @@ if ($schedule_type == '1') {
 	$frequency = $_POST['frequency'];
 	$contract_det = $client->get_contract_details($contract_id);
 	print_r($contract_det);
-	$count = $contract_det[0]['count'] + 1;
-	print_r($count);
-	$add_count= $client->add_pms_count($contract_id, $count);
+	$add_count= $client->add_pms_count_1($contract_id);
 	if ($contract_det[0]['total']- $count > 0) {
 	$add_pms_sched = $client->add_pms_sched ($contract_id, $frequency, $s_date);
 	if ($add_pms_sched) {
@@ -687,12 +685,8 @@ if(isset($_FILES['picture']) && $_POST['action'] == 'add_client') {
 		$contact_person = $_POST['contact_person'];
 		$contact_email = $_POST['email'];
 		$img_link = $file_path;
-		
 		$register_client = $client->register_client($client_name,$client_address, $contact_person,$contact_email, $img_link);
-		
-		
-	
-        echo "Valid file";
+        echo "Valid";
     } else {
          echo '<h5 class="danger">
 				<strong class="font-weight-bolder mb-0 text-center text-danger">Error! Please try again</strong>
@@ -717,7 +711,10 @@ if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
 if (isset($_POST['formDataArray'])){
 	$formDataArray = json_decode($_POST['formDataArray'], true);
 
-
+	$last_sched = $client->last_pm($_POST['contract_id']);
+	$delete_sched = $client->delete_last($last_sched['schedule_id']);
+	$last_serv_date = null;
+	$frequency = $_POST['frequency'];
 // Loop through each item in the $formDataArray and insert it into the database
 foreach ($formDataArray as $formData) {
     // Ensure all the required fields are present in the formData
@@ -735,10 +732,20 @@ foreach ($formDataArray as $formData) {
          // Assuming you have the frequency from somewhere else
 
         // Call the add_pms_sched function to insert the data into the database
-        $results =$client-> add_pms_bulk($contract_id, $sched_date);
+        $last_Id =$client-> add_pms_bulk($contract_id, $sched_date, 2);
+		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], $formData['problem'], ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], $formData['service_by'], 0);
+		$client->add_pms_count_1($contract_id);
+		$last_serv_date = $formData['serv_date'];
     }
 }
-echo $results;
+//Check if the contract still have pms. if there is still have pms, create a schedue
+$check_pms = $client->check_pms($contract_id);
+$months  = ($frequency == '1') ? 3 : ($frequency == '2' ? 6 : 12);
+	$new_date = date('Y-m-d', strtotime("+$months month", strtotime($last_serv_date)));
+if ($check_pms){
+	$client->add_pms_bulk($contract_id, $new_date, 0);
+}
+echo true;
 	
 }
 
@@ -767,7 +774,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 		else $frequency = 'Annualy';
 		if ($row['status']==1) $status = 'Installation Warranty';
 		else  $status = 'PMS Contract';
-		$count = ($row['count'] / $row['total'])*100;
+		$count = 100 - (($row['count'] / $row['total'])*100) ;
 		$output .= ' <tr class="table-row load-accordion">
                       <td class="align-middle text-center text-sm">
                         <h6 class="mb-0 text-sm">'.$row['brand'].'/'.$row['model'].'</h6>
