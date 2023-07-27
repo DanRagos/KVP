@@ -709,6 +709,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
 }
 
 if (isset($_POST['formDataArray'])){
+
 	$formDataArray = json_decode($_POST['formDataArray'], true);
 
 	$last_sched = $client->last_pm($_POST['contract_id']);
@@ -717,23 +718,33 @@ if (isset($_POST['formDataArray'])){
 	$frequency = $_POST['frequency'];
 // Loop through each item in the $formDataArray and insert it into the database
 foreach ($formDataArray as $formData) {
+	
     // Ensure all the required fields are present in the formData
     if (
         isset($formData['sched_date']) &&
         isset($formData['serv_date']) &&
         isset($formData['problem']) &&
         isset($formData['diagnosis']) &&
-        isset($formData['service_done']) &&
         isset($formData['recomm']) &&
+        isset($formData['service_done']) &&
         isset($formData['service_by'])
     ) {
+		
         $sched_date = $formData['sched_date'];
         $contract_id = $_POST['contract_id']; // Assuming you have the contract_id from somewhere else
          // Assuming you have the frequency from somewhere else
 
         // Call the add_pms_sched function to insert the data into the database
         $last_Id =$client-> add_pms_bulk($contract_id, $sched_date, 2);
-		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], $formData['problem'], ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], $formData['service_by'], 0);
+		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], $formData['problem'], ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], 0);
+			$notif_content = 'Your schedule service no:#'.$last_Id.' has been verified';
+			$notif_title = 'Schedule Service Done';
+			$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $last_Id);
+		foreach ($formData['service_by'] as $user) {
+		$client->add_user_service($user, $last_Id, 1);
+		$client->user_notification($user, $notif_id);
+		echo ($user);
+		}
 		$client->add_pms_count_1($contract_id);
 		$last_serv_date = $formData['serv_date'];
     }
@@ -755,6 +766,77 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayContracts'){
 	$client_id = $_GET['client_id'];
 	$isActive = $_GET['isActive'];
 	$results = $client -> get_contracts($client_id, $isActive);
+	$output = '';
+    $output .= '<div class="table-responsive" > <table class="table table-light table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">Machine </th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover - Coverage</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. of SV Call</th>
+					   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody> ';
+	foreach($results as $row){
+		if ($row['frequency']==1) $frequency = 'Quarterly';
+		else if ($row['frequency']==2) $frequency = 'Semi-Annualy';
+		else $frequency = 'Annualy';
+		if ($row['status']==1) $status = 'Installation Warranty';
+		else  $status = 'PMS Contract';
+		$count = 100 - (($row['count'] / $row['total'])*100) ;
+		$output .= ' <tr class="table-row load-accordion">
+                      <td class="align-middle text-center text-sm">
+                        <h6 class="mb-0 text-sm">'.$row['brand'].'/'.$row['model'].'</h6>
+                        <p class="text-xs text-secondary mb-0">'.$row['machine_name'].'</p>
+                      </td>
+					    <td class="align-middle text-center text-sm">
+                        <p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['turn_over'])).'/'.date('M-d-Y',strtotime($row['coverage'])).'</p>
+                      </td>
+					  <td class="align-middle text-center text-sm">
+                        <h6 class="mb-0 text-sm">'.$frequency.'</h6>
+                        <p class="text-xs text-secondary mb-0">'.$status.'</p>
+                      </td>
+					   <td class="align-middle text-center text-sm">
+                        <p class="text-xs font-weight-bold mb-0">'.number_format($count).'%'.'</p>
+                      </td>
+					  <td class="align-middle text-center text-sm">
+                        <p class="text-xs font-weight-bold mb-0">'.$row['sv_call'].'</p>
+                      </td>
+					  <td class="text-center">				
+						<button type="button" data-id="'.$row['contract_id'].'"class="btn btn-success no_margin accordion-btn"> <i id="dropToggle_' . $row['contract_id'] . '" class="fa-solid fa-sort-down"></i></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-secondary no_margin viewContractReport "><i class="fa-solid fa-eye"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS"> <button type="button" data-id="'.$row['contract_id'].'" data-bs-toggle="modal" data-bs-target = "#exampleModal" data-id="'.$row['contract_id'].'" data-sv="'.$row['count'].'" data-frequency = "'.$row['frequency'].'" class="btn btn-primary no_margin addPms "><i class="fa-solid fa-add"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract"> <button type="button" data-bs-toggle="modal" data-bs-target = "#editContractModal" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin editContract "><i class="fa-solid fa-edit"></i></span></button>
+		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-danger no_margin delContract "><i class="fa-solid fa-trash"></i></span></button>
+
+					   </td>
+                    </tr>
+					<tr class="accordion-content">
+                      <td colspan="6">
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="accordion-placeholder"></div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+					';
+	}
+	$output .='</tbody> </table> </div>';			  
+				  
+				  
+				  
+
+
+    echo $output;
+}
+
+if (isset($_GET['action'])&& $_GET['action'] == 'displayExpContracts'){
+	$client_id = $_GET['client_id'];
+	$isActive = $_GET['isActive'];
+	$results = $client -> get_exp_contracts($client_id, $isActive);
 	$output = '';
     $output .= '<div class="table-responsive" > <table class="table table-light table-striped table-hover">
                   <thead>
@@ -903,37 +985,49 @@ $output .= '<div class="table-responsive" >
             <thead>
                 <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Accomplished Date</th>
+                    <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+                    <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Accomplished Date</th>
+					 <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                 </tr>
             </thead>
-            <tbody>';
+            <tbody  class="align-middle ">';
 foreach ($result as $row) {
+	if ($row['accomp_date']) {
+		$status = 'DONE';
+		$status_style='success';
+		$accomp_date = date('M-d-Y',strtotime($row['accomp_date']));
+		
+	}
+	else {
+		$status = 'NOT DONE';
+		$status_style='danger';
+		$accomp_date = '';
+	}
+	
     $output .= '
                 <tr>
-                    <td>' . $row['accomp_id'] . '</td>
-                    <td>' . $row['schedule_date'] . '</td>
-                    <td>' . $row['accomp_date'] . '</td>
-                    <td class="align-middle text-center text-sm">
-                        <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-success no_margin accordion-btn">
-                            <i class="fa-solid fa-sort-down"></i>
-                        </button>
+                    <td >' . $row['sched_id'] . '</td>
+                    <td class="text-sm font-weight-bolder text-primary">' .date('M-d-Y',strtotime($row['schedule_date'])). '</td>
+                    <td class="text-sm font-weight-bolder text-success">' .$accomp_date . '</td>
+					  <td class="text-sm font-weight-bolder text-'.$status_style.'">' .$status.'</td>
+					  <td class="align-middle text-center text-sm">';
+					  
+					  if ($row['accomp_date']) {
+					  $output .= '
+                                   
                         <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
-                            <button type="button" data-id="' . $row['accomp_id'] . '"  class="btn btn-secondary no_margin viewContractPmReport ">
+                            <button type="button" data-id="' . $row['id'] . '"  class="btn btn-secondary no_margin viewContractPmReport ">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
-                        </span>
-                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
-                            <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-warning no_margin viewMmr ">
+                        </span> ';
+					  }
+                        $output .='<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit PM Details">
+                            <button data-bs-toggle = "modal" data-bs-target="#edit-pm-modal" type="button" data-id="' . $row['id'] . '" class="btn btn-warning no_margin editPm ">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
                         </span>
-                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
-                            <button type="button" data-id="' . $row['accomp_id'] . '" class="btn btn-danger no_margin dd ">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </span>
+                        
                     </td>
                 </tr>';
 }
@@ -966,5 +1060,22 @@ echo json_encode($response);
 
 
 }
+
+if (isset($_GET['action'])&& $_GET['action'] == 'getServiceBy'){
+	$users = $client->showUsers();
+	header('Content-Type: application/json');
+echo json_encode($users);
+
+}
+
+
+if (isset($_GET['action'])&& $_GET['action'] == 'edit_pm_details'){
+	$accomp_id = $_GET['accomp_id'];
+	$result = $client->get_pms_report($accomp_id); 
+	echo json_encode($result);
+	
+}
+
+
 ?>
 

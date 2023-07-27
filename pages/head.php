@@ -15,7 +15,8 @@
 
     <link href='../assets/css/main.css' rel='stylesheet' />
 	    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css' rel='stylesheet' />
-	    
+      <link href='../assets/css/virtual-select.min.css' rel='stylesheet'/>
+	  <link href='../assets/css/tooltip.min.css' rel='stylesheet'/>
 	    
 	  
   <!-- Font Awesome Icons -->

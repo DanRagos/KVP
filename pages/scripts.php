@@ -11,6 +11,8 @@
   <script src="../assets/js/plugins/chartjs.min.js"></script>
   <script src="../assets/js/plugins/dateTime.min.js"></script>
     <script src="../assets/js/plugins/sweetalert.min.js"></script>
+	<script src="../assets/js/plugins/virtual-select.min.js"></script>
+	<script src="../assets/js/plugins/tooltip.min.js"></script>
   <script>
 		$("body").on("click",".logoutBtn", function(e){
 		e.preventDefault();

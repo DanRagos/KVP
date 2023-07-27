@@ -485,31 +485,11 @@
   </div>
 </div>
 
-<!-- Modal for Masterlist Edit and Delete -->
-	<div class="col-md-4">
-    <div class="modal fade" id="obseleteTool" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
-      <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h6 class="modal-title font-weight-normal" id="modal-title-notification">Your attention is required</h6>
-            <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="py-3 text-center">
-              <i class="material-icons ">
-                warning
-              </i>
-              <h4 class="text-gradient text-danger mt-4">You should read this!</h4>
-              <p>This will mark this tool as obsolete</p>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Confirm</button>
-            <button type="button" class="btn btn-secondary ml-auto" data-bs-dismiss="modal">Cancel</button>
-          </div>
-        </div>
-      </div>
+<!-- Modal for Editing PM -->
+<div class="modal fade modal-lg" id="edit-pm-modal"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content update_pm_contents">
+
     </div>
   </div>
+</div>

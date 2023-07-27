@@ -176,10 +176,11 @@ $obj_pdf->AddPage();
 				
                 $content .= '</div>';    
 				//$content .= "<hr> </hr>";
-				$content .= '<center><h4> '.$name.'</h4></center>';
+				$content .= '<h4 style= "text-align: center;"> '.$name.'</h4>';
 				foreach ($result as $row) {
 					    $fSchedDate = date('M d, Y', strtotime($row['schedule_date']));
 						$fAccompDate = date('M d, Y', strtotime($row['accomp_date']));
+                        $status  = $row['accomp_status'] = 2 ? 'Done' : 'Unresolved';
 				$content .= <<<EOD
 			
 				<div class="table-container">
@@ -188,11 +189,11 @@ $obj_pdf->AddPage();
     <tr>
         <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
        <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
-       <td rowspan="1" colspan="1"><b>Location :</b> <br />{$row['address']}</td>
+       <td rowspan="1" colspan="1"><b>Location :</b> <br />{$row['client_address']}</td>
     </tr>
 	<tr>
          <td ><b>Reported Problem:</b> <br />$date_today</td>
-		 <td colspan="2"><b>Diagnosis :</b> <br />{$diagnosis}</td>
+		 <td colspan="2"><b>Diagnosis :</b> <br />{$row['diagnosis']}</td>
 		 
 		  
        
@@ -206,7 +207,7 @@ $obj_pdf->AddPage();
     </tr>
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />{$row['recomm']}</td>
-		 <td ><b>Status:</b> <br />$date_today</td>
+		 <td ><b>Status:</b> <br />$status</td>
 		 <td><b>Service By:</b> <br />{$row['service_by']}</td>
 		 
 		

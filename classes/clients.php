@@ -46,6 +46,14 @@ class Clients extends Db {
 		'contact_email' =>$contact_email, 'img_link' => $img_link]);
 		return $result;
 	}
+	public function showUsers() {
+		$sql = "SELECT * FROM `users`" ;
+		$stms = $this -> conn ->prepare($sql);
+		 $stms ->execute();
+		$result = $stms->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}
 	//Display all Clients
 	public function showClients () {
 		$sql = "SELECT * FROM `clients`" ;
@@ -179,12 +187,12 @@ WHERE schedule.status != 2;";
 	$result = $stmt->fetch(PDO::FETCH_ASSOC);
 	return $result;
 }
-public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby, $withC) {
+public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC) {
 	
-	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `service_by`, `accomp_status`, `withC`)
-	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :c_sby, :aStatus, :withC)";
+	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `accomp_status`, `withC`)
+	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
 	$stmt = $this->conn->prepare($sql);
-	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'c_sby'=>$c_sby, 'aStatus'=>$status, 'withC'=>$withC]);
+	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'aStatus'=>$status, 'withC'=>$withC]);
 	return true;
 }
 public function reschedule($id, $schedule_date) {
@@ -318,7 +326,7 @@ public function get_contract_details($id) {
 		CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name,COALESCE(clients.client_address, service_call.guest_address)
 		AS address, service_call.rep_problem, accomplished_schedule.accomp_date, accomplished_schedule.diagnosis, accomplished_schedule.service_don
-, accomplished_schedule.recomm, accomplished_schedule.service_by  FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND accomplished_schedule.id = :accomp_id";
+, accomplished_schedule.recomm FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND accomplished_schedule.id = :accomp_id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['accomp_id'=>$accomp_id]);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -327,7 +335,16 @@ public function get_contract_details($id) {
 	}	
 			public function get_contracts($client_id, $isActive) {
 		$sql = "SELECT *, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
-left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = :client_id AND contract.isActive = :isActive";
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = :client_id AND contract.isActive = :isActive AND contract.count > 0";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['client_id'=>$client_id, 'isActive'=>$isActive]);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+	public function get_exp_contracts($client_id, $isActive) {
+		$sql = "SELECT *, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = :client_id AND contract.isActive = :isActive AND contract.count <= 0 ";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['client_id'=>$client_id, 'isActive'=>$isActive]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -335,8 +352,8 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 		
 	}	
 			public function viewPmsContract($contract_id) {
-		$sql = "SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date,accomplished_schedule.service_don, accomplished_schedule.diagnosis, accomplished_schedule.recomm, accomplished_schedule.service_by  FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule
-		ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) and schedule.contract_id = :contract_id";
+		$sql = "select contract.* , clients.client_name, clients.client_address, schedule.schedule_date, schedule.schedule_id as sched_id, accomplished_schedule.* from contract right join schedule on contract.contract_id = schedule.contract_id left join clients on contract.client_id = clients.client_id left join accomplished_schedule on schedule.schedule_id = accomplished_schedule.schedule_id where 
+		contract.contract_id = :contract_id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['contract_id'=>$contract_id]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -409,6 +426,28 @@ public function resolved() {
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		return $result;
 	}
+	
+	public function add_user_service ($user_id, $sched_id, $status){
+	$sql = "INSERT INTO `user_sched` (`uid`, `sched_id`, `us_status`) VALUES (:user_id, :sched_id,  :status)";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['user_id'=>$user_id, 'sched_id'=>$sched_id, 'status'=>$status]);
+	return true;
+}
+
+	public function add_user_notification($notif_title, $notif_content,  $isGeneral , $current_date, $isSchedule , $schedule_id){
+	$sql = "INSERT INTO `notification` (`title`, `content`, `is_general`, `created_at`, `isSchedule`, `schedule_id`) 
+	VALUES (:notif_title, :notif_content, :isGeneral,  :current_date, :isSchedule, :schedule_id)";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['notif_title'=>$notif_title, 'notif_content'=>$notif_content, 'isGeneral'=>$isGeneral, 
+	'current_date'=>$current_date, 'isSchedule'=>$isSchedule,'schedule_id'=>$schedule_id ]);
+	return $this->conn->lastInsertId();
+}
+	public function user_notification($user_id, $notification_id){
+	$sql = "INSERT INTO `user_notification` (`user_id`, `notification_id`) VALUES (:user_id, :notification_id)";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['user_id'=>$user_id, 'notification_id'=>$notification_id]);
+	return true; 
+}
 }
 
 ?>

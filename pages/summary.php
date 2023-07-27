@@ -32,7 +32,7 @@ $client_img =$row['imglink'];
 <body class="g-sidenav-show bg-gray-200 ">
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Add PM</h5>
@@ -245,12 +245,13 @@ $client_img =$row['imglink'];
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
-                            <div class="table-responsive table-sm" id="initial-table">
+                            <div class="table-responsive table-sm" id="expired-table">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+           
         </div>
 
     </main>
@@ -261,6 +262,30 @@ $client_img =$row['imglink'];
     
         schedDone();
         displayContracts();
+        displayExpContracts()
+
+
+
+        function displayExpContracts() {
+            let client_id = <?php echo $client_id; ?>;
+            let isActive = 1;
+            // Load initial table via AJAX
+            $.ajax({
+                url: '../php/process.php',
+                type: 'GET',
+                data: {
+                    action: 'displayExpContracts',
+                    client_id: client_id,
+                    isActive : isActive
+                },
+                success: function(response) {
+                    $('#expired-table').html(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        }
 
         function displayContracts() {
             let client_id = <?php echo $client_id; ?>;
@@ -282,6 +307,16 @@ $client_img =$row['imglink'];
                 }
             });
         }
+		$(document).on('click', '#add-contract-btn', function(){
+			Swal.fire(
+  '404 ERROR',
+  'This is still under development',
+  'info'
+);
+$('#editContractModal').modal('hide');
+
+
+		});
         $(document).on('click', '.accordion-btn', function() {
             var btn = $(this);
             var accordionContent = btn.closest('.table-row').next('.accordion-content');
@@ -395,7 +430,7 @@ $client_img =$row['imglink'];
             });
             if (pm_no > 0) {
            
-            var html = '<div class="row">' +
+            var html = '<div class="row ">' +
                 '<div class="col">' +
                 '<div class="input-group input-group-outline my-3 is-filled">' +
                 '<label class="form-label">Schedule Date</label>' +
@@ -420,7 +455,7 @@ $client_img =$row['imglink'];
                 '<input class="form-control" type="text" name="diagnosis">' +
                 '</div>' +
                 '</div>' +
-                '<div class="row">' +
+                '<div class="row align-items-center">' +
                 '<div class="col">' +
                 '<div class="input-group input-group-outline my-3 is-filled">' +
                 '<label class="form-label">Service Done</label>' +
@@ -436,9 +471,10 @@ $client_img =$row['imglink'];
                 '<div class="col">' +
                 '<div class="input-group input-group-outline my-3 is-filled">' +
                 '<label class="form-label">Service By</label>' +
-                '<input type="text" class="form-control"  name="service_by"  required>' +
+                ' <div  class="form-control p-0 sample-select" name="service_by"> </div>' + 
                 '</div>' +
                 '</div>' +
+                
                 '</div>' +
                 '</div>' +
                 '<hr style="background-color:rgb(131 110 110 / 92%);">';
@@ -458,10 +494,34 @@ $client_img =$row['imglink'];
   text: 'No of PMS Reached!!',
 })
 			}
+            $.ajax({
+        url: '../php/process.php',
+        method: 'GET',
+        data: {'action': 'getServiceBy'},
+        dataType: 'json',
+        success: function(data) {
+          // Assuming the response data is an array of objects with label and value properties
+          var optionsData = data.map(function(item) {
+            var fullName = item.firstname + ' ' + item.lastname;
+            return { label: fullName, value: item.mem_id };
+          });
+
+          // Initialize Virtual Select with the fetched options
+          VirtualSelect.init({
+            ele: '.sample-select',
+            options: optionsData,
+            multiple: true,
+          });
+        },
+        error: function(xhr, status, error) {
+          console.error('Error fetching options:', error);
+        }
+      });
         });
-       
+
 
    $(document).on('click', '.addChanges', function() {
+	   alert($('#sample-select').val());
 	  let contract_id =  $('#pms_contract_id').val();
       let frequency = $('#frequency').val()
   var modalBody = $(this).closest('.modal-content').find('.modal-body');
@@ -473,8 +533,11 @@ $client_img =$row['imglink'];
       var fieldName = $(this).attr('name');
       var fieldValue = $(this).val();
       formData[fieldName] = fieldValue;
+	
+	 
     });
-
+	 formData['service_by'] = $(this).find('.sample-select').val();
+	
     // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
     // If yes, add it to the formDataArray
     if (
@@ -532,6 +595,7 @@ $client_img =$row['imglink'];
 });
 
         $(document).on('click', '.addPms', function() {
+			  $('#pms-forms').empty();
             let sv_no = $(this).attr('data-sv');
             $('#pms_no').val(sv_no)
             $('#pms_contract_id').val($(this).attr('data-id'));
@@ -565,34 +629,49 @@ $client_img =$row['imglink'];
 
             });
         });
+		
+		 $(document).on('click', '.editPm', function() {
+			 let accomp_id = $(this).attr('data-id');
+			 $.ajax ({
+				 url: '../php/process.php',
+				 method: 'GET',
+				 data: {accomp_id:accomp_id, action:'edit_pm_details'},
+				 success: function(response) {
+					
+					 console.log(response);
+				 }
+			 });
+		 });
         $(document).on('click', '.delContract', function() {
             let contract_id = $(this).attr('data-id');
-            $.ajax({
+        
+             
+                    Swal.fire({
+                        title: 'Do you want to delete the contract?',
+                        showDenyButton: true,
+                      
+                        confirmButtonText: 'Confirm',
+                        denyButtonText: 'Cancel',
+                    }).then((result) => {
+                        /* Read more about isConfirmed, isDenied below */
+                        if (result.isConfirmed) {
+                            $.ajax({
                 url: '../php/process.php',
                 method: 'GET',
                 data: {
                     contract_id: contract_id,
                     action: 'del_Contract'
                 },
-                success: function(e) {
-                    console.log(e);
-                    Swal.fire({
-                        title: 'Do you want to delete the contract?',
-                        showDenyButton: true,
-                        showCancelButton: true,
-                        confirmButtonText: 'Confirm',
-                        denyButtonText: 'Cancel',
-                    }).then((result) => {
-                        /* Read more about isConfirmed, isDenied below */
-                        if (result.isConfirmed) {
-                            Swal.fire('Deleted!', '', 'success')
+                success: function(e) {  Swal.fire('Deleted!', '', 'success')
                             displayContracts();
+                        } });
+                          
                         } else if (result.isDenied) {
                             Swal.fire('Changes are not saved', '', 'info')
                         }
                     })
-                }
-            });
+                
+           
 
         });
 
