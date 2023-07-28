@@ -42,4 +42,13 @@
 			});
 		
 	});
+	var source = new EventSource('../php/create_sse.php');
+source.onmessage = function(event) {
+    var count = parseInt(event.data); // Parse the plain text data to an integer
+    if (!isNaN(count)) {
+        document.getElementById('notif_bell').textContent = count;
+    }
+};
+	
+
 	</script>

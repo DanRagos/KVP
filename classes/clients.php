@@ -195,6 +195,13 @@ public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $di
 	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'aStatus'=>$status, 'withC'=>$withC]);
 	return true;
 }
+public function update_accomp($serv_date, $diagnosis, $service_done, $recomm, $id) {
+	
+	$sql = "UPDATE accomplished_schedule SET accomp_date = :serv_date, diagnosis = :diagnosis, service_don = :service_done, recomm = :recomm where accomplished_schedule.id = :id";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['serv_date'=>$serv_date, 'diagnosis'=>$diagnosis, 'service_done'=>$service_done,'recomm'=>$recomm, 'id'=>$id]);
+	return true;
+}
 public function reschedule($id, $schedule_date) {
 	$sql = "UPDATE schedule SET schedule_date = :schedule_date where schedule_id = :id";
 	$stmt = $this->conn->prepare($sql);
@@ -321,7 +328,7 @@ public function get_contract_details($id) {
 		
 	}	
 		public function get_pms_report($accomp_id) {
-		$sql = "SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
+		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_date, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
 		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, 
 		CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name,COALESCE(clients.client_address, service_call.guest_address)
@@ -351,9 +358,9 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 		return $result;
 		
 	}	
-			public function viewPmsContract($contract_id) {
+			public function viewPmsContract($contract_id, $status) {
 		$sql = "select contract.* , clients.client_name, clients.client_address, schedule.schedule_date, schedule.schedule_id as sched_id, accomplished_schedule.* from contract right join schedule on contract.contract_id = schedule.contract_id left join clients on contract.client_id = clients.client_id left join accomplished_schedule on schedule.schedule_id = accomplished_schedule.schedule_id where 
-		contract.contract_id = :contract_id";
+		contract.contract_id = :contract_id $status";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['contract_id'=>$contract_id]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -448,6 +455,61 @@ public function resolved() {
 	$stmt -> execute(['user_id'=>$user_id, 'notification_id'=>$notification_id]);
 	return true; 
 }
+
+public function getServiceBy($schedule_id) {
+	$sql = "SELECT users.*, user_sched.us_status from users LEFT JOIN user_sched on users.mem_id = user_sched.uid where user_sched.sched_id = :schedule_id";
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute(['schedule_id'=>$schedule_id]);
+	$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	return $result;
+	
+}	
+
+public function remove_notif($sched_id) {
+	$stmt = $this->conn->prepare("SELECT id FROM notification WHERE schedule_id = :sched_id");
+$stmt->bindParam(':sched_id', $sched_id, PDO::PARAM_INT);
+$stmt->execute();
+$deletedId = $stmt->fetchColumn();
+
+// Execute the DELETE query on notification
+$stmt = $this->conn->prepare("DELETE FROM notification WHERE id = :deletedId");
+$stmt->bindParam(':deletedId', $deletedId, PDO::PARAM_INT);
+$stmt->execute();
+
+// Execute the Delete Query on user_notification
+$stmt = $this->conn->prepare("DELETE FROM user_notification WHERE notification_id = :deletedId");
+$stmt->bindParam(':deletedId', $deletedId, PDO::PARAM_INT);
+$stmt->execute();
+
+// Execute the Delete Query on user_sched
+$stmt = $this->conn->prepare("DELETE FROM user_sched WHERE sched_id = :sched_id");
+$stmt->bindParam(':sched_id', $sched_id, PDO::PARAM_INT);
+$stmt->execute();
+
+	
+	
 }
+
+public function fetchNotificationsFromDatabase($user_id){
+	$sql = "SELECT COUNT(id) as notif FROM user_notification where is_read = 0 and user_id = :user_id";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute(['user_id'=>$user_id]);
+    return $stmt->fetchColumn();
+}
+
+public function sendNotificationsToClient($notifCount) {
+    // Send each notification to the client
+   $message = array (
+	'count' => $notifCount
+   );
+        // Flush the output buffer to send the data immediately
+        ob_flush();
+        flush();
+	return $message;
+    
+}
+
+}
+
 
 ?>

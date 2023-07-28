@@ -177,7 +177,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_resched'){
 	
 }
 //Show Confirm Schedule Form
-if (isset($_POST['sched_id'])){
+if (isset($_POST['sched_id'])&& $_POST['action']=='updateSchedule'){
 $id = $_POST['sched_id'];
 $result = $client->get_schedule($id);
 $output ='';
@@ -382,7 +382,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_clients'){
 	$output= '';
 	$row = $client->showClients();
 	if($row) {
-		$output .= '  <table id="table" class="table align-items-center justify-content-center" >
+		$output .= '  <table id="table" class="table align-items-center justify-content-center" style= "width:100%;" >
                   <thead>
                     <tr>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
@@ -878,10 +878,6 @@ if (isset($_GET['action'])&& $_GET['action'] == 'displayExpContracts'){
 					  <td class="text-center">				
 						<button type="button" data-id="'.$row['contract_id'].'"class="btn btn-success no_margin accordion-btn"> <i id="dropToggle_' . $row['contract_id'] . '" class="fa-solid fa-sort-down"></i></button>
 		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-secondary no_margin viewContractReport "><i class="fa-solid fa-eye"></i></span></button>
-		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS"> <button type="button" data-id="'.$row['contract_id'].'" data-bs-toggle="modal" data-bs-target = "#exampleModal" data-id="'.$row['contract_id'].'" data-sv="'.$row['count'].'" data-frequency = "'.$row['frequency'].'" class="btn btn-primary no_margin addPms "><i class="fa-solid fa-add"></i></span></button>
-		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract"> <button type="button" data-bs-toggle="modal" data-bs-target = "#editContractModal" data-id="'.$row['contract_id'].'" class="btn btn-warning no_margin editContract "><i class="fa-solid fa-edit"></i></span></button>
-		 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract"> <button type="button" data-id="'.$row['contract_id'].'" class="btn btn-danger no_margin delContract "><i class="fa-solid fa-trash"></i></span></button>
-
 					   </td>
                     </tr>
 					<tr class="accordion-content">
@@ -975,7 +971,8 @@ echo $output;
 }
 if (isset($_GET['action']) && $_GET['action'] == 'getAccordionContent') {
     $contract_id = $_GET['dataId'];
-	$result = $client->viewPmsContract($contract_id);
+	$status = '';
+	$result = $client->viewPmsContract($contract_id,$status);
 	$output = '';
 			
     // Generate the accordion content based on the rowData
@@ -1072,8 +1069,99 @@ echo json_encode($users);
 if (isset($_GET['action'])&& $_GET['action'] == 'edit_pm_details'){
 	$accomp_id = $_GET['accomp_id'];
 	$result = $client->get_pms_report($accomp_id); 
-	echo json_encode($result);
-	
+	$service_by = $client->getServiceBy($result['schedule_id']);
+	$mem_arr = [];
+	foreach ($service_by as $user) {
+		array_push($mem_arr, intval($user['mem_id']));
+	}
+
+	$output ='';
+	$output .= '
+	<div class="modal-header">
+	<img src="../img/line_jpg.jpg" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
+	  <h5 class="modal-title " id="title"></h5>
+	  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	</div>
+	<div class="modal-body">
+	<form id="update_pm_form" autocomplete="off">
+	<div class="row ">   
+                 <div class="col">   
+				 <input type="hidden" name="sched_id" value="'.$result['schedule_id'].'" hidden>
+				 <input type="hidden" name="accomp_id" value="'.$accomp_id.'" hidden>
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Schedule Date</label>   
+                 <input type="date" class="form-control" name="sched_date" value="'.$result['schedule_date'].'" readonly>   
+                 </div>   
+                 </div>   
+                 <div class="col">   
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Service Date</label>   
+                 <input type="date" class="form-control" value="'.$result['accomp_date'].'" name="serv_date" required>   
+                 </div>   
+                 </div>    
+                 <div class="col">   
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Diagnosis:</label>   
+                 <input class="form-control" type="text" name="diagnosis" value="'.$result['diagnosis'].'">   
+                 </div>   
+                 </div>   
+                 <div class="row align-items-center">   
+                 <div class="col">   
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Service Done</label>   
+                 <input type="text" class="form-control" name="service_done" value="'.$result['service_don'].'" required>   
+                 </div>   
+                 </div>   
+                 <div class="col">   
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Recommendation</label>   
+                 <input type="text" class="form-control"  name="recomm" value="'.$result['recomm'].'"required>   
+                 </div>   
+                 </div>   
+                 <div class="col">   
+                 <div class="input-group input-group-outline my-3 is-filled">   
+                 <label class="form-label">Service By</label>   
+                  <div  class="form-control p-0 sample-select" id="myDiv" name="service_by" data-array-value="'.json_encode( $mem_arr).'"></div>    
+                 </div>   
+                 </div>   
+                
+                 </div>   
+                 </div>
+				 <div class="modal-footer mb-0">
+				 <button type="button" class="btn btn-primary mb-0 updatePm">Confirm</button>
+				   <button type="button" class="btn btn-secondary mb-0" data-bs-dismiss="modal">Close</button>   
+				 </div>
+				 </form> 
+				 </div>  ';
+
+	echo $output;
+}
+
+if(isset($_POST['action'])&& $_POST['action']=='updatePms'){
+	$serv_date = $_POST['serv_date'];
+	$diagnosis = $_POST['diagnosis'];
+	$service_done = $_POST['service_done'];
+	$recomm = $_POST['recomm'];
+
+	$sched_id = $_POST['sched_id'];
+	$accomp_id = $_POST['accomp_id'];
+	$service_by_values = explode(',', $_POST['service_by']);
+	//delete notification, notif_user, and user_shced
+	$remove_notif = $client->remove_notif($sched_id);
+	$notif_content = 'Your schedule service no:#'.$sched_id.' has been verified';
+	$notif_title = 'Schedule Service Done';
+		$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $sched_id);
+		foreach ($service_by_values as $user) {
+		$client->add_user_service($user, $sched_id, 1);
+		$client->user_notification($user, $notif_id);
+		echo $notif_id;
+	}
+
+	//update accomp table;
+	$update_accomp = $client->update_accomp($serv_date, $diagnosis, $service_done, $recomm, $accomp_id);
+print_r( $update_accomp);
+
+
 }
 
 

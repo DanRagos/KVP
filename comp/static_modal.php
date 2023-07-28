@@ -487,7 +487,7 @@
 
 <!-- Modal for Editing PM -->
 <div class="modal fade modal-lg" id="edit-pm-modal"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-md">
     <div class="modal-content update_pm_contents">
 
     </div>

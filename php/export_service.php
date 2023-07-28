@@ -127,9 +127,12 @@ $content .=" \n Generated at $date_today";
 } 
 if (isset($_GET['action']) && $_GET['action'] == 'viewContracts') {
 	$contract_id = $_GET['contract_id'];
-	$result = $client->viewPmsContract($contract_id);
+    $status = 'AND schedule.status = 2';
+	$result = $client->viewPmsContract($contract_id, $status);
+   
 	$name =  $result[0]['client_name'];
 	$machine = $result[0]['brand'].' '.$result[0]['model'];
+
 		class MYPDF extends TCPDF {
 }
  $obj_pdf = new MYPDF('P', 'mm', 'A4'); 
@@ -178,6 +181,15 @@ $obj_pdf->AddPage();
 				//$content .= "<hr> </hr>";
 				$content .= '<h4 style= "text-align: center;"> '.$name.'</h4>';
 				foreach ($result as $row) {
+                    $service_by = $client->getServiceBy($row['schedule_id']);
+                    $service = '';
+                    foreach ($service_by as $user) {
+                       
+                        $service .= $user['firstname'].' '.$user['lastname'];
+                        if (count($service_by)>1){
+                            $service .= ', ';
+                        }
+                    }
 					    $fSchedDate = date('M d, Y', strtotime($row['schedule_date']));
 						$fAccompDate = date('M d, Y', strtotime($row['accomp_date']));
                         $status  = $row['accomp_status'] = 2 ? 'Done' : 'Unresolved';
@@ -185,7 +197,7 @@ $obj_pdf->AddPage();
 			
 				<div class="table-container">
 
-<table cellspacing="0" cellpadding="1" border="1">
+<table cellspacing="0" cellpadding="3" border="1">
     <tr>
         <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
        <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
@@ -208,7 +220,7 @@ $obj_pdf->AddPage();
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />{$row['recomm']}</td>
 		 <td ><b>Status:</b> <br />$status</td>
-		 <td><b>Service By:</b> <br />{$row['service_by']}</td>
+		 <td><b>Service By:</b> <br />$service</td>
 		 
 		
       
@@ -239,6 +251,15 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContractPm') {
 	$result = $client->get_pms_report($accomp_id); 
 	$name =  $result['client_name'];
 	$machine = $result['brand'].' '.$result['model'];
+    $service_by = $client->getServiceBy($result['schedule_id']);
+    $service = '';
+    foreach ($service_by as $user) {
+       
+        $service .= $user['firstname'].' '.$user['lastname'];
+        if (count($service_by)>1){
+            $service .= ', ';
+        }
+    }
 		class MYPDF extends TCPDF {
 }
  $obj_pdf = new MYPDF('P', 'mm', 'A4'); 
@@ -285,21 +306,21 @@ $obj_pdf->AddPage();
 				
                 $content .= '</div>';    
 				//$content .= "<hr> </hr>";
-				$content .= '<center><h4> '.$name.'</h4></center>';
+				$content .= '<h4 style= "text-align: center;"> '.$name.'</h4>';
 					    $fSchedDate = date('M d, Y', strtotime($result['schedule_date']));
 						$fAccompDate = date('M d, Y', strtotime($result['accomp_date']));
 				$content .= <<<EOD
 			
 				<div class="table-container">
 
-<table cellspacing="0" cellpadding="1" border="1">
+<table cellspacing="0" cellpadding="3" border="1">
     <tr>
         <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
        <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
        <td rowspan="1" colspan="1"><b>Location :</b> <br />{$row['address']}</td>
     </tr>
 	<tr>
-         <td ><b>Reported Problem:</b> <br />$date_today</td>
+       
 		 <td colspan="2"><b>Diagnosis :</b> <br />{$result['diagnosis']}</td>
 		 
 		  
@@ -315,7 +336,7 @@ $obj_pdf->AddPage();
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />{$result['recomm']}</td>
 		 <td ><b>Status:</b> <br />$date_today</td>
-		 <td><b>Service By:</b> <br />{$result['service_by']}</td>
+		 <td><b>Service By:</b> <br />$service</td>
 		 
 		
       

@@ -250,9 +250,7 @@ $("body").on("click",".addContractBtn", function(e) {
 				   scrollY: '45vh',
 				   scrollX: true,
 				scrollCollapse: true,
-				  	fixedColumns:   {
-            left: 1,
-        }
+				 
     });
 		}
 		

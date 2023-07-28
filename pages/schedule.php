@@ -233,7 +233,8 @@ $(document).ready(function(){
 		$.ajax({
 			url: '../php/process.php',
 			method: 'post',
-			data: {sched_id : sched_id},
+			data: {sched_id : sched_id,
+			action:'updateSchedule'},
 			success: function (response) {
 			 $("#confirm-sched-modal .update_contents").html(response);
 			 $("#confirm-sched-modal").modal("show");

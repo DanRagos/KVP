@@ -45,8 +45,8 @@ $client_img =$row['imglink'];
                                 <label class="form-label">PMS # :</label>
                                 <input type="text" name="pms_no" class="form-control" id="pms_no" readonly>
                                 <input type="hidden" name="contract_id" id="pms_contract_id">
-                                <input type="hidden"  id="last_pms">
-                                <input type="hidden"  id="frequency">
+                                <input type="hidden" id="last_pms">
+                                <input type="hidden" id="frequency">
                             </div>
                         </div>
                     </div>
@@ -68,6 +68,7 @@ $client_img =$row['imglink'];
             </div>
         </div>
     </div>
+    
     <aside
         class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark"
         id="sidenav-main">
@@ -241,7 +242,7 @@ $client_img =$row['imglink'];
                     <div class="card my-4 card ">
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                                <h6 class="text-white text-capitalize ps-3">Active Contract</h6>
+                                <h6 class="text-white text-capitalize ps-3">Completed Contract</h6>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
@@ -251,7 +252,7 @@ $client_img =$row['imglink'];
                     </div>
                 </div>
             </div>
-           
+
         </div>
 
     </main>
@@ -259,7 +260,7 @@ $client_img =$row['imglink'];
     <?php include 'scripts.php' ?>
     <script>
     $(document).ready(function() {
-    
+
         schedDone();
         displayContracts();
         displayExpContracts()
@@ -276,7 +277,7 @@ $client_img =$row['imglink'];
                 data: {
                     action: 'displayExpContracts',
                     client_id: client_id,
-                    isActive : isActive
+                    isActive: isActive
                 },
                 success: function(response) {
                     $('#expired-table').html(response);
@@ -297,7 +298,7 @@ $client_img =$row['imglink'];
                 data: {
                     action: 'displayContracts',
                     client_id: client_id,
-                    isActive : isActive
+                    isActive: isActive
                 },
                 success: function(response) {
                     $('#initial-table').html(response);
@@ -307,20 +308,18 @@ $client_img =$row['imglink'];
                 }
             });
         }
-		$(document).on('click', '#add-contract-btn', function(){
-			Swal.fire(
-  '404 ERROR',
-  'This is still under development',
-  'info'
-);
-$('#editContractModal').modal('hide');
-
-
-		});
+        $(document).on('click', '#add-contract-btn', function() {
+            Swal.fire(
+                '404 ERROR',
+                'This is still under development',
+                'info'
+            );
+            $('#editContractModal').modal('hide');
+        });
         $(document).on('click', '.accordion-btn', function() {
             var btn = $(this);
             var accordionContent = btn.closest('.table-row').next('.accordion-content');
-            console.log(accordionContent);
+           
             if (!accordionContent.is(':visible')) {
                 var rowData = btn.closest('.table-row').data(
                     'row'); // Retrieve data for the clicked row
@@ -411,17 +410,17 @@ $('#editContractModal').modal('hide');
         function initTable() {
             $('.testTable').DataTable({});
         }
-     
+
         $(document).on('click', '.editTest', function() {
-         
+
             // Generate a unique name for the input field
             let contract_no = $('#pms_contract_id').val();
             let pm_no = $('#pms_no').val();
             let frequency = $('#frequency').val()
-           
-          
-        var fieldName = 'inputField_' + Date.now(); // Example: inputField_1623286595761
-        let last_sched = $('#last_pms').val();
+
+
+            var fieldName = 'inputField_' + Date.now(); // Example: inputField_1623286595761
+            let last_sched = $('#last_pms').val();
 
             // Create the input field dynamically with the unique name
             var inputField = $('<input>').attr({
@@ -429,190 +428,199 @@ $('#editContractModal').modal('hide');
                 name: fieldName
             });
             if (pm_no > 0) {
-           
-            var html = '<div class="row ">' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Schedule Date</label>' +
-                '<input type="date" class="form-control" value="'+last_sched+ '" name="sched_date" max="<?php echo date('Y-m-d');?>" readonly>' +
-                '</div>' +
-                '</div>' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Service Date</label>' +
-                '<input type="date" class="form-control" value="<?php echo date('Y-m-d');?>" name="serv_date" required>' +
-                '</div>' +
-                '</div>' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Problem:</label>' +
-                '<input class="form-control" type="text" name="problem">' +
-                '</div>' +
-                '</div>' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Diagnosis:</label>' +
-                '<input class="form-control" type="text" name="diagnosis">' +
-                '</div>' +
-                '</div>' +
-                '<div class="row align-items-center">' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Service Done</label>' +
-                '<input type="text" class="form-control" name="service_done" required>' +
-                '</div>' +
-                '</div>' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Recommendation</label>' +
-                '<input type="text" class="form-control"  name="recomm"required>' +
-                '</div>' +
-                '</div>' +
-                '<div class="col">' +
-                '<div class="input-group input-group-outline my-3 is-filled">' +
-                '<label class="form-label">Service By</label>' +
-                ' <div  class="form-control p-0 sample-select" name="service_by"> </div>' + 
-                '</div>' +
-                '</div>' +
-                
-                '</div>' +
-                '</div>' +
-                '<hr style="background-color:rgb(131 110 110 / 92%);">';
+
+                var html = '<div class="row ">' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Schedule Date</label>' +
+                    '<input type="date" class="form-control" value="' + last_sched +
+                    '" name="sched_date" max="<?php echo date('Y-m-d');?>" readonly>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Service Date</label>' +
+                    '<input type="date" class="form-control" value="<?php echo date('Y-m-d');?>" name="serv_date" required>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Problem:</label>' +
+                    '<input class="form-control" type="text" name="problem">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Diagnosis:</label>' +
+                    '<input class="form-control" type="text" name="diagnosis">' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="row align-items-center">' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Service Done</label>' +
+                    '<input type="text" class="form-control" name="service_done" required>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Recommendation</label>' +
+                    '<input type="text" class="form-control"  name="recomm"required>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="col">' +
+                    '<div class="input-group input-group-outline my-3 is-filled">' +
+                    '<label class="form-label">Service By</label>' +
+                    ' <div  class="form-control p-0 sample-select" name="service_by"> </div>' +
+                    '</div>' +
+                    '</div>' +
+
+                    '</div>' +
+                    '</div>' +
+                    '<hr style="background-color:rgb(131 110 110 / 92%);">';
                 let nextDate = new Date(last_sched);
                 nextDate.setMonth(nextDate.getMonth() + 3);
-                 last_sched = nextDate.toISOString().slice(0, 10);
-            // Append the input field to the container element
-            $('#pms-forms').append(html);
-            pm_no -= 1;
-            $('#pms_no').val(pm_no);
-        $('#last_pms').val(last_sched);
+                last_sched = nextDate.toISOString().slice(0, 10);
+                // Append the input field to the container element
+                $('#pms-forms').append(html);
+                pm_no -= 1;
+                $('#pms_no').val(pm_no);
+                $('#last_pms').val(last_sched);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No of PMS Reached!!',
+                })
             }
-			else {
-			Swal.fire({
-  icon: 'error',
-  title: 'Oops...',
-  text: 'No of PMS Reached!!',
-})
-			}
             $.ajax({
-        url: '../php/process.php',
-        method: 'GET',
-        data: {'action': 'getServiceBy'},
-        dataType: 'json',
-        success: function(data) {
-          // Assuming the response data is an array of objects with label and value properties
-          var optionsData = data.map(function(item) {
-            var fullName = item.firstname + ' ' + item.lastname;
-            return { label: fullName, value: item.mem_id };
-          });
+                url: '../php/process.php',
+                method: 'GET',
+                data: {
+                    'action': 'getServiceBy'
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // Assuming the response data is an array of objects with label and value properties
+                    var optionsData = data.map(function(item) {
+                        var fullName = item.firstname + ' ' + item.lastname;
+                        return {
+                            label: fullName,
+                            value: item.mem_id
+                        };
+                    });
 
-          // Initialize Virtual Select with the fetched options
-          VirtualSelect.init({
-            ele: '.sample-select',
-            options: optionsData,
-            multiple: true,
-          });
-        },
-        error: function(xhr, status, error) {
-          console.error('Error fetching options:', error);
-        }
-      });
+                    // Initialize Virtual Select with the fetched options
+                    VirtualSelect.init({
+                        ele: '.sample-select',
+                        options: optionsData,
+                        multiple: true,
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching options:', error);
+                }
+            });
         });
 
 
-   $(document).on('click', '.addChanges', function() {
-	   alert($('#sample-select').val());
-	  let contract_id =  $('#pms_contract_id').val();
-      let frequency = $('#frequency').val()
-  var modalBody = $(this).closest('.modal-content').find('.modal-body');
-  var formDataArray = []; // Step 1: Initialize the formDataArray
+        $(document).on('click', '.addChanges', function() {
+            alert($('#sample-select').val());
+            let contract_id = $('#pms_contract_id').val();
+            let frequency = $('#frequency').val()
+            var modalBody = $(this).closest('.modal-content').find('.modal-body');
+            var formDataArray = []; // Step 1: Initialize the formDataArray
 
-  modalBody.find('.row').each(function() {
-    var formData = {};
-    $(this).find('input, select').each(function() {
-      var fieldName = $(this).attr('name');
-      var fieldValue = $(this).val();
-      formData[fieldName] = fieldValue;
-	
-	 
-    });
-	 formData['service_by'] = $(this).find('.sample-select').val();
-	
-    // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
-    // If yes, add it to the formDataArray
-    if (
-      formData.hasOwnProperty('sched_date') &&
-      formData.hasOwnProperty('serv_date') &&
-      formData.hasOwnProperty('problem') &&
-      formData.hasOwnProperty('diagnosis') &&
-      formData.hasOwnProperty('service_done') &&
-      formData.hasOwnProperty('recomm') &&
-      formData.hasOwnProperty('service_by')
-    ) {
-      formDataArray.push(formData);
-    }
-  });
+            modalBody.find('.row').each(function() {
+                var formData = {};
+                $(this).find('input, select').each(function() {
+                    var fieldName = $(this).attr('name');
+                    var fieldValue = $(this).val();
+                    formData[fieldName] = fieldValue;
 
-  // Step 3: Send the form data via AJAX
-  swal.fire({
-    title: 'Confirm changes',
-    confirmButtonText: 'Save',
-    showCancelButton: true,
-  }).then((result) => {
-    if (result.isConfirmed) {
-      $.ajax({
-        url: '../php/process.php',
-        type: 'POST',
-        data: { formDataArray: JSON.stringify(formDataArray),
-				contract_id:contract_id,
-                frequency:frequency
-				},
-        success: function(response) {
-			console.log(response);
-          // Handle the AJAX response
-          $('#pms-forms').empty();
-          $('#exampleModal').modal('hide');
-          displayContracts();
-          Swal.fire({
-            icon: 'success',
-            title: 'Saved',
-            timer: 1500,
-            timerProgressBar: true,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            willClose: () => {
-              Swal.hideLoading();
-            },
-          });
-        },
-        error: function(xhr, status, error) {
-          console.log(error);
-        },
-      });
-    }
-  });
-});
+
+                });
+                formData['service_by'] = $(this).find('.sample-select').val();
+
+                // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
+                // If yes, add it to the formDataArray
+                if (
+                    formData.hasOwnProperty('sched_date') &&
+                    formData.hasOwnProperty('serv_date') &&
+                    formData.hasOwnProperty('problem') &&
+                    formData.hasOwnProperty('diagnosis') &&
+                    formData.hasOwnProperty('service_done') &&
+                    formData.hasOwnProperty('recomm') &&
+                    formData.hasOwnProperty('service_by')
+                ) {
+                    formDataArray.push(formData);
+                }
+            });
+
+            // Step 3: Send the form data via AJAX
+            swal.fire({
+                title: 'Confirm changes',
+                confirmButtonText: 'Save',
+                showCancelButton: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '../php/process.php',
+                        type: 'POST',
+                        data: {
+                            formDataArray: JSON.stringify(formDataArray),
+                            contract_id: contract_id,
+                            frequency: frequency
+                        },
+                        success: function(response) {
+                          
+                            // Handle the AJAX response
+                            $('#pms-forms').empty();
+                            $('#exampleModal').modal('hide');
+                            displayContracts();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Saved',
+                                timer: 1500,
+                                timerProgressBar: true,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                willClose: () => {
+                                    Swal.hideLoading();
+                                },
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        },
+                    });
+                }
+            });
+        });
 
         $(document).on('click', '.addPms', function() {
-			  $('#pms-forms').empty();
+            $('#pms-forms').empty();
             let sv_no = $(this).attr('data-sv');
             $('#pms_no').val(sv_no)
             $('#pms_contract_id').val($(this).attr('data-id'));
-         $('#frequency').val($(this).attr('data-frequency'));
+            $('#frequency').val($(this).attr('data-frequency'));
             let contract_no = $(this).attr('data-id');
             $.ajax({
-    url: '../php/process.php', // Replace 'process.php' with your actual PHP script filename
-    method: 'get',
-    data: { contract_no: contract_no, action: 'last_pm' },
-    success: function(response) {
-     
-      let d = JSON.parse(response)
-      $('#last_pms').val(d.schedule_date);
-      
-    }
-   });
-         
+                url: '../php/process.php', // Replace 'process.php' with your actual PHP script filename
+                method: 'get',
+                data: {
+                    contract_no: contract_no,
+                    action: 'last_pm'
+                },
+                success: function(response) {
+
+                    let d = JSON.parse(response)
+                    $('#last_pms').val(d.schedule_date);
+
+                }
+            });
+
         });
         $(document).on('click', '.editContract', function() {
             let contract_id = $(this).attr('data-id');
@@ -629,49 +637,127 @@ $('#editContractModal').modal('hide');
 
             });
         });
-		
-		 $(document).on('click', '.editPm', function() {
-			 let accomp_id = $(this).attr('data-id');
-			 $.ajax ({
-				 url: '../php/process.php',
-				 method: 'GET',
-				 data: {accomp_id:accomp_id, action:'edit_pm_details'},
-				 success: function(response) {
-					
-					 console.log(response);
-				 }
-			 });
-		 });
-        $(document).on('click', '.delContract', function() {
-            let contract_id = $(this).attr('data-id');
-        
-             
-                    Swal.fire({
-                        title: 'Do you want to delete the contract?',
-                        showDenyButton: true,
-                      
-                        confirmButtonText: 'Confirm',
-                        denyButtonText: 'Cancel',
-                    }).then((result) => {
-                        /* Read more about isConfirmed, isDenied below */
-                        if (result.isConfirmed) {
-                            $.ajax({
+
+        $(document).on('click', '.editPm', function() {
+            let accomp_id = $(this).attr('data-id');
+            let value = [1, 2];
+            $.ajax({
                 url: '../php/process.php',
                 method: 'GET',
                 data: {
-                    contract_id: contract_id,
-                    action: 'del_Contract'
+                    accomp_id: accomp_id,
+                    action: 'edit_pm_details'
                 },
-                success: function(e) {  Swal.fire('Deleted!', '', 'success')
-                            displayContracts();
-                        } });
-                          
-                        } else if (result.isDenied) {
-                            Swal.fire('Changes are not saved', '', 'info')
+                success: function(response) {
+                  
+                    $('.update_pm_contents').html(response);
+                    const arrayValue = JSON.parse(document.getElementById('myDiv').dataset
+                        .arrayValue);
+                    $.ajax({
+                        url: '../php/process.php',
+                        method: 'GET',
+                        data: {
+                            'action': 'getServiceBy'
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+
+                            // Assuming the response data is an array of objects with label and value properties
+                            var optionsData = data.map(function(item) {
+                                var fullName = item.firstname + ' ' +
+                                    item.lastname;
+                                return {
+                                    label: fullName,
+                                    value: item.mem_id
+                                };
+                            });
+
+                            // Initialize Virtual Select with the fetched options
+                            VirtualSelect.init({
+                                ele: '.sample-select',
+                                options: optionsData,
+                                multiple: true,
+
+                            });
+
+                            document.querySelector('.sample-select').setValue(
+                                arrayValue);
+
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching options:', error);
                         }
-                    })
-                
-           
+                    });
+                }
+            });
+
+        });
+        $(document).on('click', '.updatePm', function(e) {
+            if ($("#update_pm_form")[0].checkValidity()) {
+    e.preventDefault();
+    var formData = new FormData($("#update_pm_form")[0]);
+    formData.append('action', 'updatePms');
+    $.ajax({
+      url: '../php/process.php',
+      method: 'post',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        console.log(response);
+          $("#update_pm_form")[0].reset();
+          $("#edit-pm-modal").modal('hide');
+          Swal.fire({
+            icon: 'success',
+            title: 'PMS Update',
+            text: 'The PM details has been edited successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+       
+        
+      }
+    });
+  }
+        });
+        $(document).on('click', '.delContract', function() {
+            let contract_id = $(this).attr('data-id');
+
+
+            Swal.fire({
+                title: 'Do you want to delete the contract?',
+                showDenyButton: true,
+
+                confirmButtonText: 'Confirm',
+                denyButtonText: 'Cancel',
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '../php/process.php',
+                        method: 'GET',
+                        data: {
+                            contract_id: contract_id,
+                            action: 'del_Contract'
+                        },
+                        success: function(e) {
+                            Swal.fire('Deleted!', '', 'success')
+                            displayContracts();
+                        }
+                    });
+
+                } else if (result.isDenied) {
+                    Swal.fire('Changes are not saved', '', 'info')
+                }
+            })
+
+
 
         });
 
@@ -801,6 +887,11 @@ $('#editContractModal').modal('hide');
                 }
             });
         }
+        
+   
+
+
+      
 
     });
     </script>
