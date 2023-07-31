@@ -509,6 +509,24 @@ public function sendNotificationsToClient($notifCount) {
     
 }
 
+public function countSchedClient($stmt) {
+	$sql = $stmt;
+	$stmt= $this->conn->prepare($sql);
+	$stmt->execute([]);
+	return $stmt->fetchColumn();
+}
+
+public function getUserServ($client_id){
+	$sql = "SELECT ud.firstname AS FirstName, SUM(CASE WHEN st.schedule_type = 1 THEN 1 ELSE 0 END) AS TotalCount FROM users ud 
+	LEFT JOIN user_sched us ON ud.mem_id = us.uid LEFT JOIN schedule st ON us.sched_id = st.schedule_id AND st.status = 2 
+	LEFT JOIN contract c ON st.contract_id = c.contract_id 
+	LEFT JOIN service_call sc ON st.sv_id = sc.sv_id WHERE (c.client_id = :client_id OR sc.client_id = :client_id) GROUP BY ud.firstname;";
+	$stmt = $this->conn->prepare($sql);
+	$stmt->execute(['client_id'=>$client_id]);
+	return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+}
+
 }
 
 

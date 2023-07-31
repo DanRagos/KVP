@@ -122,14 +122,13 @@ $client_img =$row['imglink'];
                                     <i class="material-icons opacity-10">weekend</i>
                                 </div>
                                 <div class="text-end pt-1">
-                                    <p class="text-sm mb-0 text-capitalize">Service Schedule</p>
+                                    <p class="text-lg mb-0 text-capitalize">Service Schedule</p>
                                     <h4 class="mb-0" id="serviceSchedule">...</h4>
                                 </div>
                             </div>
-                            <hr class="dark horizontal my-0">
+                            <hr class="dark horizontal my-2">
                             <div class="card-footer p-3">
-                                <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+55% </span>than
-                                    last week</p>
+                              
                             </div>
                         </div>
                     </div>
@@ -141,14 +140,13 @@ $client_img =$row['imglink'];
                                     <i class="material-icons opacity-10">person</i>
                                 </div>
                                 <div class="text-end pt-1">
-                                    <p class="text-sm mb-0 text-capitalize">PMS for this Month</p>
+                                    <p class="text-lg mb-0 text-capitalize">PMS</p>
                                     <h4 class="mb-0" id="pmsSched">...</h4>
                                 </div>
                             </div>
-                            <hr class="dark horizontal my-0">
+                            <hr class="dark horizontal my-2">
                             <div class="card-footer p-3">
-                                <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+3% </span>than
-                                    last month</p>
+                                
                             </div>
                         </div>
                     </div>
@@ -160,14 +158,14 @@ $client_img =$row['imglink'];
                                     <i class="material-icons opacity-10">person</i>
                                 </div>
                                 <div class="text-end pt-1">
-                                    <p class="text-sm mb-0 text-capitalize">SV for this Month</p>
+                                    <p class="text-lg mb-0 text-capitalize">SV</p>
                                     <h4 class="mb-0" id="svSched">...</h4>
                                 </div>
                             </div>
-                            <hr class="dark horizontal my-0">
+                            <hr class="dark horizontal my-2">
                             <div class="card-footer p-3">
-                                <p class="mb-0"><span class="text-danger text-sm font-weight-bolder">-2%</span> than
-                                    yesterday</p>
+                                <p class="mb-0"><span class="text-danger text-sm font-weight-bolder"></span> 
+                                   </p>
                             </div>
                         </div>
                     </div>
@@ -180,17 +178,16 @@ $client_img =$row['imglink'];
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">
                                 <div class="chart">
-                                    <canvas id="pie-chart-tasks" class="chart-canvas" height="170"></canvas>
+                                    <canvas id="donut-graph" class="chart-canvas" height="170"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body">
-                            <h6 class="mb-0 ">Website Views</h6>
-                            <p class="text-sm ">Last Campaign Performance</p>
+                            <h6 class="mb-0 ">Serviced By</h6>
+                          
                             <hr class="dark horizontal">
                             <div class="d-flex ">
-                                <i class="material-icons text-sm my-auto me-1">schedule</i>
-                                <p class="mb-0 text-sm"> campaign sent 2 days ago </p>
+                                
                             </div>
                         </div>
                     </div>
@@ -207,11 +204,10 @@ $client_img =$row['imglink'];
                         </div>
                         <div class="card-body">
                             <h6 class="mb-0 ">Completed Tasks</h6>
-                            <p class="text-sm ">Last Campaign Performance</p>
+                         
                             <hr class="dark horizontal">
                             <div class="d-flex ">
-                                <i class="material-icons text-sm my-auto me-1">schedule</i>
-                                <p class="mb-0 text-sm">just updated</p>
+                            
                             </div>
                         </div>
                     </div>
@@ -442,13 +438,7 @@ $client_img =$row['imglink'];
                     '<label class="form-label">Service Date</label>' +
                     '<input type="date" class="form-control" value="<?php echo date('Y-m-d');?>" name="serv_date" required>' +
                     '</div>' +
-                    '</div>' +
-                    '<div class="col">' +
-                    '<div class="input-group input-group-outline my-3 is-filled">' +
-                    '<label class="form-label">Problem:</label>' +
-                    '<input class="form-control" type="text" name="problem">' +
-                    '</div>' +
-                    '</div>' +
+                    '</div>' +                  
                     '<div class="col">' +
                     '<div class="input-group input-group-outline my-3 is-filled">' +
                     '<label class="form-label">Diagnosis:</label>' +
@@ -525,12 +515,12 @@ $client_img =$row['imglink'];
 
 
         $(document).on('click', '.addChanges', function() {
-            alert($('#sample-select').val());
+            
             let contract_id = $('#pms_contract_id').val();
             let frequency = $('#frequency').val()
             var modalBody = $(this).closest('.modal-content').find('.modal-body');
             var formDataArray = []; // Step 1: Initialize the formDataArray
-
+            alert(contract_id);
             modalBody.find('.row').each(function() {
                 var formData = {};
                 $(this).find('input, select').each(function() {
@@ -547,7 +537,6 @@ $client_img =$row['imglink'];
                 if (
                     formData.hasOwnProperty('sched_date') &&
                     formData.hasOwnProperty('serv_date') &&
-                    formData.hasOwnProperty('problem') &&
                     formData.hasOwnProperty('diagnosis') &&
                     formData.hasOwnProperty('service_done') &&
                     formData.hasOwnProperty('recomm') &&
@@ -573,6 +562,7 @@ $client_img =$row['imglink'];
                             frequency: frequency
                         },
                         success: function(response) {
+                            console.log(response);
                           
                             // Handle the AJAX response
                             $('#pms-forms').empty();
@@ -600,12 +590,14 @@ $client_img =$row['imglink'];
         });
 
         $(document).on('click', '.addPms', function() {
+            
             $('#pms-forms').empty();
             let sv_no = $(this).attr('data-sv');
             $('#pms_no').val(sv_no)
             $('#pms_contract_id').val($(this).attr('data-id'));
             $('#frequency').val($(this).attr('data-frequency'));
             let contract_no = $(this).attr('data-id');
+            alert(contract_no);
             $.ajax({
                 url: '../php/process.php', // Replace 'process.php' with your actual PHP script filename
                 method: 'get',
@@ -762,18 +754,34 @@ $client_img =$row['imglink'];
         });
 
         function schedDone() {
-            var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
+            let client_id = <?php echo $client_id; ?>;
+            var data;
+            $.ajax ({
+                url:'../php/process.php',
+                method: 'GET',
+                data:{client_id:client_id,
+                    action:'getSchedStats'},
+                success:function(response){
+                    console.log(response);
+                    data = JSON.parse(response);
+
+                    console.log(data.pm);
+
+                    if (window.lineGraph) {
+window.lineGraph.destroy();
+}
+                    var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
             var labels = [];
             var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-            new Chart(ctx3, {
+           window.lineGraph =  new Chart(ctx3, {
                 type: "line",
                 data: {
                     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
                         "Nov", "Dec"
                     ],
                     datasets: [{
-                            label: "Schedule Accuracy",
+                            label: "Preventive Maintenance",
                             tension: 0,
                             borderWidth: 0,
                             pointRadius: 5,
@@ -783,11 +791,11 @@ $client_img =$row['imglink'];
                             borderWidth: 4,
                             backgroundColor: "transparent",
                             fill: true,
-                            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+                            data: data.pm,
                             maxBarThickness: 2
 
                         }, {
-                            label: "Calibration Grade",
+                            label: "Service Call",
                             tension: 0,
                             borderWidth: 0,
                             pointRadius: 5,
@@ -797,7 +805,7 @@ $client_img =$row['imglink'];
                             borderWidth: 4,
                             backgroundColor: "transparent",
                             fill: true,
-                            data: [2, 34, 123, 220, 12, 14, 400, 230, 55, 412, 213],
+                            data: data.sv,
                             maxBarThickness: 2
                         }
 
@@ -866,6 +874,70 @@ $client_img =$row['imglink'];
                     },
                 },
             });
+
+                }
+            });
+        
+            $.ajax({
+                url: '../php/process.php',
+                method: 'GET',
+                data: {client_id:client_id, action: 'getxD'},
+                success:function (response){
+                    console.log(response);
+                    data = JSON.parse(response);
+                    console.log(data);
+                    var labels = data.map(item => item.firstname.trim());
+                    var userPie = document.getElementById('donut-graph').getContext('2d');
+                    var count = data.map(item => item.count);
+                    
+
+if (window.userPieGraph) {
+window.userPieGraph.destroy();
+}
+var backgroundColors = generateRandomColor(count.length); // Pass the length of counts array
+
+       window.userPieGraph = new Chart(userPie, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: count,
+                    backgroundColor: backgroundColors
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+          legend: {
+            display: true,
+			labels: {
+				color: 'white',
+			}
+          }
+        },
+                title: {
+                    display: true,    
+                    text: 'Customer Counts by Lastname'
+                }
+            }
+        }); 
+        function generateRandomColor(length) {
+  var colors = [];
+  for (var i = 0; i < length; i++) {
+    var color = 'rgba(' + Math.floor(Math.random() * 256) + ', '
+                        + Math.floor(Math.random() * 256) + ', '
+                        + Math.floor(Math.random() * 256) + ', 0.8)';
+    colors.push(color);
+  }
+  return colors;
+}   
+    
+    }
+            });
+           
+
+           
         }
 
         setInterval(viewSummaryDashboard, 3000);
@@ -888,6 +960,8 @@ $client_img =$row['imglink'];
             });
         }
         
+        setInterval(schedDone, 30000);
+
    
 
 

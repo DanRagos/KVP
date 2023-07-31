@@ -16,30 +16,32 @@
   <script>
 		$("body").on("click",".logoutBtn", function(e){
 		e.preventDefault();
-		swal({
-			title: "Log out??",
-			text: "",
-			icon: "warning",
-			buttons: true,
-			dangerMode: true,
-			})
-			.then((willDelete) => {
-			if (willDelete) {
-			$.ajax({
-				url: '../php/logout.php',
-				method: 'post',
-				success: function(response){
-					swal("Logged Out", {
-					icon: "success",
-			}).then(function() {
+		Swal.fire({
+				icon: "warning",
+                title: 'Do you want to logout?',
+                showDenyButton: true,
+                confirmButtonText: 'Confirm',
+                denyButtonText: 'Cancel',
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '../php/logout.php',
+                        method: 'post',
+                     
+                        success: function(e) {
+                            Swal.fire('Logged out!', '', 'success').then(function() {
             window.location.href = "../index.php";
         });
-				
-				}
-			});
-			
-			}
-			});
+                          
+                        }
+                    });
+
+                } else if (result.isDenied) {
+                    Swal.fire('Changes are not saved', '', 'info')
+                }
+            })
+	
 		
 	});
 	var source = new EventSource('../php/create_sse.php');

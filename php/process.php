@@ -709,9 +709,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'view_report'){
 }
 
 if (isset($_POST['formDataArray'])){
-
 	$formDataArray = json_decode($_POST['formDataArray'], true);
-
 	$last_sched = $client->last_pm($_POST['contract_id']);
 	$delete_sched = $client->delete_last($last_sched['schedule_id']);
 	$last_serv_date = null;
@@ -723,7 +721,6 @@ foreach ($formDataArray as $formData) {
     if (
         isset($formData['sched_date']) &&
         isset($formData['serv_date']) &&
-        isset($formData['problem']) &&
         isset($formData['diagnosis']) &&
         isset($formData['recomm']) &&
         isset($formData['service_done']) &&
@@ -736,7 +733,7 @@ foreach ($formDataArray as $formData) {
 
         // Call the add_pms_sched function to insert the data into the database
         $last_Id =$client-> add_pms_bulk($contract_id, $sched_date, 2);
-		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], $formData['problem'], ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], 0);
+		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], ' ', ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], 0);
 			$notif_content = 'Your schedule service no:#'.$last_Id.' has been verified';
 			$notif_title = 'Schedule Service Done';
 			$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $last_Id);
@@ -1164,6 +1161,48 @@ print_r( $update_accomp);
 
 }
 
+if (isset($_GET['action'])&& $_GET['action']=='getSchedStats') {
+	$client_id = $_GET['client_id'];
+	$month = 1;
+	$year = date('Y');
+	$arr = array();
+	$pm = array();
+	$sv = array();
+	while ($month <=12){
+		$stmt = "SELECT COUNT(schedule_id) as schedId FROM schedule 
+		LEFT JOIN contract on schedule.contract_id = contract.contract_id where contract.client_id = $client_id and schedule.status = 2 
+		AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year";
+		
+		array_push($pm, $client->countSchedClient($stmt));
+		$stmt = "SELECT COUNT(schedule.schedule_id)as schedId from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		WHERE service_call.client_id  = $client_id and schedule.status = 2 
+		AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year";
+		array_push($sv, $client->countSchedClient($stmt));
+		$month++;
+	}
+	
+	echo json_encode (array(
+		'pm' => $pm,
+		'sv' => $sv
+	));
+}
+
+if (isset($_GET['action'])&& $_GET['action']=='getxD') {
+	$client_id = $_GET['client_id'];
+	$year = date('Y');
+	$resultsArray = array();
+	$user_Serv = $client->getUserServ($client_id);
+	foreach($user_Serv as $row) {
+		$resultsArray[] = array (
+			"firstname" => $row['FirstName'],
+			"count" => $row['TotalCount']
+		);
+
+	}
+
+	echo json_encode($resultsArray);
+
+}
 
 ?>
 

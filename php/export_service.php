@@ -131,7 +131,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContracts') {
 	$result = $client->viewPmsContract($contract_id, $status);
    
 	$name =  $result[0]['client_name'];
-	$machine = $result[0]['brand'].' '.$result[0]['model'];
+	$machine = $result[0]['brand'].'/'.$result[0]['model'];
 
 		class MYPDF extends TCPDF {
 }
@@ -204,7 +204,7 @@ $obj_pdf->AddPage();
        <td rowspan="1" colspan="1"><b>Location :</b> <br />{$row['client_address']}</td>
     </tr>
 	<tr>
-         <td ><b>Reported Problem:</b> <br />$date_today</td>
+         <td ><b>Machine:</b> <br />$machine</td>
 		 <td colspan="2"><b>Diagnosis :</b> <br />{$row['diagnosis']}</td>
 		 
 		  
@@ -212,21 +212,14 @@ $obj_pdf->AddPage();
       
     </tr>
 	<tr>
-         <td colspan="3"><b>Service Done:</b> <br />{$row['service_don']}</td>
-			 
-		
-      
+         <td colspan="3"><b>Service Done:</b> <br />{$row['service_don']}</td>   
     </tr>
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />{$row['recomm']}</td>
 		 <td ><b>Status:</b> <br />$status</td>
-		 <td><b>Service By:</b> <br />$service</td>
-		 
-		
-      
+		 <td><b>Service By:</b> <br />$service</td>    
     </tr>
-		
-	
+
 
 </table>
 </div>
@@ -317,10 +310,10 @@ $obj_pdf->AddPage();
     <tr>
         <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
        <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
-       <td rowspan="1" colspan="1"><b>Location :</b> <br />{$row['address']}</td>
+       <td rowspan="1" colspan="1"><b>Location :</b> <br />{$result['address']}</td>
     </tr>
 	<tr>
-       
+    <td ><b>Machine :</b> <br />$machine</td>
 		 <td colspan="2"><b>Diagnosis :</b> <br />{$result['diagnosis']}</td>
 		 
 		  
