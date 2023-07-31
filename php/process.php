@@ -1204,5 +1204,35 @@ if (isset($_GET['action'])&& $_GET['action']=='getxD') {
 
 }
 
+if (isset($_GET['action'])&& $_GET['action'] =='getUserNotification'){
+	$output ='';
+	$user_id = $_GET['user_id'];
+	$notifs = $client->getUserNotification($user_id);
+	foreach($notifs as $row) {
+		$output .='
+                <li class="mb-2">
+                  <a class="dropdown-item border-radius-md" href="javascript:;">
+                    <div class="d-flex align-items-center py-1">
+                      <div class="my-auto">
+                        <span class="material-icons">
+                          email
+                        </span>
+                      </div>
+                      <div class="ms-2">
+                        <h6 class="text-sm font-weight-normal mb-0">
+                         '.$row['content'].'
+                        </h6>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+          
+	';
+	}
+	$client->readUserNotification($user_id);
+	echo $output;
+
+}
+
 ?>
 

@@ -47,10 +47,25 @@
 	var source = new EventSource('../php/create_sse.php');
 source.onmessage = function(event) {
     var count = parseInt(event.data); // Parse the plain text data to an integer
-    if (!isNaN(count)) {
+    if (!isNaN(count)&& count>0) {
         document.getElementById('notif_bell').textContent = count;
     }
+    else {
+        document.getElementById('notif_bell').textContent = "";
+    }
+
 };
+$(document).on('click', function () {
+    let user_id = <?php echo $id ; ?>;
+   $.ajax({
+     url: '../php/process.php',
+     method: 'GET',
+     data: {user_id:user_id, action:'getUserNotification'},
+     success: function (response){
+       $('.notifContent').html(response);
+     }
+   });
+});
 	
 
 	</script>

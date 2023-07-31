@@ -4,7 +4,7 @@ class Db {
     private $host = "localhost";
     private $user = "root";
     private $pwd = "";
-    private $dbName = "tms";
+    private $dbName = "kvp";
 	
 	public $conn;
     public function __construct() {

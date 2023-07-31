@@ -1,6 +1,6 @@
 <?php
 require_once 'db.php';
-
+date_default_timezone_set('Asia/Manila');
 class Clients extends Db {
 	//register user
 	public function register($firstname,$lastname, $username,$email, $password, $type){
@@ -455,7 +455,22 @@ public function resolved() {
 	$stmt -> execute(['user_id'=>$user_id, 'notification_id'=>$notification_id]);
 	return true; 
 }
+public function getUserNotification($user_id){
+	$sql = "SELECT notification.*, user_notification.user_id from notification LEFT JOIN user_notification 
+	on notification.id = user_notification.notification_id where user_notification.user_id = :user_id ORDER BY notification.id DESC LIMIT 5";
+	$stmt = $this->conn->prepare($sql);
+	$stmt -> execute(['user_id'=>$user_id]);
+	return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+}
 
+public function readUserNotification ($user_id){
+	$dateTime = date('Y-m-d H:i:s');
+	$sql = "UPDATE user_notification SET is_read = 1, read_at = :dateAndTime where user_id = :user_id AND is_read = 0";
+	$stmt= $this->conn->prepare($sql);
+	$stmt->execute(['dateAndTime'=>$dateTime, 'user_id'=>$user_id]);
+	return true;
+
+}
 public function getServiceBy($schedule_id) {
 	$sql = "SELECT users.*, user_sched.us_status from users LEFT JOIN user_sched on users.mem_id = user_sched.uid where user_sched.sched_id = :schedule_id";
 	$stmt = $this ->conn ->prepare($sql);
