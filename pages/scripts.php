@@ -19,7 +19,7 @@
 		Swal.fire({
 				icon: "warning",
                 title: 'Do you want to logout?',
-                showDenyButton: true,
+                showCancelButton: true,
                 confirmButtonText: 'Confirm',
                 denyButtonText: 'Cancel',
             }).then((result) => {
@@ -41,8 +41,6 @@
                     Swal.fire('Changes are not saved', '', 'info')
                 }
             })
-	
-		
 	});
 	var source = new EventSource('../php/create_sse.php');
 source.onmessage = function(event) {
@@ -55,7 +53,7 @@ source.onmessage = function(event) {
     }
 
 };
-$(document).on('click', function () {
+$(document).on('click', '#notifications', function () {
     let user_id = <?php echo $id ; ?>;
    $.ajax({
      url: '../php/process.php',

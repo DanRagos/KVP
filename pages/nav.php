@@ -32,5 +32,15 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end p-2 me-sm-n4 notifContent" aria-labelledby="dropdownMenuButton">
                 
-          </ul>
+             
+            </ul>
+
+            <li class="nav-item dropdown px-3 pe-2 d-flex align-items-center">
+               <a href="#" class="dropdown-item border-radius-md logoutBtn" href="javascript:;">
+                <i class="fa-solid fa-right-from-bracket cursor-pointer"></i>
+              </a>
+            
+            </li>
+</ul>
+
         </div>

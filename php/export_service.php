@@ -10,15 +10,27 @@ if (isset($_POST['jsonData'])) {
     $jsonData = $_POST['jsonData'];
 	$name = $jsonData['brand'];
 	$schedule_type = ($jsonData['schedule_type'] == 2) ? "Service Call" : "PMS"; 
-	$client = $jsonData['client_name'];
+	$client_name = $jsonData['client_name'];
 	$address = $jsonData['address'];
 	$machine = $jsonData['brand'].' '.$jsonData['model'];
 	$rep_problem = $jsonData['rep_problem'];
 	$diagnosis = $jsonData['diagnosis'];
 	$service_done = $jsonData['service_don'];
 	$remarks = $jsonData['recomm'];
-	$service_by = $jsonData['service_by'];
-	$status = $jsonData['status'] == 2? "DONE" : "Unresolved";
+    $schedule_id=$jsonData['schedule_id'];
+    $service ='';
+    $service_by = $client->getServiceBy($jsonData['schedule_id']);           
+                    foreach ($service_by as $user) {
+                       
+                        $service .= $user['firstname'].' '.$user['lastname'];
+                        if (count($service_by)>1){
+                            $service .= ', ';
+                        }
+                    }
+
+ $fSchedDate = date('M d, Y', strtotime($jsonData['schedule_date']));
+ $fAccompDate = date('M d, Y', strtotime($jsonData['accomp_date']));
+  $status  = $row['accomp_status'] = 2 ? 'DONE' : 'Unresolved';               
 	
 	
     // Process the JSON data and generate the PDF using TCPDF or any other library
@@ -72,17 +84,18 @@ $obj_pdf->AddPage();
                 $obj_pdf -> SetFont('Helvetica', '', 10);
                 $obj_pdf -> Ln(10);
 				
-                $content .= '</div>';    
+                $content .= '</div>';   
+                $content .= '<h4 style= "text-align: center;"> '.$client_name.'</h4>'; 
 				//$content .= "<hr> </hr>";
 				$content .= <<<EOD
 <table cellspacing="0" cellpadding="5" border="1">
     <tr>
-        <td rowspan="1" ><b>Client :</b> <br />$client</td>
-       <td rowspan="1"><b>Machine :</b> <br />$machine</td>
+        <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
+       <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
        <td rowspan="1" colspan="1"><b>Location :</b> <br />$address</td>
     </tr>
 	<tr>
-         <td ><b>Reported Problem:</b> <br />$rep_problem</td>
+         <td ><b>Machine:</b> <br />$machine</td>
 		 <td colspan="2"><b>Diagnosis :</b> <br />$diagnosis</td>
 		 
 		  
@@ -98,7 +111,7 @@ $obj_pdf->AddPage();
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />$remarks</td>
 		 <td ><b>Status:</b> <br />$status</td>
-		 <td><b>Service By:</b> <br />$service_by</td>
+		 <td><b>Service By:</b> <br />$service</td>
 		 
 		
       
@@ -245,6 +258,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContractPm') {
 	$name =  $result['client_name'];
 	$machine = $result['brand'].' '.$result['model'];
     $service_by = $client->getServiceBy($result['schedule_id']);
+    $status  = $row['accomp_status'] = 2 ? 'DONE' : 'Unresolved';
     $service = '';
     foreach ($service_by as $user) {
        
@@ -328,7 +342,7 @@ $obj_pdf->AddPage();
     </tr>
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />{$result['recomm']}</td>
-		 <td ><b>Status:</b> <br />$date_today</td>
+		 <td ><b>Status:</b> <br />$status</td>
 		 <td><b>Service By:</b> <br />$service</td>
 		 
 		

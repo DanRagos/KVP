@@ -77,11 +77,11 @@
 				</div>	
 				</div>				
 				</div>
-		 <table id="example" class="table align-items-center justify-content-center table-responsive" style="height:70%;" >
+		 <table id="example" class="table align-items-center justify-content-center table-responsive" style="width:100%;" >
         <thead>
             <tr>
-					  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-					  <th class="text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Address</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Brand</th>
@@ -105,23 +105,20 @@
   <!--   Core JS Files   -->
    <?php include 'scripts.php'; ?>
 <script>
-displayAllNotes();
-		function displayAllNotes() {
-			var db = 1;
+    var db = 1;
 		var table= $('#example').DataTable({
 					 stateSave: true,
 					 processing: true,
 					 serverSide: true,
+           scrollY: '45vh',
+           scrollX: true,
 					ajax: {
 					url: '../php/ssp_list.php',
 					data: {db : db},
 					method:'GET',
 					},
 					"order":[0,'asc'],					
-					fixedColumns:   {
-					left: 2,
-					right: 2
-					}
+				
 					
     });
  $('#month-filter').on('change', function() {
@@ -136,7 +133,7 @@ $('#tool_type').on('change', function() {
       table.column(3).search(value).draw();
    }
 });
-	}
+	
 	
 		$("body").on("click",".viewPms", function(e) {
 		let accomp_id = $(this).attr('data-id');
@@ -179,6 +176,96 @@ $('#tool_type').on('change', function() {
 			
 		});
 	});
+
+  $(document).on('click', '.editPm', function() {
+            let accomp_id = $(this).attr('data-id');
+            $.ajax({
+                url: '../php/process.php',
+                method: 'GET',
+                data: {
+                    accomp_id: accomp_id,
+                    action: 'edit_pm_details'
+                },
+                success: function(response) {
+                  
+                    $('.update_pm_contents').html(response);
+                    const arrayValue = JSON.parse(document.getElementById('myDiv').dataset
+                        .arrayValue);
+                    $.ajax({
+                        url: '../php/process.php',
+                        method: 'GET',
+                        data: {
+                            'action': 'getServiceBy'
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+
+                            // Assuming the response data is an array of objects with label and value properties
+                            var optionsData = data.map(function(item) {
+                                var fullName = item.firstname + ' ' +
+                                    item.lastname;
+                                return {
+                                    label: fullName,
+                                    value: item.mem_id
+                                };
+                            });
+
+                            // Initialize Virtual Select with the fetched options
+                            VirtualSelect.init({
+                                ele: '.sample-select',
+                                options: optionsData,
+                                multiple: true,
+
+                            });
+
+                            document.querySelector('.sample-select').setValue(
+                                arrayValue);
+
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching options:', error);
+                        }
+                    });
+                }
+            });
+
+        });
+
+        $(document).on('click', '.updatePm', function(e) {
+            if ($("#update_pm_form")[0].checkValidity()) {
+    e.preventDefault();
+    var formData = new FormData($("#update_pm_form")[0]);
+    formData.append('action', 'updatePms');
+    $.ajax({
+      url: '../php/process.php',
+      method: 'post',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        console.log(response);
+          $("#update_pm_form")[0].reset();
+          $("#edit-pm-modal").modal('hide');
+          table.ajax.reload( null, false );
+          Swal.fire({
+            icon: 'success',
+            title: 'PMS Update',
+            text: 'The PM details has been edited successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+       
+        
+      }
+    });
+  }
+        });
 	
 </script>
 </body>

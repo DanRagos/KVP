@@ -109,7 +109,8 @@ class Clients extends Db {
 		VALUES (NULL, :type,'', :last_id,  :schedule_date, '')";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['type'=>$type, 'last_id'=>$last_id, 'schedule_date'=>$schedule_date]);
-		return true;
+		$last_id = $this->conn->lastInsertId();
+		return $last_id;
 		
 	}
 	//Add SV Call Client
@@ -120,8 +121,8 @@ class Clients extends Db {
 		$stmt = $this->conn-> prepare($sql);
 		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
-		$test = $add_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
-		return $test;
+		$last_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
+		return $last_sched;
 	}
 	//Add SV Call Guest
 		public function add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date){
@@ -132,7 +133,7 @@ class Clients extends Db {
 		$stmt ->execute(['gName'=>$gName, 'gAddress'=>$gAddress, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
 		$add_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
-		return true;
+		return $add_sched;
 	}
 	
 	//Display Contract
@@ -328,7 +329,7 @@ public function get_contract_details($id) {
 		
 	}	
 		public function get_pms_report($accomp_id) {
-		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_date, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
+		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_date, accomplished_schedule.accomp_status, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
 		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, 
 		CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name,COALESCE(clients.client_address, service_call.guest_address)
@@ -405,13 +406,20 @@ public function resolved() {
 }
 
 
-	public function countSchedule ($client_id) {
-		$sql ="SELECT COUNT(schedule_id) as serviceSched from contract right join schedule on contract.contract_id = schedule.contract_id where contract.client_id = :client_id";
-		$stmt = $this ->conn->prepare($sql);
-		$stmt->execute(['client_id'=>$client_id]);
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		return $result;
-	}
+public function countSchedule($client_id) {
+    $sql = "SELECT SUM(total_schedules) AS total_schedules FROM (
+        SELECT COUNT(*) AS total_schedules FROM service_call 
+        WHERE client_id = :client_1
+        UNION ALL
+        SELECT COUNT(*) FROM schedule 
+        LEFT JOIN contract ON schedule.contract_id = contract.contract_id 
+        WHERE client_id = :client_2
+    ) AS all_schedules";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute(['client_1' => $client_id, 'client_2' => $client_id]);
+    $result = $stmt->fetchColumn();
+    return $result;
+}
 		public function countPMS ($client_id) {
 		$sql ="SELECT COUNT(schedule_id) as pmsSched from contract right join schedule on contract.contract_id = schedule.contract_id where contract.client_id = :client_id AND contract.contract_id > 0 ";
 		$stmt = $this ->conn->prepare($sql);
@@ -450,7 +458,7 @@ public function resolved() {
 	return $this->conn->lastInsertId();
 }
 	public function user_notification($user_id, $notification_id){
-	$sql = "INSERT INTO `user_notification` (`user_id`, `notification_id`) VALUES (:user_id, :notification_id)";
+	$sql = "INSERT INTO `user_notification` (`user_id`, `notification_id`,`is_read`, `read_at`) VALUES (:user_id, :notification_id, 0, NULL)";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['user_id'=>$user_id, 'notification_id'=>$notification_id]);
 	return true; 

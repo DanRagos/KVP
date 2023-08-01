@@ -18,16 +18,11 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <title>
     Dashboard
   </title>
- 
- 
 </head>
-
 <body class="g-sidenav-show  bg-gray-200">
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark" id="sidenav-main">
    <?php include 'aside.php'; ?>
@@ -65,7 +60,6 @@
        <option value= 2> Table View</option>
      </select>
    </div>-->
-
                             <button type="button" class="btn btn-block bg-gradient-primary ms-3" data-bs-toggle="modal" data-bs-target="#addSchedule">
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Client)</span>
@@ -73,8 +67,7 @@
 							 <button type="button" class="btn btn-block bg-gradient-success  ml-3" data-bs-toggle="modal" data-bs-target="#addSvGModal">
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Guest)</span>
-                            </button>
-			 
+                            </button>	 
                 </div>
              <center> <div id="calendar" style="width: 50%; height:50%;" > </center> </div>
 			    <div class="table-responsive" id="schedTable" style="display:none";>
@@ -87,15 +80,72 @@
       
     </div>
   </main>
- 
   <!--   Core JS Files   -->
    <?php include 'scripts.php'; ?>
 <script>
 $(document).ready(function(){
 	displaySchedule();
 	showSchedules();
-	 $("#pmsCheck").on('change',function(e){
+	$(document).on('click', '#addSchedule', function (){
+			$.ajax({
+                url: '../php/process.php',
+                method: 'GET',
+                data: {
+                    'action': 'getServiceBy'
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // Assuming the response data is an array of objects with label and value properties
+                    var optionsData = data.map(function(item) {
+                        var fullName = item.firstname + ' ' + item.lastname;
+                        return {
+                            label: fullName,
+                            value: item.mem_id
+                        };
+                    });
+                    // Initialize Virtual Select with the fetched options
+                    VirtualSelect.init({
+                        ele: '.service_by',
+                        options: optionsData,
+                        multiple: true,
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching options:', error);
+                }
+            });
+});
+$(document).on('click', '#addSvGModal', function (){
+			$.ajax({
+                url: '../php/process.php',
+                method: 'GET',
+                data: {
+                    'action': 'getServiceBy'
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // Assuming the response data is an array of objects with label and value properties
+                    var optionsData = data.map(function(item) {
+                        var fullName = item.firstname + ' ' + item.lastname;
+                        return {
+                            label: fullName,
+                            value: item.mem_id
+                        };
+                    });
+                    // Initialize Virtual Select with the fetched options
+                    VirtualSelect.init({
+                        ele: '.service_by_svg',
+                        options: optionsData,
+                        multiple: true,
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching options:', error);
+                }
+            });
+});
 
+	 $("#pmsCheck").on('change',function(e){
 		   if ($(this).is(':checked')) {
 			  $('#client_id option:not(:selected)').prop('disabled', true);
 			  $('#machine').prop('required', true);
@@ -103,14 +153,12 @@ $(document).ready(function(){
 				$('#option2').removeAttr("required");
 				$('#option1').show();
 				$('#pmsCheck').val(1);
-				let user_id = $('#client_id').val();
-			
+				let user_id = $('#client_id').val();	
 				$.ajax({
 				url: '../php/process.php',
 				method : 'POST',
 				data: {user_id : user_id},
-				success: function (response){
-				
+				success: function (response){	
 				$('#machine').html(response);
 				let contract_id1= $('#machine').val();
 				}
@@ -123,9 +171,7 @@ $(document).ready(function(){
 				$('#add-sched-form')[0].reset();
 				$('#machine').prop('required', false);
 				//$('#pmsCheck').val(0);
-				
-				
-			
+		
 		   }
         });
 		
@@ -137,17 +183,13 @@ $(document).ready(function(){
 				method : 'POST',
 				data: {ctr : ctr},
                 success:function(response){
-                    $('#sv_call').val(response);
-					
+                    $('#sv_call').val(response);		
                 }
             }); 
         }else{
             $('#city').html('<input placeholder="test">'); 
         }
     });
-		
-		
-
 	//Resched Schedule
 		$('#resched-btn').click(function(e) { 
 			e.preventDefault();
@@ -186,10 +228,9 @@ $(document).ready(function(){
 		success: function(response){
 			$("#schedTable").html(response);
 			let table = $('#table').DataTable({
-				stateSave:true,
+			stateSave:true,
     });
 		}
-		
 		});
 	}
 	//Resched
@@ -242,46 +283,77 @@ $(document).ready(function(){
 			}
 		});
 	});
+	$("#confirmBtn").click(function(e) {
+    if ($("#add-sched-form")[0].checkValidity()) {
+        e.preventDefault();
+        let service_by = $('.service_by').val(); // Fixed this line to get the value from 'sample-select'
+        $.ajax({
+            url: '../php/process.php',
+            method: 'post',
+            data: {
+                ...$("#add-sched-form").serializeArray(),
+                action: "confirm_sched",
+                service_by: service_by
+            },
+            success: function(response) {
+                console.log(response);
+                $("#addSchedule").modal('hide');
+                $("#add-sched-form")[0].reset();
+                $('#option2').show();
+                $('#option1').hide();
+                $('#client_id option:not(:selected)').prop('disabled', false);
+				Swal.fire({
+                                icon: 'success',
+                                title: 'Saved',
+                                timer: 1500,
+                                timerProgressBar: true,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                willClose: () => {
+                                    Swal.hideLoading();
+									showSchedules();
+                                },
+                            });
+                
+            }
+        });
+    }
+});
 	
-	
-	$("#confirmBtn").click(function(e){
-		if ($("#add-sched-form")[0].checkValidity()) {
-			e.preventDefault();
-			$.ajax({
-				url:'../php/process.php',
-				method: 'post',
-				data: $("#add-sched-form").serialize()+"&action=confirm_sched",
-				success:function(response){
-					console.log(response);
-					swal("Schedule Done!", "", "success");
-					$("#addSchedule").modal('hide');
-					$("#add-sched-form")[0].reset();
-					$('#option2').show();
-					$('#option1').hide();
-					$('#client_id option:not(:selected)').prop('disabled', false);
-					showSchedules();
-					}
-			});
-		} 
-	});
-	
-		$("#confirmG").click(function(e){
-		if ($("#add-sched-g-form")[0].checkValidity()) {
-			e.preventDefault();
-			$.ajax({
-				url:'../php/process.php',
-				method: 'post',
-				data: $("#add-sched-g-form").serialize()+"&action=confirm_g_sched",
-				success:function(response){
-					console.log(response);
-					swal("SV Call Added!", "", "success");
-					$("#addSvGModal").modal('hide');
-					$("#add-sched-g-form")[0].reset();
-					showSchedules();
-					}
-			});
-		} 
-	});
+$("#confirmG").click(function (e) {
+    if ($("#add-sched-g-form")[0].checkValidity()) {
+        e.preventDefault();
+        let service_by1 = $('.service_by_svg').val();
+        $.ajax({
+            url: '../php/process.php',
+            method: 'post',
+            data: {
+                ...$("#add-sched-g-form").serializeArray(),
+                action: "confirm_g_sched",
+                service_by1: service_by1
+            },
+            success: function (response) {
+                console.log(response);
+                $("#addSvGModal").modal('hide');
+                $("#add-sched-g-form")[0].reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    willClose: () => {
+                        Swal.hideLoading();
+                        showSchedules();
+                    },
+                });
+            }
+        });
+    }
+});
 		
 		$("body").on("click","#c_confirmBtn", function(e) {
 		if ($("#confirm_form")[0].checkValidity()) {
@@ -300,7 +372,6 @@ $(document).ready(function(){
 			});
 		} 
 	});	
-	
 	//Cancel Service Call
 		$("body").on("click",".cancelSv", function(e){
 		e.preventDefault();
@@ -325,15 +396,12 @@ $(document).ready(function(){
 			$("#schedule_details_modal").modal('hide');
 				showSchedules();
 				}
-			});
-			
+			});	
 			}
 			});
-		
 	});
 	//Calendar show Schedule function
 	function showSchedules(initialDate) {
-
 		$.ajax ({
 			url: '../php/process.php',
 			method: 'post',
@@ -386,9 +454,7 @@ $(document).ready(function(){
             },
             editable: false
         });
-
         calendar.render();
-
         // Form reset listener
         $('#schedule-form').on('reset', function() {
             $(this).find('input:hidden').val('')
@@ -412,7 +478,6 @@ $(document).ready(function(){
                 alert("Event is undefined");
             }
         })
-
         // Delete Button / Deleting an Event
         $('#delete').click(function() {
             var id = $(this).attr('data-id')
@@ -429,17 +494,9 @@ $(document).ready(function(){
 			}
 		});
 	}
-	
 });
-
-    
-	
- 
-	
 </script>
 </body>
-
-
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {

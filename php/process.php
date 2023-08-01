@@ -604,15 +604,15 @@ if (isset($_POST['ctr'])){
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	print_r($_POST);
 
-	$client_id = $_POST['client_id'];
-	$contract_id = $_POST['contract_id'];
+	$client_id = $_POST[0]['value'];
+	$contract_id = $_POST[2]['value'];
 	
 	$sv_type = 2;
-	if ($_POST['pmsCheck'] == 0) {
+	if ($_POST[1]['value'] == 0) {
 	$sv_type = 1;	
-	$machine_type = $_POST['machine_type'];
-	$brand = $_POST['brand'];
-	$model = $_POST['model'];
+	$machine_type = $_POST[3]['value'];
+	$brand = $_POST[4]['value'];
+	$model = $_POST[5]['value'];
 	}
 	else {
 	$result1= $client ->get_contract_details($contract_id);
@@ -623,21 +623,49 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	}
 	}
 	
-	$rep_problem = $_POST['rep_problem'];
-	$sv_date = $_POST['sv_date'];
-	$result = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
+	$rep_problem = $_POST[6]['value'];
+	$sv_date = $_POST[7]['value'];
+	$last_id = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
+	$sched_Date = date('M d, Y', strtotime($sv_date));
+	$service_by = $_POST['service_by'];
+	$notif_title = "Service Assigned";
+	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
+	$notif_createdAt= date('Y-m-d h:i:s');
+	//Add Notification
+	$last_notif= $client->add_user_notification($notif_title, $notif_content,  0 , $notif_createdAt, 1 , $last_id);
+	foreach ($service_by as $row){
+		//insert user_sched
+		$client->add_user_service ($row, $last_id, 0);
+		//inser user notification
+		$client->user_notification($row, $last_notif);
+	}
 
 }
 //Add sv guest
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
-	$gName = $_POST['gName'];
-	$gAddress = $_POST['gAddress'];
-	$machine_type = $_POST['machine_type'];
-	$brand = $_POST['brand'];
-	$model = $_POST['model'];
-	$rep_problem = $_POST['rep_problem'];
-    $sv_date = $_POST['sv_date'];
-	$result = $client->add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date);
+	print_r($_POST);
+	$gName = $_POST[0]['value'];
+	$gAddress = $_POST[1]['value'];
+	$machine_type = $_POST[2]['value'];
+	$brand = $_POST[3]['value'];
+	$model = $_POST[4]['value'];
+	$rep_problem = $_POST[5]['value'];
+    $sv_date = $_POST[6]['value'];
+	$last_id = $client->add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date);
+
+	$sched_Date = date('M d, Y', strtotime($sv_date));
+	$service_by = $_POST['service_by1'];
+	$notif_title = "Service Assigned";
+	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
+	$notif_createdAt= date('Y-m-d h:i:s');
+	//Add Notification
+	$last_notif= $client->add_user_notification($notif_title, $notif_content,  0 , $notif_createdAt, 1 , $last_id);
+	foreach ($service_by as $row){
+		//insert user_sched
+		$client->add_user_service ($row, $last_id, 0);
+		//inser user notification
+		$client->user_notification($row, $last_notif);
+	}
 
 }
 
@@ -733,7 +761,7 @@ foreach ($formDataArray as $formData) {
 
         // Call the add_pms_sched function to insert the data into the database
         $last_Id =$client-> add_pms_bulk($contract_id, $sched_date, 2);
-		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], ' ', ' ', $formData['diagnosis'], $formData['service_done'],' ', $formData['recomm'], 0);
+		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], ' ', ' ', $formData['diagnosis'], $formData['service_done'],'2', $formData['recomm'], 0);
 			$notif_content = 'Your schedule service no:#'.$last_Id.' has been verified';
 			$notif_title = 'Schedule Service Done';
 			$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $last_Id);
@@ -1045,9 +1073,9 @@ $client_id = $_GET['client_id'];
 
 
 $response = array(
- 'serviceSched' => $service_sched = $client->countSchedule ($client_id)['serviceSched'],
-  'pmSched' => $service_sched = $client->countPMS ($client_id)['pmsSched'],
-   'svSched' => $service_sched = $client->countSV ($client_id)['svSched'],
+ 'serviceSched' =>  $client->countSchedule ($client_id),
+  'pmSched' => $client->countPMS ($client_id)['pmsSched'],
+   'svSched' =>  $client->countSV ($client_id)['svSched'],
  
 );
 echo json_encode($response);
@@ -1058,7 +1086,7 @@ echo json_encode($response);
 if (isset($_GET['action'])&& $_GET['action'] == 'getServiceBy'){
 	$users = $client->showUsers();
 	header('Content-Type: application/json');
-echo json_encode($users);
+	echo json_encode($users);
 
 }
 

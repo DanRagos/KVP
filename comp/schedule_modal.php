@@ -105,15 +105,9 @@
 	<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">No. of SV Call :</label>
-        <input type="text" id="sv_call" class="form-control" readonly>
-			
-			
+        <input type="text" id="sv_call" class="form-control" readonly>	
       </div>
-    </div>
-	
-	
-						
-					
+    </div>			
 	</div>
 	<div class="row" id="option2" >
 	
@@ -146,10 +140,7 @@
         <label class="form-">Model :</label>
         <input type="text"  name="model" class="form-control" >
       </div>
-    </div>
-	
-						
-					
+    </div>				
 	</div>
 <div class="row">
 <div class="col">
@@ -163,6 +154,12 @@
         <label class="form-">Service Call Date:</label>
         <input type="date"  name="sv_date" class="form-control" required>
       </div>
+    </div>
+    <div class="col">
+      <div class="input-group input-group-outline my-3 is-filled">
+                    <label class="form-label">Assign To: </label>
+                     <div  class="form-control p-0 service_by"> </div>
+                    </div>
     </div>
 </div>						
                     </div>
@@ -252,6 +249,12 @@
         <input type="date"  name="sv_date" class="form-control" required>
       </div>
     </div>
+    <div class="col">
+      <div class="input-group input-group-outline my-3 is-filled">
+                    <label class="form-label">Assign To: </label>
+                     <div  class="form-control p-0 service_by_svg"> </div>
+                    </div>
+    </div>
 </div>						
                     </div>
                 </div>
@@ -266,4 +269,11 @@
         </div>
     </div>
 
-    
+<!-- Modal for Editing PM -->
+<div class="modal fade modal-lg" id="edit-pm-modal"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-md">
+    <div class="modal-content update_pm_contents">
+
+    </div>
+  </div>
+</div>  

@@ -5,7 +5,7 @@
 $sql_details = array(
     'user' => 'root',
     'pass' => '',
-    'db'   => 'tms',
+    'db'   => 'kvp',
     'host' => 'localhost'
 );
 

@@ -5,7 +5,7 @@
 $sql_details = array(
     'user' => 'root',
     'pass' => '',
-    'db'   => 'tms',
+    'db'   => 'kvp',
     'host' => 'localhost'
 );
 
@@ -14,32 +14,29 @@ $sql_details = array(
 	 $primaryKey = 'accomp_id';
 	 // DB table to use
 $table = <<<EOT
- (SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) ) temp
+ (SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) ORDER BY schedule.schedule_id DESC ) temp
 EOT;
 // indexes
 $columns = array(
-array( 'db' => 'accomp_id', 'dt' => 0,
+array( 'db' => 'schedule_id', 'dt' => 0,
 'formatter' => function($d,$row){
 return '<div class="d-flex px-2 py-1">
-	<div>
-	<img src="../assets/img/small-logos/machine-1.svg" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
-	</div>
 	<div class="d-flex flex-column justify-content-center">
-	<h6 class="mb-0 text-sm">'.$row['accomp_id'].'</h6>
+	<h6 class="text-center mb-0 text-sm">'.$row['schedule_id'].'</h6>
 	</div>';
 }),
 array( 'db' => 'client_name', 'dt' => 1,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
-	<h5 class="text-xs text-secondary mb-0">'.$d.'</h5>
+	<h5 class="text-center text-xs text-secondary mb-0">'.$d.'</h5>
 	</div>';
 }),
 array( 'db' => 'address', 'dt' => 2,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
-	<h5 class="text-xs text-secondary mb-0">'.$d.'</h5>
+	<h5 class="text-center text-xs text-secondary mb-0">'.$d.'</h5>
 	</div>';
 }),
 array( 'db' => 'schedule_type',  'dt' => 3,
@@ -55,14 +52,14 @@ array( 'db' => 'brand', 'dt' => 4,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
-	<h6 class="text-xs text-secondary mb-0">'.$d.'</h6>
+	<h6 class="text-center text-uppercase text-xs text-secondary mb-0">'.$d.'</h6>
 	</div>';
 }),
 
 array( 'db' => 'model', 'dt' => 5, 'formatter' => function($d,$row){
 return '<align-middle text-center text-sm">
 	<div class="align-middle text-center text-sm">
-	<h6 class="text-xs text-secondary mb-0">'.$d.'</h6> </div>';}),
+	<h6 class="text-xs text-uppercase text-secondary mb-0">'.$d.'</h6> </div>';}),
 array( 'db' => 'rep_problem', 'dt' => 6,
 'formatter'=> function($d,$row){
 return '<div class ="align-middle text-center text-sm">'.$d.'</div>';}),
@@ -82,7 +79,7 @@ array(
 return
 '<div class ="align-middle text-center text-sm">
 <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Report"> <button type="button" data-id="'.$row['accomp_id'].'" class="btn btn-secondary no_margin viewPms"><i class="fa-solid fa-eye"></i></span></button>
-<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit tool details"> <button type="button" id="'.$row['accomp_id'].'"data-bs-target = "#editTool" data-bs-toggle="modal" class="btn btn-warning no_margin editBtn"><i class="fa-solid fa-edit"></i></span></button>
+<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit tool details"> <button type="button" data-id="'.$row['accomp_id'].'"data-bs-target = "#edit-pm-modal" data-bs-toggle="modal" class="btn btn-warning no_margin editPm"><i class="fa-solid fa-edit"></i></span></button>
 </div>';
 }
 ),

@@ -261,8 +261,11 @@ $client_img =$row['imglink'];
         displayContracts();
         displayExpContracts()
 
+       var table =  $('.testTable').DataTable({});
 
-
+       function initTable() {
+            $('.testTable').DataTable({});
+        }
         function displayExpContracts() {
             let client_id = <?php echo $client_id; ?>;
             let isActive = 1;
@@ -330,7 +333,7 @@ $client_img =$row['imglink'];
                     success: function(response) {
                         var dropToggleIcon = btn.find('i');
                         dropToggleIcon.removeClass('fa-sort-down').addClass('fa-sort-up');
-                        var table = $('.testTable').DataTable();
+                        let table = $('.testTable').DataTable();
                         table.destroy();
                         accordionContent.find('.accordion-placeholder').html(response);
                         accordionContent.slideToggle('fade');
@@ -403,9 +406,7 @@ $client_img =$row['imglink'];
             });
         });
 
-        function initTable() {
-            $('.testTable').DataTable({});
-        }
+        
 
         $(document).on('click', '.editTest', function() {
 
@@ -520,7 +521,6 @@ $client_img =$row['imglink'];
             let frequency = $('#frequency').val()
             var modalBody = $(this).closest('.modal-content').find('.modal-body');
             var formDataArray = []; // Step 1: Initialize the formDataArray
-            alert(contract_id);
             modalBody.find('.row').each(function() {
                 var formData = {};
                 $(this).find('input, select').each(function() {
@@ -597,7 +597,6 @@ $client_img =$row['imglink'];
             $('#pms_contract_id').val($(this).attr('data-id'));
             $('#frequency').val($(this).attr('data-frequency'));
             let contract_no = $(this).attr('data-id');
-            alert(contract_no);
             $.ajax({
                 url: '../php/process.php', // Replace 'process.php' with your actual PHP script filename
                 method: 'get',
@@ -696,7 +695,7 @@ $client_img =$row['imglink'];
       contentType: false,
       processData: false,
       success: function (response) {
-        console.log(response);
+        table.ajax.reload( null, false );
           $("#update_pm_form")[0].reset();
           $("#edit-pm-modal").modal('hide');
           Swal.fire({
@@ -952,6 +951,7 @@ var backgroundColors = generateRandomColor(count.length); // Pass the length of 
                     action: 'viewSummaryDashboard'
                 },
                 success: function(response) {
+                    console.log(response);
                     let data = JSON.parse(response);
                     $('#serviceSchedule').text(data.serviceSched);
                     $('#pmsSched').text(data.pmSched);
