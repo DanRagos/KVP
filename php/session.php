@@ -16,6 +16,8 @@ $data = $cuser ->currentUser($username);
 $id = $data['mem_id'];
 $firstname = $data['firstname'];
 $lastname = $data['lastname'];
+$email = $data['email'];
+$username = $data['username'];
 $type = $data['type'];
 $img = $data['imglink'];
 

@@ -164,6 +164,17 @@ WHERE schedule.status != 2;";
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
 	}
+	public function display_schedule_user ($user_id) {
+		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, COALESCE(contract.brand, service_call.brand) 
+		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
+		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
+		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.status != 2 AND user_sched.uid = :user_id";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['user_id'=>$user_id]);
+		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
 
 		public function get_schedule ($id) {
 			$sql = "SELECT schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id,
@@ -463,9 +474,9 @@ public function countSchedule($client_id) {
 	$stmt -> execute(['user_id'=>$user_id, 'notification_id'=>$notification_id]);
 	return true; 
 }
-public function getUserNotification($user_id){
+public function getUserNotification($user_id, $limit){
 	$sql = "SELECT notification.*, user_notification.user_id from notification LEFT JOIN user_notification 
-	on notification.id = user_notification.notification_id where user_notification.user_id = :user_id ORDER BY notification.id DESC LIMIT 5";
+	on notification.id = user_notification.notification_id where user_notification.user_id = :user_id ORDER BY notification.id DESC LIMIT $limit";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['user_id'=>$user_id]);
 	return $stmt->fetchAll(PDO::FETCH_ASSOC); 

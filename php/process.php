@@ -51,7 +51,14 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 }
 //Display All Schedules 
 if (isset($_POST['action'])&& $_POST['action'] == 'display_schedule'){
-$result = $client ->display_schedule();
+
+if(isset($_POST['user_idNotif'])) {
+	$result = $client ->display_schedule_user($_POST['user_idNotif']);
+}
+else {
+	$result = $client ->display_schedule();
+}
+
 $sched_res = [];
 foreach($result as $row){
     $row['sdate'] = date("F d, Y",strtotime($row['schedule_date']));
@@ -1235,7 +1242,7 @@ if (isset($_GET['action'])&& $_GET['action']=='getxD') {
 if (isset($_GET['action'])&& $_GET['action'] =='getUserNotification'){
 	$output ='';
 	$user_id = $_GET['user_id'];
-	$notifs = $client->getUserNotification($user_id);
+	$notifs = $client->getUserNotification($user_id, 5);
 	foreach($notifs as $row) {
 		$output .='
                 <li class="mb-2">
@@ -1259,6 +1266,32 @@ if (isset($_GET['action'])&& $_GET['action'] =='getUserNotification'){
 	}
 	$client->readUserNotification($user_id);
 	echo $output;
+
+}
+
+if (isset($_GET['action'])&& $_GET['action']=='getUserNotifications'){
+	$user_id = $_GET['user_id'];
+	$count= $_GET['count'];
+	$notifs  = $client->getUserNotification($user_id, $count);
+	$output ='';
+	foreach ($notifs as $notif){
+		$output .= '  <li class="list-group-item border-0 d-flex align-items-center px-0 mb-2 pt-0">
+		<div class="avatar me-3">
+		  <img src="../assets/img/kal-visuals-square.jpg" alt="kal" class="border-radius-lg shadow">
+		</div>
+		<div class="d-flex align-items-start flex-column justify-content-center">
+		  <h6 class="mb-0 text-sm">'.$notif['title'].'</h6>
+		  <p class="mb-0 text-sm">'.$notif['content'].'</p>
+		</div>
+		
+	  </li>';
+
+	}
+	$output .= '<li class="text-center">
+	<span class="text-sm text-uppercase viewMore">View More</span>
+	</li> ';
+	echo $output;
+
 
 }
 
