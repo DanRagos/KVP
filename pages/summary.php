@@ -111,8 +111,11 @@ $client_img =$row['imglink'];
                                 <p class="mb-0 font-weight-normal text-sm">
                                     <?php echo $client_address ; ?>
                                 </p>
+                              
                             </div>
+                            
                         </div>
+                     
                     </div>
                     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
                         <div class="card">

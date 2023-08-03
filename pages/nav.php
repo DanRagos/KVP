@@ -4,10 +4,11 @@
           </div>
           <ul class="navbar-nav  justify-content-end">
             
-            <li class="nav-item d-flex align-items-center">
+          <li class="nav-item d-flex align-items-center">
               <a href="#" class="nav-link text-body font-weight-bold px-0">
-                <i class="fa-solid fa-user me-sm-1"></i>
+              <img src="<?php echo $img; ?>" class="avatar mb-2 mr-1 p-2">
                 <span class="d-sm-inline d-none"><?php echo $firstname?></span>
+				<input type="hidden" id="cuser_id" value="<?php echo $user_id?>"> 
               </a>
             </li>
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">

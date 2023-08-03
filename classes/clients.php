@@ -20,6 +20,20 @@ class Clients extends Db {
 		return $result;
 		
 	}
+
+	public function edit_profile($imglink, $mem_id){
+		$sql = "UPDATE users SET imglink = :imglink WHERE mem_id = :mem_id";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['imglink' => $imglink, 'mem_id' => $mem_id]);
+		return true;
+	}
+	public function edit_profile_cover($imglink, $mem_id){
+		$sql = "UPDATE users SET coverPhoto = :imglink WHERE mem_id = :mem_id";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['imglink' => $imglink, 'mem_id' => $mem_id]);
+		return true;
+	}
+	
 	// login existing user
 	public function login ($username) {
 		$sql = "SELECT mem_id,username, password from users where username = ?";
