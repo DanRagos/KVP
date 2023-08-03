@@ -20,5 +20,6 @@ $email = $data['email'];
 $username = $data['username'];
 $type = $data['type'];
 $img = $data['imglink'];
+$coverPhoto = $data['coverPhoto'];
 
 ?>

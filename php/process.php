@@ -580,9 +580,9 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_contract'){
 	}
 }
 // Edit Client Details
-if (isset($_POST['user_id'])){
+if (isset($_POST['client_id'])){
 	$output = '';
-	$id = $_POST['user_id'];
+	$id = $_POST['client_id'];
 	$result = $client ->get_contract($id);
 	$output .= ' <option value=" " selected ></option>';
 	foreach($result as $row) {
@@ -1295,5 +1295,162 @@ if (isset($_GET['action'])&& $_GET['action']=='getUserNotifications'){
 
 }
 
+if (isset($_POST['action'])&& $_POST['action']=='uploadProfilePic'){
+	$user_id = $_POST['user_id'];
+	$fileTmpLocation = $_FILES["file"]["tmp_name"];
+
+	// Destination directory on your server to move the uploaded file
+	$destinationDirectory = "../uploads/";
+
+	// Get the original file name
+	$originalFileName = $_FILES["file"]["name"];
+	// Generate a new file name (you can use other techniques to make it unique)
+	
+	// Perform image resizing
+   $uploadFile = $destinationDirectory . $originalFileName;
+		// Handle the uploaded file here, e.g., move it to a specific directory
+		$targetWidth = 400;
+		$targetHeight = 400;
+		list($width, $height) = getimagesize($fileTmpLocation);
+
+		// Calculate new dimensions while maintaining aspect ratio
+		if ($width > $height) {
+			$newWidth = $targetWidth;
+			$newHeight = intval($height * ($targetWidth / $width));
+		} else {
+			$newWidth = intval($width * ($targetHeight / $height));
+			$newHeight = $targetHeight;
+		}
+
+		// Create a new image with the desired dimensions
+		$resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+		// Get the image type (you can support other formats as needed)
+		$imageType = exif_imagetype($fileTmpLocation);
+
+		// Create a new image from the uploaded file based on its type
+		switch ($imageType) {
+			case IMAGETYPE_JPEG:
+				$sourceImage = imagecreatefromjpeg($fileTmpLocation);
+				break;
+			case IMAGETYPE_PNG:
+				$sourceImage = imagecreatefrompng($fileTmpLocation);
+				break;
+			case IMAGETYPE_GIF:
+				$sourceImage = imagecreatefromgif($fileTmpLocation);
+				break;
+			// Add support for other image types if needed
+			default:
+				echo "Unsupported image type.";
+				exit;
+		}
+
+		// Resize the image
+		imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+		// Save the resized image to the destination directory
+		switch ($imageType) {
+			case IMAGETYPE_JPEG:
+				imagejpeg($resizedImage, $destinationDirectory . $originalFileName, 80); // 80 is the image quality (0-100)
+				break;
+			case IMAGETYPE_PNG:
+				imagepng($resizedImage, $destinationDirectory . $originalFileName, 9); // 9 is the compression level (0-9)
+				break;
+			case IMAGETYPE_GIF:
+				imagegif($resizedImage, $destinationDirectory . $originalFileName);
+				break;
+			// Add support for other image types if needed
+			default:
+				echo "Unsupported image type.";
+				exit;
+		}
+
+		// Free up memory
+		imagedestroy($resizedImage);
+		imagedestroy($sourceImage);
+
+		$client-> edit_profile($uploadFile, $user_id);
+
+		echo $uploadFile;
+}
+
+if (isset($_POST['action'])&& $_POST['action']=='updateProfileCover'){
+	$user_id = $_POST['user_id'];
+	$fileTmpLocation = $_FILES["file"]["tmp_name"];
+
+	// Destination directory on your server to move the uploaded file
+	$destinationDirectory = "../uploads/cover/";
+
+	// Get the original file name
+	$originalFileName = $_FILES["file"]["name"];
+	// Generate a new file name (you can use other techniques to make it unique)
+	
+	// Perform image resizing
+   $uploadFile = $destinationDirectory . $originalFileName;
+		// Handle the uploaded file here, e.g., move it to a specific directory
+		$targetWidth = 1920;
+		$targetHeight = 1080;
+		list($width, $height) = getimagesize($fileTmpLocation);
+
+		// Calculate new dimensions while maintaining aspect ratio
+		if ($width > $height) {
+			$newWidth = $targetWidth;
+			$newHeight = intval($height * ($targetWidth / $width));
+		} else {
+			$newWidth = intval($width * ($targetHeight / $height));
+			$newHeight = $targetHeight;
+		}
+
+		// Create a new image with the desired dimensions
+		$resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+		// Get the image type (you can support other formats as needed)
+		$imageType = exif_imagetype($fileTmpLocation);
+
+		// Create a new image from the uploaded file based on its type
+		switch ($imageType) {
+			case IMAGETYPE_JPEG:
+				$sourceImage = imagecreatefromjpeg($fileTmpLocation);
+				break;
+			case IMAGETYPE_PNG:
+				$sourceImage = imagecreatefrompng($fileTmpLocation);
+				break;
+			case IMAGETYPE_GIF:
+				$sourceImage = imagecreatefromgif($fileTmpLocation);
+				break;
+			// Add support for other image types if needed
+			default:
+				echo "Unsupported image type.";
+				exit;
+		}
+
+		// Resize the image
+		imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+		// Save the resized image to the destination directory
+		switch ($imageType) {
+			case IMAGETYPE_JPEG:
+				imagejpeg($resizedImage, $destinationDirectory . $originalFileName, 80); // 80 is the image quality (0-100)
+				break;
+			case IMAGETYPE_PNG:
+				imagepng($resizedImage, $destinationDirectory . $originalFileName, 9); // 9 is the compression level (0-9)
+				break;
+			case IMAGETYPE_GIF:
+				imagegif($resizedImage, $destinationDirectory . $originalFileName);
+				break;
+			// Add support for other image types if needed
+			default:
+				echo "Unsupported image type.";
+				exit;
+		}
+
+		// Free up memory
+		imagedestroy($resizedImage);
+		imagedestroy($sourceImage);
+
+		$client-> edit_profile_cover($uploadFile, $user_id);
+
+		echo $uploadFile;
+}
 ?>
 

@@ -68,7 +68,22 @@
               </div>
             </div>
             <div class="card-body px-0 pb-2">
-              <div class="table-responsive p-0" id="displayAllContract">
+              <div class="table-responsive p-0">
+			  <table id="contracts" class="table align-items-center justify-content-center table-responsive" style="width:100%;" >
+        <thead>
+            <tr>
+					  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID/Client</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover - Coverage</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contract</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. SV Call</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+            </tr>
+        </thead>
+ 
+    </table>         
                 
               </div>
             </div>
@@ -82,150 +97,52 @@
   <!--   Core JS Files   -->
   <?php include 'scripts.php' ?>
   <script>
-$(".freq").click(function(){
-if ($(this).val()=='2') {
-$('#inp_reason').attr('required', true); 
-document.getElementById('reason').style.display = '';
-}
-else {
-$('#inp_reason').val(''); 
-$('#inp_reason').attr('required', false); 
-document.getElementById('reason').style.display = 'none';
-}
-});
-//Date Range Picker
-$(function() {
-
-$('input[name="datefilter"]').daterangepicker({
-autoUpdateInput: false,
-locale: {
-cancelLabel: 'Clear'
-}
-});
-
-$('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
-$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-});
-
-$('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
-$(this).val('');
-});
-
-});
     $(document).ready(function(){
-		
-		   displayAllContract();
-
-	//View Details Users
-	$("body").on("click", ".editClientBtn", function(e){
-		e.preventDefault();
-		var edit_client = $(this).attr('id');
-			$.ajax({
-				url: '../php/process.php',
-				method: 'post',
-				data: {edit_client : edit_client},
-				success: function (response){
-				data = JSON.parse(response);
-				$("#client_id").val(edit_client);
-				$("#client_name").val(data.client_name);
-				$("#address").val(data.client_address);
-				$("#cPerson").val(data.contact_person);
-				$("#email").val(data.contact_email);
-				$("#title").text('Edit details for '+data.client_name);
-				$("#title1").text('Add details for '+data.client_name);
-				console.log($("#title1").text());
-	
-				}
-			});
-	});
-		//Update Users
-		$("#editClientBtn").click(function(e){
-		if ($("#edit-client-form")[0].checkValidity()) {
-			e.preventDefault();
-			$.ajax({
-				url:'../php/process.php',
-				method: 'post',
-				data: $("#edit-client-form").serialize()+"&action=update_client",
-				success:function(response){
-				swal("Tool Updated!", "", "success");
-					displayAllclients();
-					$("#edit-client-form")[0].reset();
-					$("#editClient").modal('hide');
+		var db = 3;
+		var user_id = 1;
+		var table= $('#contracts').DataTable({
+					 
+					 processing: true,
+					 serverSide: true,
+           scrollY: '45vh',
+           scrollX: true,
+					ajax: {
+					url: '../php/ssp_list.php',
+					data: {db : db,
+					user_id:user_id},
+					method:'GET',
+					},
+					"order":[0,'asc'],					
 				
 					
-				}
-			});
-		}
-	});
-//Show Add Contract Modal
-$("body").on("click",".addContractBtn", function(e) {
-		e.preventDefault();
-		var sched_id = $(this).attr('id'); 
-			$.ajax({
-				url: '../php/process.php',
-				method: 'post',
-				data: {edit_client : sched_id},
-				success: function (response){
-				data = JSON.parse(response);
-				$("#contract_id").val(sched_id);
-				$("#title1").text('Add contract for '+data.client_name);
-			
-	
-				}
-			});
-		});
-//Add Contract  
-	$("#add-contract-btn").click(function(e){
-	let add_id = $(this).attr('id');
-	if($("#add-contract-form")[0].checkValidity()){
-          e.preventDefault();
-		  let add_id = $(this).attr('id');
-			   $("#passError").text('');
-				$.ajax({
-				url: '../php/process.php',
-				method: 'post',
-				data: $("#add-contract-form").serialize()+"&action=add_contract",
-				success: function (response){
-				console.log(response);
-					swal("Contract Added!", "", "success");
-					$("#add-contract-form")[0].reset();
-					$("#addContract").modal('hide');
-				/*data = JSON.parse(response);
-				$("#client_id").val(add_id);
-				$("#client_name").val(data.client_name);
-				$("#address").val(data.client_address);
-				$("#cPerson").val(data.contact_person);
-				$("#email").val(data.contact_email);
-				$("#title1").text('Add contract for '+data.client_name);
-				*/
-	
-				}
-			});
-		  
-        }
-      });
-	
-   	function displayAllContract() {
-		$.ajax({
-			url:'../php/process.php',
-			method: 'POST',
-			data: {action:'display_contract'},
-		success: function(response){
-			$("#displayAllContract").html(response);
-				$('#contractTable').DataTable({ 
-				 "order": [],
-				  stateSave: true,
-				   scrollY: '45vh',
-				   scrollX: true,
-				scrollCollapse: true,
-				  	fixedColumns:   {
-            left: 1,
-        }
     });
-		}
-		
-		});
-	}
+
+    $(document).on('click', '.viewContractReport', function() {
+            let contract_id = $(this).attr('data-id');
+            $.ajax({
+                url: '../php/export_service.php',
+                type: 'GET',
+                data: {
+                    action: "viewContracts",
+                    contract_id: contract_id
+                },
+                xhrFields: {
+                    responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                },
+                success: function(response) {
+                    var blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });
+
+                    // Create a temporary URL for the blob
+                    var blobUrl = URL.createObjectURL(blob);
+
+                    // Open the PDF in a new tab or window
+                    window.open(blobUrl, '_blank');
+
+                }
+            });
+        });
 });
   </script>
 

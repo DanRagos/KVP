@@ -153,11 +153,11 @@ $(document).on('click', '#addSvGModal', function (){
 				$('#option2').removeAttr("required");
 				$('#option1').show();
 				$('#pmsCheck').val(1);
-				let user_id = $('#client_id').val();	
+				let client_id = $('#client_id').val();	
 				$.ajax({
 				url: '../php/process.php',
 				method : 'POST',
-				data: {user_id : user_id},
+				data: {client_id : client_id},
 				success: function (response){	
 				$('#machine').html(response);
 				let contract_id1= $('#machine').val();
