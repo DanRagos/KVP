@@ -187,13 +187,18 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_resched'){
 if (isset($_POST['sched_id'])&& $_POST['action']=='updateSchedule'){
 $id = $_POST['sched_id'];
 $result = $client->get_schedule($id);
+$service_by = $client->getServiceBy($id);
+	$mem_arr = [];
+	foreach ($service_by as $user) {
+		array_push($mem_arr, intval($user['mem_id']));
+	}
 $output ='';
 if ($result) {
 	$output .= '
 	      <div class="modal-header">
 	  <img src="../img/icon.jpg" class="img-fluid" style="width:10%;height:5%;padding-right:14px;" alt="...">
 	
-        <h6 class="modal-title ">Update details for '.$result['contract_id'].'</h6>
+        <h6 class="modal-title ">Update details for '.$result['client_name'].'</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -276,9 +281,9 @@ if ($result) {
   </div>
   <div class="row">
 	<div class="col">
-      <div class="input-group input-group-static my-0">
+      <div class="input-group input-group-static mt-4">
         <label for="interval_date" class="ms-0">Service By:</label>
-            <input type="text" name="c_sby"  class="form-control">
+		<div  class="form-control p-0 ml-1 sample-select-update" id="serviceByDiv" name="service_by_con" data-array-value="'.json_encode( $mem_arr).'"></div>  
       </div>
     </div>
   </div>
@@ -297,7 +302,7 @@ if ($result) {
 }
 //Update Schedule Details
 if (isset($_POST['action'])&& $_POST['action'] == 'update_sched'){
-print_r($_POST);
+
 $schedule_type = $_POST['schedule_type'];
 $contract_id = $_POST['contract_id'];
 $sv_id = $_POST['sv_id'];
@@ -309,21 +314,21 @@ $diagnosis = $_POST['diagnosis'];
 $c_done = $_POST['c_done'];
 $status = $_POST['status'];
 $c_recom = $_POST['c_recom'];
-$c_sby = $_POST['c_sby'];
+$s_by = explode(",", $_POST['service_by_con']);
 $withC = 0;
 if ($schedule_type == '1') {
 	$frequency = $_POST['frequency'];
 	$contract_det = $client->get_contract_details($contract_id);
 	print_r($contract_det);
 	$add_count= $client->add_pms_count_1($contract_id);
-	if ($contract_det[0]['total']- $count > 0) {
+	if ($contract_det['count'] - 1 > 0) {
 	$add_pms_sched = $client->add_pms_sched ($contract_id, $frequency, $s_date);
 	if ($add_pms_sched) {
 		$remove_pms = "";
 	}
 }
 else {
-	$set_contract_expi = $client->expire_sched($contract_id);
+	
 }
 	}
 
@@ -333,9 +338,9 @@ else {
 	if ($check_sv_contract['contract_id'] > 0 ) {
 	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
 	print_r($contract_det);
-	$count = $contract_det[0]['sv_call'] > 0 ? $contract_det[0]['sv_call'] - 1 : 0 ;
+	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
 	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
-	$withC =  $contract_det[0]['sv_call'] > 0 ? 0 : 1;
+	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;
 	
 		
 	}
@@ -343,10 +348,27 @@ else {
 
 }
 
-$accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $c_sby, $withC);
+$accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC);
 $update_schedule = $client->update_schedule($schedule_id, $status);
+$notif_content = 'Your schedule service no:#'.$schedule_id.' has been verified';
+$notif_title = 'Schedule Service Done';
+$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $schedule_id);
+foreach ($s_by as $user) {
+$check = $client->check_user_service($user, $schedule_id);
+	if (!$check) {
+		$client->add_user_service($user, $schedule_id, 1);
+		echo 'check';
 
-echo 'Success';
+	}
+	$client->user_notification($user, $notif_id);	
+	$client->user_sched_status($user, $schedule_id);
+
+
+}
+
+// echo 'Success';
+print_r($_POST);
+print_r($s_by);
 }
 
 //CancelSv
@@ -611,30 +633,28 @@ if (isset($_POST['ctr'])){
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	print_r($_POST);
 
-	$client_id = $_POST[0]['value'];
-	$contract_id = $_POST[2]['value'];
+	$client_id = $_POST['client_id'];
+	$contract_id = $_POST['contract_id'];
 	
 	$sv_type = 2;
-	if ($_POST[1]['value'] == 0) {
+	if ($_POST['pmsCheck'] == 0) {
 	$sv_type = 1;	
-	$machine_type = $_POST[3]['value'];
-	$brand = $_POST[4]['value'];
-	$model = $_POST[5]['value'];
+	$machine_type = $_POST['machine_type'];
+	$brand = $_POST['brand'];
+	$model = $_POST['model'];
 	}
 	else {
 	$result1= $client ->get_contract_details($contract_id);
-	foreach($result1 as $row) {
-	$machine_type = $row['machine_type'];
-	$brand = $row['brand'];
-	$model = $row['model'];
-	}
+	$machine_type = $result1['machine_type'];
+	$brand = $result1['brand'];
+	$model = $result1['model'];
 	}
 	
-	$rep_problem = $_POST[6]['value'];
-	$sv_date = $_POST[7]['value'];
+	$rep_problem = $_POST['rep_problem'];
+	$sv_date = $_POST['sv_date'];
 	$last_id = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
 	$sched_Date = date('M d, Y', strtotime($sv_date));
-	$service_by = $_POST['service_by'];
+	$service_by = explode("," , $_POST['service_by']); 
 	$notif_title = "Service Assigned";
 	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
 	$notif_createdAt= date('Y-m-d h:i:s');

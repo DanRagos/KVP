@@ -43,7 +43,7 @@
     </div>
 	<!-- Modal for Resched -->
 	<div class="modal fade modal-lg" id="confirm-sched-modal"  data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog">
     <div class="modal-content update_contents">
 
     </div>
@@ -66,7 +66,7 @@
                 </div>
                 <div class="modal-body rounded-0">
                     <div class="container-fluid">
-					 <form action="#" method= "post" id ="add-sched-form">
+					 <form action="#" method= "post" id ="add-sched-form" autocomplete="off">
                       <div class="row">
 					  <div class="col">
 	 <div class="input-group input-group-static mb-4">
@@ -158,7 +158,7 @@
     <div class="col">
       <div class="input-group input-group-outline my-3 is-filled">
                     <label class="form-label">Assign To: </label>
-                     <div  class="form-control p-0 service_by"> </div>
+                     <div  name="service_by" class="form-control p-0 service_by_client"> </div>
                     </div>
     </div>
 </div>						

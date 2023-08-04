@@ -105,7 +105,7 @@ $(document).ready(function(){
                     });
                     // Initialize Virtual Select with the fetched options
                     VirtualSelect.init({
-                        ele: '.service_by',
+                        ele: '.service_by_client',
                         options: optionsData,
                         multiple: true,
                     });
@@ -191,20 +191,7 @@ $(document).on('click', '#addSvGModal', function (){
         }
     });
 	//Resched Schedule
-		$('#resched-btn').click(function(e) { 
-			e.preventDefault();
-			$.ajax({
-				url: '../php/process.php',
-				method : 'POST',
-				data: $("#resched-form").serialize()+ '&action=resched',
-				success: function (response){
-					swal("Rescheduled", "", "success");
-							$("#resched-form")[0].reset();
-							$("#resched-modal").modal('hide');
-							 showSchedules(response);			 
-				}
-			});
-		});
+	
 			$('#resched-btn1').click(function(e) { 
 			e.preventDefault();
 			$.ajax({
@@ -257,8 +244,19 @@ $(document).on('click', '#addSvGModal', function (){
 			data: $("#resched_form").serialize()+"&action=confirm_resched",
 			success: function (response) {
 				var formattedDate = new Date(response).toISOString().substring(0, 10);
-
-						swal("Rescheduled", "", "success");
+                Swal.fire({
+            icon: 'success',
+            title: 'Rescheduled',
+            text: '.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
 							$("#add-sched-form")[0].reset();
 							$("#reschedModal").modal('hide');	
 						showSchedules(formattedDate);	
@@ -269,7 +267,7 @@ $(document).on('click', '#addSvGModal', function (){
 	// Confirm Schedule
 	$("body").on("click","#updateBtn", function(e) {
 	let sched_id = $(this).attr('data-id');
-	e.preventDefault();
+	
 	var edit_id = $(this).attr('data-id');
 		$.ajax({
 			url: '../php/process.php',
@@ -279,22 +277,56 @@ $(document).on('click', '#addSvGModal', function (){
 			success: function (response) {
 			 $("#confirm-sched-modal .update_contents").html(response);
 			 $("#confirm-sched-modal").modal("show");
+             const arrayValue = JSON.parse(document.getElementById('serviceByDiv').dataset
+                        .arrayValue);
+                       
+            $.ajax({
+                url:'../php/process.php',
+                method: 'GET',
+                data: {
+                    action:'getServiceBy'
+                },
+                dataType: 'json',
+                success: function (data){
+                    var optionsData = data.map((item)=>{
+                        let fullname = item.firstname + ' ' +  item.lastname
 
+                        return {
+                            label: fullname,
+                            value: item.mem_id
+                        }
+                    })
+
+                    VirtualSelect.init({
+                                ele: '.sample-select-update',
+                                options: optionsData,
+                                multiple: true,
+
+                            });
+                  document.querySelector('.sample-select-update').setValue(arrayValue);
+                 
+                }
+            })
 			}
 		});
 	});
 	$("#confirmBtn").click(function(e) {
     if ($("#add-sched-form")[0].checkValidity()) {
         e.preventDefault();
-        let service_by = $('.service_by').val(); // Fixed this line to get the value from 'sample-select'
+
+        // Create a new FormData object directly from the form
+        var formData = new FormData($("#add-sched-form")[0]);
+
+        // Append the action 'confirm_sched' to the FormData object
+        formData.append('action', 'confirm_sched');
+
+        // Send the AJAX request using $.ajax()
         $.ajax({
             url: '../php/process.php',
             method: 'post',
-            data: {
-                ...$("#add-sched-form").serializeArray(),
-                action: "confirm_sched",
-                service_by: service_by
-            },
+            data: formData,
+            processData: false, // Set processData to false when using FormData
+            contentType: false, // Set contentType to false when using FormData
             success: function(response) {
                 console.log(response);
                 $("#addSchedule").modal('hide');
@@ -302,20 +334,19 @@ $(document).on('click', '#addSvGModal', function (){
                 $('#option2').show();
                 $('#option1').hide();
                 $('#client_id option:not(:selected)').prop('disabled', false);
-				Swal.fire({
-                                icon: 'success',
-                                title: 'Saved',
-                                timer: 1500,
-                                timerProgressBar: true,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                },
-                                willClose: () => {
-                                    Swal.hideLoading();
-									showSchedules();
-                                },
-                            });
-                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    willClose: () => {
+                        Swal.hideLoading();
+                        showSchedules();
+                    },
+                });
             }
         });
     }
@@ -356,15 +387,32 @@ $("#confirmG").click(function (e) {
 });
 		
 		$("body").on("click","#c_confirmBtn", function(e) {
+        let service_by =$('.sample-select').val();
 		if ($("#confirm_form")[0].checkValidity()) {
 			e.preventDefault();
+    var formData = new FormData($("#confirm_form")[0]);
+    formData.append('action', 'update_sched');
 			$.ajax({
 				url:'../php/process.php',
 				method: 'post',
-				data: $("#confirm_form").serialize()+"&action=update_sched",
+                data: formData,
+                contentType: false,
+                    processData: false,
 				success:function(response){
 					console.log(response);
-					swal("Schedule Done!", "", "success");
+				    Swal.fire({
+                    icon: 'success',
+                    title: 'Saved',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    willClose: () => {
+                        Swal.hideLoading();
+                        showSchedules();
+                    },
+                });
 					$("#confirm-sched-modal").modal('hide');
 					$("#confirm_form")[0].reset();
 					showSchedules();

@@ -20,7 +20,7 @@ require_once '../php/session.php';
 
 <head>
   <?php include 'head.php'; 
-		include '../comp/static_modal.php';
+		include '../comp/dashboardModal.php';
   ?>
     <title>
     Dashboard
@@ -55,7 +55,7 @@ require_once '../php/session.php';
 		  <a  type="button"  data-bs-toggle="modal" data-bs-target="#activeUsers">
             <div class="card-header p-3 pt-5">
               <div class="icon icon-lg icon-shape bg-gradient-primary shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-              <i class="fa-solid fa-user opacity-10"></i>
+              <i class="material-icons-round opacity-10">calendar_month</i>
               </div>
               <div class="text-end pt-1">
                 <h1 class="text-sm mb-0 text-capitalize">Service Schedule</h1>
@@ -64,7 +64,7 @@ require_once '../php/session.php';
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">View</span></p> </a>
+             </a>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ require_once '../php/session.php';
             <div class="card-header p-3 pt-5">
 			
               <div class="icon icon-lg icon-shape bg-gradient-success shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-               <i class="fa-solid fa-toolbox opacity-10"></i>
+              <i class="material-icons-round opacity-10">design_services</i>
               </div>
               <div class="text-end pt-1">
                 <h1 class="text-sm mb-0 text-capitalize">Service Call</h1>
@@ -84,7 +84,7 @@ require_once '../php/session.php';
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">View</span></p></a>
+              </a>
             </div>
           </div>
         </div>	
@@ -94,7 +94,7 @@ require_once '../php/session.php';
             <div class="card-header p-3 pt-5">
 			
               <div class="icon icon-lg icon-shape bg-gradient-warning shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-               <i class="fa-solid fa-calendar opacity-10"></i>
+              <i class="material-icons-round opacity-10">engineering</i>
               </div>
               <div class="text-end pt-1">
                 <h1 class="text-sm mb-0 text-capitalize">PMS</h1>
@@ -103,13 +103,13 @@ require_once '../php/session.php';
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">View</span></p></a>
+              </a>
             </div>
           </div>
         </div>
 		<div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
-		  <a  type="button"  data-bs-toggle="modal" data-bs-target="#delayedModal">
+		  <a  type="button"  id="pendingSvBtn" data-bs-toggle="modal" data-bs-target="#pendingSv">
             <div class="card-header p-3 pt-5">
 			
               <div class="icon icon-lg icon-shape bg-gradient-danger shadow-primary text-center border-radius-xl mt-n4 position-absolute">
@@ -130,10 +130,10 @@ require_once '../php/session.php';
   <div class="row mt-2 justify-content-center">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
       <div class="card">
-        <a type="button" data-bs-toggle="modal" data-bs-target="#scheduledModal">
+        <a type="button" id="pendingPmBtn" data-bs-toggle="modal" data-bs-target="#pendingPm">
           <div class="card-header p-3 pt-5">
-            <div class="icon icon-lg icon-shape bg-gradient-warning shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-              <i class="fa-solid fa-calendar opacity-10"></i>
+            <div class="icon icon-lg icon-shape bg-gradient-danger shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+            <i class="fa-solid fa-calendar-xmark opacity-10"></i>
             </div>
             <div class="text-end pt-1">
               <h1 class="text-sm mb-0 text-capitalize">Pending PMS</h1>
@@ -151,8 +151,8 @@ require_once '../php/session.php';
       <div class="card">
         <a type="button" data-bs-toggle="modal" data-bs-target="#scheduledModal">
           <div class="card-header p-3 pt-5">
-            <div class="icon icon-lg icon-shape bg-gradient-warning shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-              <i class="fa-solid fa-calendar opacity-10"></i>
+            <div class="icon icon-lg icon-shape bg-gradient-success shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+            <i class="material-icons-round opacity-10">event_available</i>
             </div>
             <div class="text-end pt-1">
               <h1 class="text-sm mb-0 text-capitalize">Resolved</h1>
@@ -170,12 +170,12 @@ require_once '../php/session.php';
       <div class="card">
         <a type="button" data-bs-toggle="modal" data-bs-target="#scheduledModal">
           <div class="card-header p-3 pt-5">
-            <div class="icon icon-lg icon-shape bg-gradient-warning shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+            <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
               <i class="fa-solid fa-calendar opacity-10"></i>
             </div>
             <div class="text-end pt-1">
               <h1 class="text-sm mb-0 text-capitalize">Schedule for this Month</h1>
-              <h1 class="mb-2">...</h1>
+              <h1 class="mb-2" id="scheduleMonth">...</h1>
             </div>
           </div>
           <hr class="dark horizontal my-0">
@@ -268,6 +268,34 @@ require_once '../php/session.php';
 <?php include 'scripts.php' ?>
   <script>
   $(document).ready(function(){
+    //Modals
+    $(document).on('click', '#pendingSvBtn', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=pendingSvModal', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+              $('.pendSvTableContent').html(response);
+              console.log(response);
+              $('#pendSvTable').DataTable();
+            
+          
+        }
+      });
+    });
+    $(document).on('click', '#pendingPmBtn', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=pendingPmModal', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+          console.log(response);
+              $('.pendPmTableContent').html(response);
+             
+              $('#pendPmTable').DataTable();
+            
+          
+        }
+      });
+    });
 	  setInterval(loadDashboard, 3000);
 	  
 	  function loadDashboard () {
@@ -277,13 +305,16 @@ require_once '../php/session.php';
 		  method: 'GET',
 		  data: {action:'dboardCards'},
 		  success: function (response) {
+        
 			   let json = JSON.parse(response);
-			 $('#serviceSchedule').text(json.serviceSchedule);
+        console.log(json);
+         $('#serviceSchedule').text(json.serviceSchedule);
 			 $('#serviceCall').text(json.svCall);
 			  $('#pms').text(json.pms);
 			   $('#pPms').text(json.pendPms);
 			   $('#pSvCall').text(json.pendSv);
 			   $('#resolved').text(json.resolved);
+         $('#scheduleMonth').text(json.schedule);
 			 
 		  }
 	  });
