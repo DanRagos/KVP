@@ -21,7 +21,7 @@
    
 			<li class="nav-item">
          <a data-bs-toggle="collapse" href="#clients" class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>" role="button" aria-expanded="false">
-<i class="material-icons-round opacity-10">date_range</i>
+<i class="material-icons-round opacity-10">face</i>
 <span class="nav-link-text ms-2 ps-1">Clients</span>
 </a>
 <div class="collapse" id="clients" style="">

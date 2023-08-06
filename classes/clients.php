@@ -5,7 +5,7 @@ class Clients extends Db {
 	//register user
 	public function register($firstname,$lastname, $username,$email, $password, $type){
 		$sql = "INSERT INTO `users` (`mem_id`, `firstname`, `lastname`, `username`, `email`, `password`, `type`, `imglink`)
-		VALUES (NULL, :firstname, :lastname, :username, :email, :password, :type, '../userpics/avatar.png');";
+		VALUES ('', :firstname, :lastname, :username, :email, :password, :type, '../userpics/avatar.png');";
 		$stmt = $this ->conn->prepare($sql);
 		$result = $stmt->execute(['firstname' => $firstname,'lastname' => $lastname, 'username' => $username, 'email' =>$email, 'password' => $password, 'type' =>$type]);
 		return $result;
@@ -54,7 +54,7 @@ class Clients extends Db {
 	//Register Client
 		public function register_client($client_name,$client_address, $contact_person, $contact_email, $img_link){
 		$sql = "INSERT INTO `clients` (`client_id`, `client_name`, `client_address`, `contact_person`, `contact_email`, `imglink`)
-		VALUES (NULL, :client_name, :client_address, :contact_person, :contact_email, :img_link)";
+		VALUES ('', :client_name, :client_address, :contact_person, :contact_email, :img_link)";
 		$stmt = $this ->conn->prepare($sql);
 		$result = $stmt->execute(['client_name' => $client_name,'client_address' => $client_address, 'contact_person' => $contact_person,
 		'contact_email' =>$contact_email, 'img_link' => $img_link]);
@@ -112,7 +112,7 @@ class Clients extends Db {
 	
 	public function add_schedule_contract($last_id, $schedule_date, $type){
 		$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
-		VALUES (NULL, :type, :last_id, '',  :schedule_date, '')";
+		VALUES ('', :type, :last_id, '',  :schedule_date, '')";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['type'=>$type, 'last_id'=>$last_id, 'schedule_date'=>$schedule_date]);
 		return true;
@@ -120,7 +120,7 @@ class Clients extends Db {
 	}
 		public function add_schedule_sv($last_id, $schedule_date, $type){
 		$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
-		VALUES (NULL, :type,'', :last_id,  :schedule_date, '')";
+		VALUES ('', :type,'', :last_id,  :schedule_date, '')";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['type'=>$type, 'last_id'=>$last_id, 'schedule_date'=>$schedule_date]);
 		$last_id = $this->conn->lastInsertId();
@@ -131,7 +131,7 @@ class Clients extends Db {
 	public function add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date){
 		$type = 2;
 	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES (NULL, :sv_type , :client_id,  :contract_id ,'' , '', :machine_type, :brand, :model, :rep_problem)";
+		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, :brand, :model, :rep_problem)";
 		$stmt = $this->conn-> prepare($sql);
 		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
@@ -142,7 +142,7 @@ class Clients extends Db {
 		public function add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date){
 		$type = 2;
 	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES (NULL, 0 , '',  '' , :gName , :gAddress, :machine_type, :brand, :model, :rep_problem)";
+		VALUES ('', 0 , 0,  0 , :gName , :gAddress, :machine_type, :brand, :model, :rep_problem)";
 		$stmt = $this->conn-> prepare($sql);
 		$stmt ->execute(['gName'=>$gName, 'gAddress'=>$gAddress, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
@@ -190,8 +190,40 @@ WHERE schedule.status != 2;";
 		return $result;
 	}
 
+	public function display_schedule_month (){
+		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, COALESCE(contract.brand, service_call.brand) 
+		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
+		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
+		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.schedule_date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0 ";
+$stmt = $this ->conn ->prepare($sql);
+$stmt -> execute([]);
+$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+return $result;
+	}
+	public function display_pend_sv (){
+		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, service_call.brand, service_call.model
+		from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute([]);
+		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
+	public function display_pend_pm (){
+		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
+		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute([]);
+		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
 		public function get_schedule ($id) {
+<<<<<<< HEAD
 			$sql = "SELECT schedule.*,clients.client_name, COALESCE(contract.contract_id, service_call.sv_id) AS id,
+=======
+			$sql = "SELECT schedule.*, clients.client_name, COALESCE(contract.contract_id, service_call.sv_id) AS id,
+>>>>>>> a17266095bd212f23fe48fc8175922c1c86e3625
 			COALESCE(contract.brand, service_call.brand) as brand, 
 			COALESCE(contract.model, service_call.model) as model, 
 			COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END)
@@ -216,7 +248,7 @@ WHERE schedule.status != 2;";
 public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC) {
 	
 	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `accomp_status`, `withC`)
-	VALUES (NULL, :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
+	VALUES ('', :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'aStatus'=>$status, 'withC'=>$withC]);
 	return true;
@@ -255,7 +287,7 @@ public function delete_svcall($sv_call) {
 }
 
 public function add_pms_sched ($contract_id, $frequency, $s_date){
-	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, '0')";
+	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES ('', '1', :contract_id, 0, :s_date, '0')";
 	$stmt = $this->conn->prepare($sql);
 	$months  = ($frequency == '1') ? 3 : ($frequency == '2' ? 6 : 12);
 	$new_date = date('Y-m-d', strtotime("+$months month", strtotime($s_date)));
@@ -263,7 +295,7 @@ public function add_pms_sched ($contract_id, $frequency, $s_date){
 	return true;	
 }
 public function add_pms_bulk ($contract_id, $s_date, $status){
-	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES (NULL, '1', :contract_id, 0, :s_date, :status)";
+	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES ('', '1', :contract_id, 0, :s_date, :status)";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['contract_id'=>$contract_id, 's_date'=>$s_date, 'status'=>$status]);
 	return $this->conn->lastInsertId();
@@ -319,7 +351,7 @@ public function get_contract_details($id) {
 		$sql = "SELECT * FROM `contract` WHERE contract_id = :id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['id'=>$id]);
-		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$result = $stmt->fetch();
 		return $result;
 		
 	}	
@@ -412,19 +444,25 @@ public function countAllPms() {
     return $stmt->fetchColumn();
 }
 public function pendPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and schedule.status = 1";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id  > 0 and schedule.status != 2";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function pendSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and schedule.status = 1";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id  = 0 and schedule.status != 2";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function resolved() {
     $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.status = 2";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function schedule() {
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -465,6 +503,22 @@ public function countSchedule($client_id) {
 		$stmt->execute(['accomp_id'=>$accomp_id]);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		return $result;
+	}
+
+	public function check_user_service($user_id, $schedule_id){
+		$sql = "SELECT uid from user_sched where user_sched.uid = :user_id AND user_sched.sched_id = :sched_id ";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['user_id'=>$user_id, 'sched_id'=>$schedule_id]);
+		$result = $stmt->fetchColumn();
+		return $result > 0;
+	}
+	public function user_sched_status($user_id, $schedule_id){
+		$sql = "UPDATE user_sched SET user_sched.us_status = 1 where user_sched.uid = :user_id AND user_sched.sched_id = :schedule_id ";
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute(['user_id'=>$user_id, 'schedule_id'=>$schedule_id]);
+		return true;
+
+
 	}
 	
 	public function add_user_service ($user_id, $sched_id, $status){
