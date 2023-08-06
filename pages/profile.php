@@ -83,7 +83,7 @@ include '../comp/static_modal.php';
                 </li>
                 <li class="nav-item" id="scheduleTab">
                   <a class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" href="javascript:;" role="tab" aria-selected="false">
-                    <i class="material-icons text-lg position-relative">settings</i>
+                    <i class="material-icons text-lg position-relative">event</i>
                     <span class="ms-1">Schedule</span>
                   </a>
                 </li>
@@ -175,9 +175,18 @@ include '../comp/static_modal.php';
           </div>
         </div>
         <div class="row" id="scheduleContent" style="display:none;">
+			<div class="col-2">
+			<select  id="scheduleView" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+  <option selected value="1">Calendar View</option>
+  <option value="2">Table View</option>
+
+</select>
+</div>
           <div class="row">
         <div class="col-6 d-flex justify-content-center align-items-center">
           <div id="calendar"style="width: 100%; height:100%;" >  </div>
+		    <div id="tableCalendar"style="width: 100%; height:100%; display:none"> 
+			</div>
 </div>  
 <div class="col-6">
           <div class="card my-4">
@@ -287,8 +296,23 @@ include '../comp/static_modal.php';
 
  <script>
  $(document).ready(function(){
+	var calendar;
     var notifCount = 5;
     taskDone();
+ $(document).on('change', '#scheduleView', function(){
+	 let schedV = $('#scheduleView').find(":selected").val();
+	if (schedV == 1){
+		
+		showCalendar();
+		$('#calendar').show();
+		$('#tableCalendar').hide();
+	}
+	else {
+		
+		$('#calendar').hide();
+		$('#tableCalendar').show();
+	}
+ });
 
     getNotifications(notifCount);
   
@@ -303,6 +327,7 @@ include '../comp/static_modal.php';
         $('#settingContent').hide();
         $('#homeContent').hide();
         showSchedules();
+		showCalendar();
         notifCount= 5;
     });
     $('#settingTab').click(function(){
@@ -329,6 +354,23 @@ include '../comp/static_modal.php';
         }
     });
 }
+	function showCalendar(){
+		let user_id = <?php echo $id; ?>;
+	$.ajax({
+		url: '../php/process.php',
+		method: 'GET',
+		data: {
+			action:'display_schedule_table',
+			user_id: user_id,
+		},
+		success: function (response) {
+			console.log(response);
+			$('#tableCalendar').html(response);
+			$('#user_scheds').DataTable();
+			
+		}
+	});
+	}
 
 $(document).on('click', '.editProfilePic', async function() {
   let user_id = <?php echo $id; ?>;

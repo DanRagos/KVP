@@ -49,6 +49,61 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 	echo $output;
 	}
 }
+if (isset($_GET['action'])&& $_GET['action'] == 'display_schedule_table'){
+	$user_id = $_GET['user_id'];
+	$result = $client->display_schedule_user($user_id);
+	$output ='';
+	$output .='
+	<table id="user_scheds" class="table-responsive">
+        <thead>
+            <tr>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule No. </th>
+					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Brand / Model</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Reported Problem</th>
+					  
+					
+            </tr>
+        </thead>
+ 
+    <tbody>';
+foreach($result as $row) {
+	$type=($row['schedule_type']==1)? "PMS" : "SV";
+	$output .= '
+		<tr>
+		<td> <div class="d-flex px-2 py-1">
+	<div class="d-flex flex-column justify-content-center">
+	<h6 class="text-center mb-0 text-sm">'.$row['schedule_id'].'</h6>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['client_name'].'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['brand'].' / '.$row['model'].'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$type.'</h5>
+	</div>
+		</td>
+			<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['schedule_date'].'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['rep_problem'].'</h5>
+	</div>
+		</td>
+		</tr>
+	';
+}
+$output .='</tbody></table>';
+	echo $output;
+}
 //Display All Schedules 
 if (isset($_POST['action'])&& $_POST['action'] == 'display_schedule'){
 
@@ -193,7 +248,7 @@ if ($result) {
 	      <div class="modal-header">
 	  <img src="../img/icon.jpg" class="img-fluid" style="width:10%;height:5%;padding-right:14px;" alt="...">
 	
-        <h6 class="modal-title ">Update details for '.$result['contract_id'].'</h6>
+        <h6 class="modal-title ">Update details for '.$result['client_name'].'</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -636,7 +691,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	$sched_Date = date('M d, Y', strtotime($sv_date));
 	$service_by = $_POST['service_by'];
 	$notif_title = "Service Assigned";
-	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
+	$notif_content = "You have been asigned for Schedule no.#$last_id at $sched_Date";
 	$notif_createdAt= date('Y-m-d h:i:s');
 	//Add Notification
 	$last_notif= $client->add_user_notification($notif_title, $notif_content,  0 , $notif_createdAt, 1 , $last_id);

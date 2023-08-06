@@ -50,7 +50,7 @@ $client_img =$row['imglink'];
                             </div>
                         </div>
                     </div>
-                    <form id="pms-forms">
+                    <form id="pms-forms" autocomplete="off">
                     </form>
                 </div>
                 <div class="modal-footer">
