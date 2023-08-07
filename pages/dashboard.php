@@ -213,52 +213,19 @@ require_once '../php/session.php';
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
               <div class="bg-gradient-success shadow-dark border-radius-lg py-3 pe-1">
                 <div class="chart">
-                  <canvas id="chart-line-ver" class="chart-canvas" height="230"></canvas>
+                  <canvas id="user-done-chart" class="chart-canvas" height="230"></canvas>
                 </div>
               </div>
             </div>
             <div class="card-body">
-              <h6 class="mb-0 ">Verification Grade</h6>
+              <h6 class="mb-0 ">Most Serviced By</h6>
                <p class="text-sm "> <span class="font-weight-bolder"></span> </p>
  			  <hr class="dark horizontal">
 
             </div>
           </div>
         </div>
-        <div class="col-lg-4 col-lg-6 mt-4 mb-3">
-          <div class="card z-index-2 ">
-            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
-              <div class="bg-gradient-info shadow-dark border-radius-lg py-3 pe-1">
-                <div class="chart">
-                  <canvas id="donut-graph" class="chart-canvas" height="225"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <h6 class="mb-0 ">Verification Grade</h6>
-               <p class="text-sm "> <span class="font-weight-bolder"></span> </p>
- 			  <hr class="dark horizontal">
-
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-lg-6 mt-4 mb-3">
-          <div class="card z-index-2 ">
-            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
-              <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
-                <div class="chart">
-                  <canvas id="bar-graph" class="chart-canvas" height="225"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <h6 class="mb-0 ">Bar Grade</h6>
-               <p class="text-sm "> <span class="font-weight-bolder"></span> </p>
- 			  <hr class="dark horizontal">
-
-            </div>
-          </div>
-        </div>
+   
         
       </div>
     </div>
@@ -271,6 +238,7 @@ require_once '../php/session.php';
     //Modals
 
     scheduleDoneChart();
+    userScheduleDoneChart();
     $(document).on('click', '#pendingSvBtn', function(){
       $.ajax({
         url: '../php/dboardProcess.php?action=pendingSvModal', // Pass the action as a query parameter
@@ -345,6 +313,64 @@ require_once '../php/session.php';
 	  }
   });
 
+  function userScheduleDoneChart() {
+    $.ajax({
+      url: '../php/dboardProcess.php',
+      method: 'GET',
+      data: {
+        action: 'getUserScheduleDoneChart'
+      },
+      success: function (response){
+        console.log(response);
+        data= JSON.parse(response);
+
+        let labels = data.map((x)=>x.firstname.trim());
+        let count = data.map((y)=>y.totalCount);
+       var pieCtx = document.getElementById("user-done-chart").getContext("2d");
+       if (window.userDone) {
+        window.userDone.destroy();
+       }
+       var backgroundColors = generateRandomColor(count.length)
+       window.userDone = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: count,
+                    backgroundColor: backgroundColors
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+          legend: {
+            display: true,
+			labels: {
+				color: 'white',
+			}
+          }
+        },
+                title: {
+                    display: true,    
+                    text: 'Customer Counts by Lastname'
+                }
+            }
+        }); 
+        function generateRandomColor(length) {
+  var colors = [];
+  for (var i = 0; i < length; i++) {
+    var color = 'rgba(' + Math.floor(Math.random() * 256) + ', '
+                        + Math.floor(Math.random() * 256) + ', '
+                        + Math.floor(Math.random() * 256) + ', 0.8)';
+    colors.push(color);
+  }
+  return colors;
+}   
+       
+      }
+    });
+  }
   function scheduleDoneChart() {
     $.ajax({
       url: '../php/dboardProcess.php',

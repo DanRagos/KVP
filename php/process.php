@@ -21,7 +21,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 						<td>
                          <div class="d-flex px-2 py-1">
                           <div>
-                            <img src="../assets/img/small-logos/machine-1.svg" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
+                            <img src="'.$row['imglink'].'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
                           </div>
                           <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">'.$row['mem_id'].'</h6>

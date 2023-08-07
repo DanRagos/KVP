@@ -637,6 +637,12 @@ public function countSchedUser($stmt) {
 	$stmt->execute([]);
 	return $stmt->fetchColumn();
 }
+public function countUserScheduleDone($stmt) {
+	$sql = $stmt;
+	$stmt= $this->conn->prepare($sql);
+	$stmt->execute([]);
+	return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 public function getUserServ($client_id){
 	$sql = "SELECT ud.firstname AS FirstName, SUM(CASE WHEN st.schedule_type = 1 THEN 1 ELSE 0 END) AS TotalCount FROM users ud 

@@ -172,4 +172,20 @@ if (isset($_GET['action']) && $_GET['action']=='getScheduleDoneChart') {
 		'sv'=>$sv
 	));
 }
+if (isset($_GET['action']) && $_GET['action']=='getUserScheduleDoneChart') {
+	$resultsArray = array();
+	$month = 1;
+	$year = date('Y');
+		$stmt = "SELECT COUNT(schedule.schedule_id)as totalCount, users.firstname 
+		FROM schedule INNER JOIN user_sched on schedule.schedule_id = user_sched.uid 
+		LEFT JOIN users on user_sched.uid = users.mem_id WHERE user_sched.us_status = 1 GROUP BY users.firstname;";
+	$result = $client->countUserScheduleDone($stmt);
+	foreach($result as $row){
+		$resultsArray [] = array(
+			'firstname'=> $row['firstname'],
+			'totalCount'=> $row['totalCount']
+		);
+	}
+	echo json_encode($resultsArray);
+}
 ?>
