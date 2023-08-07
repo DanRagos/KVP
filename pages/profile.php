@@ -83,7 +83,7 @@ include '../comp/static_modal.php';
                 </li>
                 <li class="nav-item" id="scheduleTab">
                   <a class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" href="javascript:;" role="tab" aria-selected="false">
-                    <i class="material-icons text-lg position-relative">settings</i>
+                    <i class="material-icons text-lg position-relative">event_available</i>
                     <span class="ms-1">Schedule</span>
                   </a>
                 </li>
@@ -143,12 +143,12 @@ include '../comp/static_modal.php';
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">
                                 <div class="chart">
-                                    <canvas id="line-graph" class="chart-canvas" height="200"></canvas>
+                                    <canvas id="chart-line-tasks" class="chart-canvas" height="200"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body">
-                            <h6 class="mb-0 ">Serviced Done</h6>
+                            <h6 class="mb-0 ">Your Serviced Done</h6>
                           
                             <hr class="dark horizontal">
                             <div class="d-flex ">
@@ -175,15 +175,38 @@ include '../comp/static_modal.php';
           </div>
         </div>
         <div class="row" id="scheduleContent" style="display:none;">
+        <div class="row ">
+        <div class="col-2 mb-2">
+        <select  id="viewSelect" class="form-select form-select-md" aria-label=".form-select-sm example">
+  <option selected value=1 >Calendar</option>
+  <option value=2>Table</option>
+ 
+</select>
+      </div>
+      </div>
           <div class="row">
         <div class="col-6 d-flex justify-content-center align-items-center">
           <div id="calendar"style="width: 100%; height:100%;" >  </div>
+          <div class="card my-4" id="tableCalendar" style="display:none">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+              <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                <h6 class="text-white text-capitalize ps-3">Your Service Schedule</h6>
+              </div>
+			
+            </div>
+            <div class="card-body">
+              <div id ="tableCalendarContent" class="table-responsive p-0">
+             
+                
+              </div>
+            </div>
+          </div>
 </div>  
 <div class="col-6">
           <div class="card my-4">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
               <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                <h6 class="text-white text-capitalize ps-3">Service Done</h6>
+                <h6 class="text-white text-capitalize ps-3">Your Service Done</h6>
               </div>
 			
             </div>
@@ -289,8 +312,9 @@ include '../comp/static_modal.php';
  $(document).ready(function(){
     var notifCount = 5;
     taskDone();
-
+    showCalendar();
     getNotifications(notifCount);
+    schedUserDone();
   
     $('#homeTab').click(function(){
         $('#scheduleContent').hide();
@@ -309,6 +333,22 @@ include '../comp/static_modal.php';
         $('#scheduleContent').hide();
         $('#settingContent').show();
         $('#homeContent').hide();
+    });
+
+
+    $(document).on('change', '#viewSelect', function (){
+      if ($(this).val()== 1){
+        showSchedules();
+        $('#calendar').show();
+        $('#tableCalendar').hide();
+      }
+        else {
+          $('#calendar').hide();
+          showCalendar();
+        $('#tableCalendar').show();
+
+        
+      }
     });
 
     //Ajax for Notification 
@@ -462,10 +502,7 @@ function taskDone() {
 		var table= $('#user_task').DataTable({
 					 stateSave: true,
 					 processing: true,
-					 serverSide: true,
-           
-          
-         
+					 serverSide: true,    
 					ajax: {
 					url: '../php/ssp_list.php',
 					data: {db : db, user_id:user_id},
@@ -613,7 +650,147 @@ $("body").on("click",".viewPms", function(e) {
   }
         });
 
-        
+        function schedUserDone() {
+            let user_id = <?php echo $id; ?>;
+            var data;
+            $.ajax ({
+                url:'../php/process.php',
+                method: 'GET',
+                data:{user_id:user_id,
+                    action:'getUserSchedStats'},
+                success:function(response){
+                    console.log(response);
+                    data = JSON.parse(response);
+
+                    console.log(data.pm);
+
+                    if (window.lineGraph) {
+window.lineGraph.destroy();
+}
+                    var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
+            var labels = [];
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+           window.lineGraph =  new Chart(ctx3, {
+                type: "line",
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
+                        "Nov", "Dec"
+                    ],
+                    datasets: [{
+                            label: "Preventive Maintenance",
+                            tension: 0,
+                            borderWidth: 0,
+                            pointRadius: 5,
+                            pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                            pointBorderColor: "transparent",
+                            borderColor: "blue",
+                            borderWidth: 4,
+                            backgroundColor: "transparent",
+                            fill: true,
+                            data: data.pm,
+                            maxBarThickness: 2
+
+                        }, {
+                            label: "Service Call",
+                            tension: 0,
+                            borderWidth: 0,
+                            pointRadius: 5,
+                            pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                            pointBorderColor: "transparent",
+                            borderColor: "green",
+                            borderWidth: 4,
+                            backgroundColor: "transparent",
+                            fill: true,
+                            data: data.sv,
+                            maxBarThickness: 2
+                        }
+
+
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'white',
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                drawBorder: false,
+                                display: true,
+                                drawOnChartArea: true,
+                                drawTicks: false,
+                                borderDash: [5, 5],
+                                color: 'rgba(255, 255, 255, .2)'
+                            },
+                            ticks: {
+                                display: true,
+                                color: '#f8f9fa',
+                                padding: 10,
+                                font: {
+                                    size: 14,
+                                    weight: 300,
+                                    family: "Roboto",
+                                    style: 'normal',
+                                    lineHeight: 2
+                                },
+                            }
+                        },
+                        x: {
+                            grid: {
+                                drawBorder: false,
+                                display: false,
+                                drawOnChartArea: false,
+                                drawTicks: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                display: true,
+                                color: '#f8f9fa',
+                                padding: 10,
+                                font: {
+                                    size: 14,
+                                    weight: 300,
+                                    family: "Roboto",
+                                    style: 'normal',
+                                    lineHeight: 2
+                                },
+                            }
+                        },
+                    },
+                },
+            });
+
+                }
+            });
+          }
+function showCalendar() {
+  let user_id = <?php echo $id; ?>;
+  $.ajax({
+    url: '../php/process.php',
+    method: 'GET',
+    data: {
+      action: 'display_schedule_table',
+      user_id: user_id
+    },
+    success: function (response){
+      console.log(response);
+      $('#tableCalendarContent').html(response);
+      $('#tableCalendarData').DataTable();
+    }
+  });
+}        
 function showSchedules(initialDate) {
     let user_idNotif = <?php echo $id; ?>;
 		$.ajax ({

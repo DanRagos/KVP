@@ -149,14 +149,14 @@ require_once '../php/session.php';
     </div>
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
       <div class="card">
-        <a type="button" data-bs-toggle="modal" data-bs-target="#scheduledModal">
+        <a id="resolvedBtn" type="button" data-bs-toggle="modal" data-bs-target="#resolved">
           <div class="card-header p-3 pt-5">
             <div class="icon icon-lg icon-shape bg-gradient-success shadow-primary text-center border-radius-xl mt-n4 position-absolute">
             <i class="material-icons-round opacity-10">event_available</i>
             </div>
             <div class="text-end pt-1">
               <h1 class="text-sm mb-0 text-capitalize">Resolved</h1>
-              <h1 class="mb-2" id="resolved">...</h1>
+              <h1 class="mb-2" id="resolvedH1">...</h1>
             </div>
           </div>
           <hr class="dark horizontal my-0">
@@ -168,7 +168,7 @@ require_once '../php/session.php';
     </div>
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
       <div class="card">
-        <a type="button" data-bs-toggle="modal" data-bs-target="#scheduledModal">
+        <a type="button" id="scheduleMonthBtn"data-bs-toggle="modal" data-bs-target="#scheduledMonthModal">
           <div class="card-header p-3 pt-5">
             <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
               <i class="fa-solid fa-calendar opacity-10"></i>
@@ -196,12 +196,12 @@ require_once '../php/session.php';
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-transparent">
               <div class="bg-gradient-primary shadow-success border-radius-lg py-3 pe-1">
 			  <div class="chart">
-                  <canvas id="chart-line" class="chart-canvas" height="230"></canvas>				  
+                  <canvas id="schedule-done-chart" class="chart-canvas" height="230"></canvas>				  
                 </div>
               </div>
             </div>
             <div class="card-body">
-              <h6 class="mb-0 "> Calibration Grade </h6>
+              <h6 class="mb-0 ">Schedule Done </h6>
               <p class="text-sm "> <span class="font-weight-bolder"></span> </p>
               <hr class="dark horizontal">
 
@@ -269,6 +269,8 @@ require_once '../php/session.php';
   <script>
   $(document).ready(function(){
     //Modals
+
+    scheduleDoneChart();
     $(document).on('click', '#pendingSvBtn', function(){
       $.ajax({
         url: '../php/dboardProcess.php?action=pendingSvModal', // Pass the action as a query parameter
@@ -296,6 +298,28 @@ require_once '../php/session.php';
         }
       });
     });
+    $(document).on('click', '#resolvedBtn', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=resolvedModal', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+          console.log(response);
+              $('.resolvedTableContent').html(response);
+              $('#resolvedTable').DataTable();
+        }
+      });
+    });
+    $(document).on('click', '#scheduleMonthBtn', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=scheduleModalMonth', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+          console.log(response);
+              $('.scheduleMonthTableContent').html(response);
+              $('#scheduleMonthTable').DataTable()     
+        }
+      });
+    });
 	  setInterval(loadDashboard, 3000);
 	  
 	  function loadDashboard () {
@@ -313,92 +337,133 @@ require_once '../php/session.php';
 			  $('#pms').text(json.pms);
 			   $('#pPms').text(json.pendPms);
 			   $('#pSvCall').text(json.pendSv);
-			   $('#resolved').text(json.resolved);
+			   $('#resolvedH1').text(json.resolved);
          $('#scheduleMonth').text(json.schedule);
 			 
 		  }
 	  });
 	  }
   });
-    var ctx = document.getElementById("chart-bars").getContext("2d");
 
-    new Chart(ctx, {
-      type: "bar",
+  function scheduleDoneChart() {
+    $.ajax({
+      url: '../php/dboardProcess.php',
+      method: 'GET',
       data: {
-        labels: ["Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
-        datasets: [{
-          label: "Sales",
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "rgba(255, 255, 255, .8)",
-          data: [2000, 10500, 30000, 4500, 15000, 8000, 9000],
-          maxBarThickness: 6
-        }, ],
+        action: 'getScheduleDoneChart'
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5],
-              color: 'rgba(255, 255, 255, .2)'
-            },
-            ticks: {
-              suggestedMin: 0,
-              suggestedMax: 500,
-              beginAtZero: true,
-              padding: 10,
-              font: {
-                size: 14,
-                weight: 300,
-                family: "Roboto",
-                style: 'normal',
-                lineHeight: 2
-              },
-              color: "#fff"
-            },
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5],
-              color: 'rgba(255, 255, 255, .2)'
-            },
-            ticks: {
-              display: true,
-              color: '#f8f9fa',
-              padding: 10,
-              font: {
-                size: 14,
-                weight: 300,
-                family: "Roboto",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-        },
-      },
+      success: function(response){
+        data = JSON.parse(response);
+      
+        if (window.lineTask) {
+window.lineTask.destroy();
+}
+        var ctx = document.getElementById("schedule-done-chart").getContext("2d");
+
+   window.lineTask =  new Chart(ctx, {
+      type: "line",
+      data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
+                        "Nov", "Dec"
+                    ],
+                    datasets: [{
+                            label: "Preventive Maintenance",
+                            tension: 0,
+                            borderWidth: 0,
+                            pointRadius: 5,
+                            pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                            pointBorderColor: "transparent",
+                            borderColor: "blue",
+                            borderWidth: 4,
+                            backgroundColor: "transparent",
+                            fill: true,
+                            data: data.pm,
+                            maxBarThickness: 2
+
+                        }, {
+                            label: "Service Call",
+                            tension: 0,
+                            borderWidth: 0,
+                            pointRadius: 5,
+                            pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                            pointBorderColor: "transparent",
+                            borderColor: "green",
+                            borderWidth: 4,
+                            backgroundColor: "transparent",
+                            fill: true,
+                            data: data.sv,
+                            maxBarThickness: 2
+                        }
+
+
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'white',
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                drawBorder: false,
+                                display: true,
+                                drawOnChartArea: true,
+                                drawTicks: false,
+                                borderDash: [5, 5],
+                                color: 'rgba(255, 255, 255, .2)'
+                            },
+                            ticks: {
+                                display: true,
+                                color: '#f8f9fa',
+                                padding: 10,
+                                font: {
+                                    size: 14,
+                                    weight: 300,
+                                    family: "Roboto",
+                                    style: 'normal',
+                                    lineHeight: 2
+                                },
+                            }
+                        },
+                        x: {
+                            grid: {
+                                drawBorder: false,
+                                display: false,
+                                drawOnChartArea: false,
+                                drawTicks: false,
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                display: true,
+                                color: '#f8f9fa',
+                                padding: 10,
+                                font: {
+                                    size: 14,
+                                    weight: 300,
+                                    family: "Roboto",
+                                    style: 'normal',
+                                    lineHeight: 2
+                                },
+                            }
+                        },
+                    },
+                },
     });
+      }
+    });
+  }
+    
 
 
     var ctx2 = document.getElementById("chart-line").getContext("2d");

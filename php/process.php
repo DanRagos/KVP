@@ -86,6 +86,63 @@ foreach($result as $row){
 }
 echo json_encode($sched_res);
 }
+
+if (isset($_GET['action'])&& $_GET['action'] == 'display_schedule_table'){
+	$user_id = $_GET['user_id'];
+	$result = $client->display_schedule_user($user_id);
+	$output ='';
+	$output .='
+	<table id="tableCalendarData" class="table-responsive">
+        <thead>
+            <tr>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule No. </th>
+					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Brand / Model</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Reported Problem</th>
+					  
+					
+            </tr>
+        </thead>
+ 
+    <tbody>';
+foreach($result as $row) {
+	$type=($row['schedule_type']==1)? "PMS" : "SV";
+	$color = $row['schedule_type'] == 1 ? "primary" :  "success";
+	$output .= '
+		<tr>
+		<td> <div class="d-flex px-2 py-1">
+	<div class="d-flex flex-column justify-content-center">
+	<h6 class="text-center mb-0 text-sm">'.$row['schedule_id'].'</h6>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['client_name'].'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['brand'].' / '.$row['model'].'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="badge badge-sm bg-gradient-'.$color.'">'.$type.'</h5>
+	</div>
+		</td>
+			<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="badge badge-sm bg-gradient-info text-center mb-0">'.date('M-d-Y',strtotime($row['schedule_date'])).'</h5>
+	</div>
+		</td>
+		<td> <div class="d-flex flex-column justify-content-center">
+	<h5 class="text-center text-xs text-secondary mb-0">'.$row['rep_problem'].'</h5>
+	</div>
+		</td>
+		</tr>
+	';
+}
+$output .='</tbody></table>';
+	echo $output;
+}
 //show sched details
 if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
 	$id = $_POST['id'];
@@ -1215,8 +1272,33 @@ print_r( $update_accomp);
 
 
 }
+if(isset($_GET['action'])&& $_GET['action']== 'getUserSchedStats'){
+	$user_id = $_GET['user_id'];
+	$month = 1;
+	$year = date('Y');
+	$sv = array();
+	$pm = array();
+	while ($month <=12){
+		$stmt = "SELECT COUNT(accomplished_schedule.id) AS taskDone from accomplished_schedule 
+		LEFT JOIN schedule on accomplished_schedule.schedule_id = schedule.schedule_id INNER JOIN user_sched ON schedule.schedule_id = user_sched.sched_id 
+		WHERE schedule.schedule_type = '1' AND user_sched.uid = $user_id AND user_sched.us_status = '1' AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year
+		";
+		array_push($pm, $client->countSchedUser($stmt));
+		$stmt= "SELECT COUNT(accomplished_schedule.id) AS taskDone from accomplished_schedule 
+		LEFT JOIN schedule on accomplished_schedule.schedule_id = schedule.schedule_id 
+		INNER JOIN user_sched ON schedule.schedule_id = user_sched.sched_id 
+		WHERE schedule.schedule_type = '2' AND user_sched.uid = $user_id AND user_sched.us_status = '1' AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year";
+		array_push($sv, $client->countSchedUser($stmt));
+		$month++;
+	}
+	echo json_encode( array(
+		'pm'=> $pm,
+		'sv'=> $sv
+	));
 
+}
 if (isset($_GET['action'])&& $_GET['action']=='getSchedStats') {
+	
 	$client_id = $_GET['client_id'];
 	$month = 1;
 	$year = date('Y');
@@ -1230,8 +1312,7 @@ if (isset($_GET['action'])&& $_GET['action']=='getSchedStats') {
 		
 		array_push($pm, $client->countSchedClient($stmt));
 		$stmt = "SELECT COUNT(schedule.schedule_id)as schedId from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
-		WHERE service_call.client_id  = $client_id and schedule.status = 2 
-		AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year";
+		WHERE service_call.client_id  = $client_id and schedule.status = 2";
 		array_push($sv, $client->countSchedClient($stmt));
 		$month++;
 	}
@@ -1297,7 +1378,7 @@ if (isset($_GET['action'])&& $_GET['action']=='getUserNotifications'){
 	foreach ($notifs as $notif){
 		$output .= '  <li class="list-group-item border-0 d-flex align-items-center px-0 mb-2 pt-0">
 		<div class="avatar me-3">
-		  <img src="../assets/img/kal-visuals-square.jpg" alt="kal" class="border-radius-lg shadow">
+		  <img src="../assets/img/user_notif.png" alt="kal" class="border-radius-lg shadow">
 		</div>
 		<div class="d-flex align-items-start flex-column justify-content-center">
 		  <h6 class="mb-0 text-sm">'.$notif['title'].'</h6>

@@ -179,7 +179,7 @@ WHERE schedule.status != 2;";
 		return $result;
 	}
 	public function display_schedule_user ($user_id) {
-		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, COALESCE(contract.brand, service_call.brand) 
+		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type,service_call.rep_problem,  COALESCE(contract.brand, service_call.brand) 
 		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
@@ -191,11 +191,16 @@ WHERE schedule.status != 2;";
 	}
 
 	public function display_schedule_month (){
-		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, COALESCE(contract.brand, service_call.brand) 
-		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
-		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
-		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
-		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.schedule_date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0 ";
+		$sql = "SELECT schedule.*, COALESCE(clients.client_name, service_call.guest_name, 
+		COALESCE((SELECT clients.client_name FROM clients 
+		WHERE clients.client_id = service_call.client_id), 'Fallback Client Name')) AS client_name, 
+		COALESCE(clients.client_address, service_call.guest_address,
+		 COALESCE((SELECT clients.client_address FROM clients where clients.client_id = service_call.client_id), 'Null'))as client_address,
+		  COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') AS imglink, COALESCE(contract.brand, service_call.brand) AS brand, 
+		  COALESCE(contract.model, service_call.model) AS model FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id 
+		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN clients ON contract.client_id = clients.client_id 
+		  WHERE schedule.schedule_date 
+		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0;";
 $stmt = $this ->conn ->prepare($sql);
 $stmt -> execute([]);
 $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -213,6 +218,19 @@ return $result;
 	public function display_pend_pm (){
 		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
 		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute([]);
+		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
+	public function display_resolved_month (){
+		$sql = "SELECT schedule.*, accomplished_schedule.accomp_date, clients.imglink, clients.client_address, COALESCE(clients.client_name, service_call.guest_name) as client_name, 
+		COALESCE(contract.brand, service_call.brand)AS brand, COALESCE(contract.model, service_call.model) AS model
+		FROM schedule LEFT JOIN accomplished_schedule ON schedule.schedule_id = accomplished_schedule.schedule_id 
+		LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN clients ON contract.client_id = clients.client_id
+		 LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id WHERE schedule.status = 2
+		  AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
+		AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE);";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -608,6 +626,12 @@ public function sendNotificationsToClient($notifCount) {
 }
 
 public function countSchedClient($stmt) {
+	$sql = $stmt;
+	$stmt= $this->conn->prepare($sql);
+	$stmt->execute([]);
+	return $stmt->fetchColumn();
+}
+public function countSchedUser($stmt) {
 	$sql = $stmt;
 	$stmt= $this->conn->prepare($sql);
 	$stmt->execute([]);
