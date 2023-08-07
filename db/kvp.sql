@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 04, 2023 at 09:04 AM
+-- Generation Time: Aug 07, 2023 at 08:20 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 8.0.25
 
@@ -304,17 +304,6 @@ CREATE TABLE `service_call` (
   `rep_problem` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `service_call`
---
-
-INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`) VALUES
-(1, 1, 1, 0, NULL, NULL, 2, 'GE', 'Test', 'None'),
-(2, 0, 0, 0, 'Guest ', 'Tanza, Cavite', 7, 'GE', 'XD', 'Test'),
-(3, 2, 1, 1, NULL, NULL, 3, 'GE', 'Test', 'Test'),
-(4, 1, 34, 0, NULL, NULL, 2, 'GE', 'Test', 'CTSC'),
-(5, 0, 0, 0, 'TEST', 'Test, Cavite', 7, 'EG', 'Test', 'TEst');
-
 -- --------------------------------------------------------
 
 --
@@ -338,14 +327,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`mem_id`, `firstname`, `lastname`, `username`, `email`, `password`, `type`, `imglink`, `coverPhoto`) VALUES
-(1, 'David Daniel      ', 'Ragos', 'davidragos', 'dandanragos@gmail.com', 'Dandan2x!', 'admin\r\n', '../uploads/sample.jpg', '../uploads/cover/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg'),
-(2, 'Alliah Grace            ', 'Dolors', 'alliahdolor', 'alliahdolor@gmail.com', 'Dandan2x!', 'admin', '../userpics/images.jpg', ''),
-(3, 'Test User       ', 'Ragosss', '', 'test@gmail.com', 'Dandan2x!', 'Viewer', '../userpics/2.jpg', ''),
-(8, 'Alliah  ', 'Dolorss', 'alliahxD', 'alliahdolor@yahoo.com', 'Alliah089!', 'Viewer', '../userpics/avatar.png', ''),
-(9, 'Test', 'Dolor', 'dolortest', 'dolortest@gmail.com', 'Dandan2x!', 'Viewer', '../userpics/Sample_User_Icon.png', ''),
-(10, 'Alliah Grace', 'Dolor', 'alliahdolor', 'alliahdolor@gmail.com', 'Alliahdolor123', 'Viewer', '../userpics/Sample_User_Icon.png', ''),
-(11, 'Visitor', 'Ragos', 'visitor123', 'visitor@gmail.com', '12345678', 'Viewer', '../userpics/Profile-Male-PNG.png', ''),
-(12, 'galie', 'laza', 'galieboy', 'lazagalie009@gmail.com', '1234', 'Admin', '../userpics/mtb.jpg', '');
+(1, 'Kvp', 'Admin', 'admin', 'admin@gmail.com', 'admin', 'Admin', '../uploads/sample.jpg', '../uploads/coverVan_Gogh_-_Starry_Night_-_Google_Art_Project.jpg');
 
 -- --------------------------------------------------------
 
@@ -521,13 +503,13 @@ ALTER TABLE `schedule`
 -- AUTO_INCREMENT for table `service_call`
 --
 ALTER TABLE `service_call`
-  MODIFY `sv_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `sv_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `mem_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `mem_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `user_notification`
