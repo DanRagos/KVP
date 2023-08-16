@@ -11,6 +11,7 @@
       <table id="pendSvTable" class="table align-items-center justify-content-center" >
         <thead>
                     <tr>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Type</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
@@ -42,6 +43,7 @@
       <table id="pendPmTable" class="table align-items-center justify-content-center" >
         <thead>
                     <tr>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Type</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
@@ -65,18 +67,20 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="resolvedLbl">Delayed PM</h5>
+        <h5 class="modal-title" id="resolvedLbl">Resolved</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-      <div class="table-responsive">
+      <div class="table-responsive"  style="max-width:100%;">
       <table id="resolvedTable" class="table align-items-center justify-content-center" >
         <thead>
                     <tr>
+                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Type</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
-					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+					  <th class="text-center text-uppercase text-seasdcondary text-xxs font-weight-bolder opacity-7">Service Date</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
                     </tr>
                   </thead>
                   <tbody class="resolvedTableContent"> 
@@ -104,7 +108,7 @@
       <table id="scheduleMonthTable" class="table align-items-center justify-content-center" >
         <thead>
                     <tr>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Service No.</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule No.</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Type</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>

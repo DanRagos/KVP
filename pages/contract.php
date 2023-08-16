@@ -26,6 +26,12 @@
     <title>
     Dashboard
   </title>
+  <style>
+    .no_margin {
+            margin-bottom: 0rem;
+            margin-top: 0rem;
+        }
+    </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">

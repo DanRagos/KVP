@@ -51,4 +51,11 @@ $user = new Auth ();
 			}
 			
 	}
+
+	//DElete
+
+	if (isset($_POST['action'])&& $_POST['action']== 'delete'){
+		$user->delete_user($_POST['id']);
+		echo 'done';
+	}
 ?>

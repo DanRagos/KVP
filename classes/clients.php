@@ -224,13 +224,8 @@ return $result;
 		return $result;
 	}
 	public function display_resolved_month (){
-		$sql = "SELECT schedule.*, accomplished_schedule.accomp_date, clients.imglink, clients.client_address, COALESCE(clients.client_name, service_call.guest_name) as client_name, 
-		COALESCE(contract.brand, service_call.brand)AS brand, COALESCE(contract.model, service_call.model) AS model
-		FROM schedule LEFT JOIN accomplished_schedule ON schedule.schedule_id = accomplished_schedule.schedule_id 
-		LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN clients ON contract.client_id = clients.client_id
-		 LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id WHERE schedule.status = 2
-		  AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
-		AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE);";
+		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, clients.imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
+		AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);

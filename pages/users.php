@@ -111,7 +111,7 @@
 					  console.log(response);
 					  $("#register-btn").text('Sign Up'); 
 						if(response ==='register'){
-							swal("User added", "", "success");
+							swal.fire("User added", "", "success");
 							$("#register-form")[0].reset();
 							$("#createUser").modal('hide');
 							$("#passError").text('');
@@ -125,6 +125,44 @@
 		  }
         }
       });
+	  $(document).on('click', ".deleteBtn", function (e){
+	let user_id = $(this).attr('data-id');
+		Swal.fire({
+ icon: 'error',
+  title: 'Set this user to INACTIVE?',
+  showCancelButton: true,
+  confirmButtonText: 'Confirm',
+}).then((result) => {
+  /* Read more about isConfirmed, isDenied below */
+  if (result.isConfirmed) {
+	$.ajax({
+    url: '../php/action.php',
+    method: 'POST',
+    data: { id: user_id
+	,action:'delete' }, // Corrected the data object
+    success: function (e) {
+        console.log(e);
+        Swal.fire({
+            icon: 'success',
+            title: 'User Deleted',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+				
+            },
+            willClose: () => {
+                Swal.hideLoading();
+				displayAllUsers();
+            },
+        });
+    }
+});
+
+
+  } 
+})
+	  });
 	//View Details Users
 	$("body").on("click", ".editUserbtn", function(e){
 		e.preventDefault();
@@ -157,7 +195,7 @@
 				method: 'post',
 				data: $("#edit-user-form").serialize()+"&action=update_user",
 				success:function(response){
-					swal("Tool Updated!", "", "success");
+					swal.fire("Tool Updated!", "", "success");
 					$("#edit-user-form")[0].reset();
 					$("#editUser").modal('hide');
 					displayAllUsers();

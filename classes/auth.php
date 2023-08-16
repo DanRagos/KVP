@@ -5,7 +5,7 @@ class Auth extends Db {
 	//register user
 	public function register($firstname,$lastname, $username,$email, $password, $type){
 		$sql = "INSERT INTO `users` (`mem_id`, `firstname`, `lastname`, `username`, `email`, `password`, `type`, `imglink`)
-		VALUES (NULL, :firstname, :lastname, :username, :email, :password, :type, '../userpics/avatar.png');";
+		VALUES (NULL, :firstname, :lastname, :username, :email, :password, :type, '../uploads/user.png');";
 		$stmt = $this ->conn->prepare($sql);
 		$result = $stmt->execute(['firstname' => $firstname,'lastname' => $lastname, 'username' => $username, 'email' =>$email, 'password' => $password, 'type' =>$type]);
 		return $result;
@@ -22,7 +22,7 @@ class Auth extends Db {
 	}
 	// login existing user
 	public function login ($username) {
-		$sql = "SELECT mem_id,username, password from users where username = ?";
+		$sql = "SELECT mem_id,username, password from users where username = ? AND userStatus != 0 ";
 		$stmt = $this ->conn->prepare($sql);
 		$stmt -> execute([$username]);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -38,7 +38,7 @@ class Auth extends Db {
 	}
 	//Display all Users
 	public function showUsers ($id) {
-		$sql = "Select * from users where mem_id != ? " ;
+		$sql = "Select * from users where mem_id != ? AND  userStatus !=0 " ;
 		$stms = $this -> conn ->prepare($sql);
 		 $stms ->execute([$id]);
 		$result = $stms->fetchAll(PDO::FETCH_ASSOC);
@@ -59,6 +59,14 @@ class Auth extends Db {
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['firstname'=>$firstname,'lastname'=>$lastname,'email'=>$email,'password'=>$password,'type'=>$type,'id'=>$id]);
 		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
+		return true;
+		
+	}
+
+	public function delete_user($id) {
+		$sql = "UPDATE users SET userStatus = 0 where mem_id = :id";
+		$stmt = $this -> conn -> prepare($sql);
+		$stmt ->execute(['id'=>$id]);
 		return true;
 		
 	}

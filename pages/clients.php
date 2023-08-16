@@ -29,6 +29,7 @@
       <style>
         .no_margin {
             margin-bottom: 0rem;
+            margin-top: 0rem;
         }
 
     </style>

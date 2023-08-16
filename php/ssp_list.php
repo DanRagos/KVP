@@ -14,7 +14,7 @@ $sql_details = array(
 	 $primaryKey = 'accomp_id';
 	 // DB table to use
 $table = <<<EOT
- (SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule RIGHT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) ORDER BY schedule.schedule_id DESC ) temp
+ (SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) ORDER BY schedule.schedule_id DESC ) temp
 EOT;
 // indexes
 $columns = array(
@@ -70,11 +70,21 @@ array(
 return ($d!==null) ? '<td class ="align-middle text-center text-sm"  "'.strtotime($d).'">
 <span class="badge badge-sm bg-gradient-info">'.date( 'M d, Y', strtotime($d)).'</span>
 </td>':' ' ;}),
+array('db'=> 'withC', 'dt'=> ''), 
+array(
+	'db'        => 'accomp_status',
+	'dt'        => 8,
+	'formatter' => function( $d, $row) {
+		$aStats = ($row['withC'] >0 )? "W/Collection": " ";
+	$status =  ($row['accomp_status'] == 2) ? '<span class="badge badge-sm bg-gradient-success">DONE '. $aStats.'</span>' 
+	: '<span class="badge badge-sm bg-gradient-warning">Unresolved '. $aStats.'</span>' ;
+	return '<td class ="justify-content-center align-middle text-center text-sm"> '.$status.'</td>';
+	}
+),
 
 array(
-
 'db'        => 'accomp_id',
-'dt'        => 8,
+'dt'        => 9,
 'formatter' => function( $d, $row) {
 return
 '<div class ="align-middle text-center text-sm">

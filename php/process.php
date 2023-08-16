@@ -9,7 +9,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 		$output .= '  <table id="table" class="table align-items-center justify-content-center" >
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                      <th class="text-center-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Username</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
@@ -38,10 +38,10 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
                         <p class="text-xs font-weight-bold mb-0">'.$row['type'].'</p>
                  
                       </td>
-					  <td>
+					  <td class="align-middle text-center text-sm">
 					   
 					   <button type="button" id="'.$row['mem_id'].'"data-bs-target = "#editUser" data-bs-toggle="modal" class="btn btn-warning editUserbtn"><i class="material-icons">edit</i></button>
-					   <button type="button" id="'.$row['mem_id'].'"  data-bs-toggle="modal"  class="btn btn-danger deleteBtn"><i class="material-icons">delete</i></button>
+					   <button type="button" data-id="'.$row['mem_id'].'"  data-bs-toggle="modal"  class="btn btn-danger deleteBtn"><i class="material-icons">delete</i></button>
 					  </td>
                     </tr>';
 	}
@@ -391,15 +391,11 @@ else {
 
 else {
 	$check_sv_contract = $client->get_sv_details($sv_id);
-	print_r($check_sv_contract);
 	if ($check_sv_contract['contract_id'] > 0 ) {
 	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
-	print_r($contract_det);
 	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
 	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
-	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;
-	
-		
+	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;	
 	}
 	
 
@@ -407,7 +403,7 @@ else {
 
 $accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC);
 $update_schedule = $client->update_schedule($schedule_id, $status);
-$notif_content = 'Your schedule service no:#'.$schedule_id.' has been verified';
+$notif_content = 'Your schedule no:#'.$schedule_id.' has been verified';
 $notif_title = 'Schedule Service Done';
 $notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $schedule_id);
 foreach ($s_by as $user) {
@@ -713,7 +709,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	$sched_Date = date('M d, Y', strtotime($sv_date));
 	$service_by = explode("," , $_POST['service_by']); 
 	$notif_title = "Service Assigned";
-	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
+	$notif_content = "You have been asigned for schedule no.#$last_id at $sched_Date";
 	$notif_createdAt= date('Y-m-d h:i:s');
 	//Add Notification
 	$last_notif= $client->add_user_notification($notif_title, $notif_content,  0 , $notif_createdAt, 1 , $last_id);
@@ -740,7 +736,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
 	$sched_Date = date('M d, Y', strtotime($sv_date));
 	$service_by = $_POST['service_by1'];
 	$notif_title = "Service Assigned";
-	$notif_content = "You have been asigned for service no.#$last_id at $sched_Date";
+	$notif_content = "You have been asigned for schedule no.#$last_id at $sched_Date";
 	$notif_createdAt= date('Y-m-d h:i:s');
 	//Add Notification
 	$last_notif= $client->add_user_notification($notif_title, $notif_content,  0 , $notif_createdAt, 1 , $last_id);
@@ -846,7 +842,7 @@ foreach ($formDataArray as $formData) {
         // Call the add_pms_sched function to insert the data into the database
         $last_Id =$client-> add_pms_bulk($contract_id, $sched_date, 2);
 		$accomp = $client->accomplished_schedule($last_Id, $formData['serv_date'], ' ', ' ', $formData['diagnosis'], $formData['service_done'],'2', $formData['recomm'], 0);
-			$notif_content = 'Your schedule service no:#'.$last_Id.' has been verified';
+			$notif_content = 'Your schedule no:#'.$last_Id.' has been verified';
 			$notif_title = 'Schedule Service Done';
 			$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $last_Id);
 		foreach ($formData['service_by'] as $user) {
@@ -1025,18 +1021,18 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	<div class="modal-body">
 	<div class="container">
 	<form action="#" method="POST" id="add-contract-form" autocomplete="off">
-	<input type="hidden" name="contract_id" value = '.$result[0]['contract_id'].'>
+	<input type="hidden" name="contract_id" value = '.$result['contract_id'].'>
    <div class="row">
 	 <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Brand :</label>
-	  <input type="text" name="brand" class="form-control" required value='.$result[0]['brand'].'>
+	  <input type="text" name="brand" class="form-control" required value='.$result['brand'].'>
 	</div>
   </div>
   <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Model :</label>
-	  <input type="text"  name="model" class="form-control" required value='.$result[0]['model'].'> 
+	  <input type="text"  name="model" class="form-control" required value='.$result['model'].'> 
 	</div>
   </div>
   
@@ -1045,22 +1041,22 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	  <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Turn Over</label>
-	  <input type="date" class="form-control"name="turn_over" readonly value='.$result[0]['turn_over'].'>
+	  <input type="date" class="form-control"name="turn_over" readonly value='.$result['turn_over'].'>
 	</div>
   </div>
   <div class="col">
   <div class="input-group input-group-static mb-4">
 	<label class="form-">Coverage:</label>
-	<input type="date" class="form-control"name="coverage" required value='.$result[0]['coverage'].' min = '.$result[0]['coverage'].'>
+	<input type="date" class="form-control"name="coverage" required value='.$result['coverage'].' min = '.$result['coverage'].'>
   </div>
 </div>
 </div>';
-if ($result[0]['status'] != '1') {
+if ($result['status'] != '1') {
 $output .='  <div class="row">
 <div class="col">
 <div class="input-group input-group-outline is-filled" >
 <label class="form-label">PMS Count:</label>
-<input type="number" min=1 name="pms_count"  value = '.$result[0]['sv_call'].' class="form-control" required>
+<input type="number" min=1 name="pms_count"  value = '.$result['sv_call'].' class="form-control" required>
 </div>
 </div></div>';
 }
@@ -1257,7 +1253,7 @@ if(isset($_POST['action'])&& $_POST['action']=='updatePms'){
 	$service_by_values = explode(',', $_POST['service_by']);
 	//delete notification, notif_user, and user_shced
 	$remove_notif = $client->remove_notif($sched_id);
-	$notif_content = 'Your schedule service no:#'.$sched_id.' has been verified';
+	$notif_content = 'Your schedule no:#'.$sched_id.' has been verified';
 	$notif_title = 'Schedule Service Done';
 		$notif_id = $client->add_user_notification($notif_title, $notif_content,  0 , date('Y-m-d h:i:s'), 1, $sched_id);
 		foreach ($service_by_values as $user) {

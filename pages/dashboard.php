@@ -155,7 +155,7 @@ require_once '../php/session.php';
             <i class="material-icons-round opacity-10">event_available</i>
             </div>
             <div class="text-end pt-1">
-              <h1 class="text-sm mb-0 text-capitalize">Resolved</h1>
+              <h1 class="text-sm mb-0 text-capitalize">Service Done</h1>
               <h1 class="mb-2" id="resolvedH1">...</h1>
             </div>
           </div>
@@ -273,7 +273,11 @@ require_once '../php/session.php';
         success: function (response){ 
           console.log(response);
               $('.resolvedTableContent').html(response);
-              $('#resolvedTable').DataTable();
+              $('#resolvedTable').DataTable({
+           
+              
+     
+              });
         }
       });
     });

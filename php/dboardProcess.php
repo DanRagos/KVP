@@ -28,6 +28,7 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingSvModal'){
 	foreach($schedules as $row){
 		$output .= '
 		<tr>
+		<td class="text-center">'.$row['schedule_id'].'</td>
 		<td>
 		 <div class="d-flex px-2 py-1">
 		  <div>
@@ -40,7 +41,9 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingSvModal'){
 		</div>
 		</div>
 	  </td>
-	  <td class="text-center">SV</td>
+	  <td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-success">SV</p>
+	</td>
 	  <td class="align-middle text-center text-sm">
 		<h6 class="mb-0 text-sm text-center">'.$row['brand'].'</h6>
 		<p class="text-center text-xs font-weight-bold mb-0">'.$row['model'].'</p>
@@ -60,6 +63,7 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingPmModal'){
 	foreach($schedules as $row){
 		$output .= '
 		<tr>
+		<td class="text-center">'.$row['schedule_id'].'</td>
 		<td>
 		 <div class="d-flex px-2 py-1">
 		  <div>
@@ -72,7 +76,9 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingPmModal'){
 		</div>
 		</div>
 	  </td>
-	  <td class="text-center">PM</td>
+	  <td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-primary">PM</p>
+	</td>
 	  <td class="align-middle text-center text-sm">
 		<h6 class="mb-0 text-sm text-center">'.$row['brand'].'</h6>
 		<p class="text-center text-xs font-weight-bold mb-0">'.$row['model'].'</p>
@@ -90,8 +96,16 @@ if(isset($_GET['action'])&& $_GET['action']=='resolvedModal'){
 	$output ='';
 	$schedules = $client->display_resolved_month();
 	foreach($schedules as $row){
+		$schedType = ($row['schedule_type'] == 1) ? "PMS":"SV"; 
+		$color = ($row['schedule_type'] == 1) ? "primary":"success"; 
+		$stats = ($row['accomp_status'] == 2) ? "Done":"Unresolved";
+		$statsC = ($row['withC'] == 1) ? "W/Collection":""; 
+		$statsColor = ($row['accomp_status'] == 2) ? "success":"warning";
+		$imglink = ($row['imglink']) ? $row['imglink'] : '../image/uploads/mv santiago.webp';
 		$output .= '
 		<tr>
+		<td class="text-center">'.$row['schedule_id'].'</td>
+		
 		<td>
 		 <div class="d-flex px-2 py-1">
 		  <div>
@@ -104,7 +118,9 @@ if(isset($_GET['action'])&& $_GET['action']=='resolvedModal'){
 		</div>
 		</div>
 	  </td>
-	  <td class="text-center">PM</td>
+	  <td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-'.$color.'">'.$schedType.'</p>
+	</td>
 	  <td class="align-middle text-center text-sm">
 		<h6 class="mb-0 text-sm text-center">'.$row['brand'].'</h6>
 		<p class="text-center text-xs font-weight-bold mb-0">'.$row['model'].'</p>
@@ -112,6 +128,9 @@ if(isset($_GET['action'])&& $_GET['action']=='resolvedModal'){
 	  </td>
 	  <td class="align-middle text-center text-sm">
 	  <p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['accomp_date'])).'</p>
+	</td>
+	<td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-'.$statsColor.'">'.$stats.' '.$statsC.'</p>
 	</td>
 	</tr>';
 
@@ -122,13 +141,16 @@ if(isset($_GET['action'])&& $_GET['action']=='scheduleModalMonth'){
 	$output ='';
 	$schedules = $client->display_schedule_month();
 	foreach($schedules as $row){
+		$schedType = ($row['schedule_type'] == 1) ? "PMS":"SV"; 
+		$color = ($row['schedule_type'] == 1) ? "primary":"success"; 
+		$imglink = ($row['imglink']) ? $row['imglink'] : '../image/uploads/mv santiago.webp';
 		$output .= '
 		<tr>
 		<td class="text-center">'.$row['schedule_id'].'</td>
 		<td>
 		 <div class="d-flex px-2 py-1">
 		  <div>
-			<img src="'.$row['imglink'].'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
+			<img src="'.$imglink.'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
 		  </div>
 		  <div class="d-flex flex-column justify-content-center">
 			<h6 class="text-center mb-0 text-sm clientName">'.$row['client_name'].'</h6>
@@ -137,7 +159,9 @@ if(isset($_GET['action'])&& $_GET['action']=='scheduleModalMonth'){
 		</div>
 		</div>
 	  </td>
-	  <td class="text-center">PM</td>
+	  <td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-'.$color.'">'.$schedType.'</p>
+	</td>
 	  <td class="align-middle text-center text-sm">
 		<h6 class="mb-0 text-sm text-center">'.$row['brand'].'</h6>
 		<p class="text-center text-xs font-weight-bold mb-0">'.$row['model'].'</p>

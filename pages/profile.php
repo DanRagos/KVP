@@ -29,6 +29,10 @@ include '../comp/static_modal.php';
   .viewMore:hover {
     cursor: pointer;
   }
+  .no_margin {
+	  margin-bottom: 0rem;
+  }
+
 </style>
 </head>
 
@@ -185,7 +189,7 @@ include '../comp/static_modal.php';
       </div>
       </div>
           <div class="row">
-        <div class="col-6 d-flex justify-content-center align-items-center">
+        <div class="col-6 d-flex justify-content-center align-items-start">
           <div id="calendar"style="width: 100%; height:100%;" >  </div>
           <div class="card my-4" id="tableCalendar" style="display:none">
             <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
@@ -208,14 +212,13 @@ include '../comp/static_modal.php';
               <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
                 <h6 class="text-white text-capitalize ps-3">Your Service Done</h6>
               </div>
-			
             </div>
             <div class="card-body px-0 pb-2">
               <div class="table-responsive p-0">
-              <table id="user_task" class="table align-items-center justify-content-center table-responsive" style="max-width:300px;max-height:300px;" >
+              <table id="user_task" class="table align-items-center justify-content-center table-responsive" >
         <thead>
             <tr>
-					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
 					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Reported Problem</th>

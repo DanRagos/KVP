@@ -25,7 +25,12 @@
     Dashboard
   </title>
  
- 
+ <style>
+  .no_margin {
+            margin-bottom: 0rem;
+            margin-top: 0rem;
+        }
+  </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">
@@ -80,14 +85,15 @@
 		 <table id="example" class="table align-items-center justify-content-center table-responsive" style="width:100%;" >
         <thead>
             <tr>
-					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
 					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Address</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Brand</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Model</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Model</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Reported Problem</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">PMS/SV Date</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
 					 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th> 
             </tr>
         </thead>
