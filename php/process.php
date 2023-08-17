@@ -181,13 +181,8 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
                 </div>
                 <div class="modal-footer rounded-0">
                     <div class="text-end">
-                        <button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
-                        <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>
-                        ';
-						if ($result['schedule_type'] == '2') {
-						$output .= '	
-						<button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button> ';
-						}
+                         ';
+						
 						$output.='
 						<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
                     </div>
@@ -497,8 +492,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_clients'){
 					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#addContract" data-bs-toggle="modal" class="btn btn-primary no_margin addContractBtn" ><i class="material-icons">add</i></button>
 					   <button type="button" id="'.$row['client_id'].'"data-bs-target = "#editClient" data-bs-toggle="modal" class="btn btn-warning no_margin editClientBtn"><i class="material-icons">edit</i></button>
 					   <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Profile"> <button type="button" data-id="'.$row['client_id'].'" class="btn btn-secondary no_margin viewProfile"><i class="fa-solid fa-eye"></i></span></button>
-					   <button type="button" id="'.$row['client_id'].'"  data-bs-toggle="modal"  class="btn btn-danger no_margin deleteBtn"><i class="material-icons">delete</i></button>
-					  </td>
+					   </td>
                     </tr>';
 	}
 	$output .='</tbody> </table>';
@@ -655,7 +649,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_contract'){
 	}
 }
 // Edit Client Details
-if (isset($_POST['client_id'])){
+if (isset($_POST['action'])&& $_POST['action']=='isClient'){
 	$output = '';
 	$id = $_POST['client_id'];
 	$result = $client ->get_contract($id);
@@ -1020,8 +1014,13 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	</div>
 	<div class="modal-body">
 	<div class="container">
-	<form action="#" method="POST" id="add-contract-form" autocomplete="off">
+	<form action="#" method="POST" id="edit-contract-form" autocomplete="off">
 	<input type="hidden" name="contract_id" value = '.$result['contract_id'].'>
+	<input type="hidden" name="cType" value = '.$result['status'].'>
+	<input type="hidden" name="frequency" value = '.$result['frequency'].'>
+	<input type="hidden" name="count" value = '.$result['count'].'>
+	<input type="hidden" name="total" value = '.$result['total'].'>
+	<input type="hidden" name="coverage" value = '.$result['coverage'].'>
    <div class="row">
 	 <div class="col">
 	<div class="input-group input-group-static mb-4">
@@ -1041,13 +1040,13 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	  <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Turn Over</label>
-	  <input type="date" class="form-control"name="turn_over" readonly value='.$result['turn_over'].'>
+	  <input type="input" class="form-control"name="turn_over" readonly value='.date('m/d/Y', strtotime($result['turn_over'])).'>
 	</div>
   </div>
   <div class="col">
   <div class="input-group input-group-static mb-4">
 	<label class="form-">Coverage:</label>
-	<input type="date" class="form-control"name="coverage" required value='.$result['coverage'].' min = '.$result['coverage'].'>
+	<input type="date" class="form-control"name="coverage_input" required value='.$result['coverage'].' min = '.$result['coverage'].'>
   </div>
 </div>
 </div>';
@@ -1066,7 +1065,7 @@ $output .='  <div class="row">
 </div>
 	</div>
 	<div class="modal-footer">
-	<button type="submit" class="btn btn-primary" id="add-contract-btn" >Confirm</button>
+	<button type="submit" class="btn btn-primary" data-id="'.$contract_id.'" id="edit-contract-btn" >Confirm</button>
 	  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 	  
 	</div>
@@ -1308,7 +1307,7 @@ if (isset($_GET['action'])&& $_GET['action']=='getSchedStats') {
 		
 		array_push($pm, $client->countSchedClient($stmt));
 		$stmt = "SELECT COUNT(schedule.schedule_id)as schedId from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
-		WHERE service_call.client_id  = $client_id and schedule.status = 2";
+		WHERE service_call.client_id  = $client_id and schedule.status = 2 AND MONTH(schedule.schedule_date) = $month  AND YEAR(schedule.schedule_date) = $year";
 		array_push($sv, $client->countSchedClient($stmt));
 		$month++;
 	}
@@ -1548,6 +1547,136 @@ if (isset($_POST['action'])&& $_POST['action']=='updateProfileCover'){
 		$client-> edit_profile_cover($uploadFile, $user_id);
 
 		echo $uploadFile;
+}
+if (isset($_POST['action']) && $_POST['action'] == 'update_contract') {
+    $contract_id = $_POST['contract_id'];
+    $brand = $_POST['brand'];
+    $model = $_POST['model'];
+    $turn_over = $_POST['turn_over'];
+    $coverage = $_POST['coverage'];
+    $coverageInput = $_POST['coverage_input'];
+    $sv_count = $_POST['pms_count'];
+    $frequency = $_POST['frequency'];
+    $contractType = $_POST['cType'];
+	$pmCount = $_POST['count'];
+	$pmTotal = $_POST['total'];
+////////////////
+$months = ($frequency == 1) ? "3":  (($frequency)== 2 ? "6":"12");
+$pmsCount = 0;
+$done = true;
+do {
+$turn_over = date('Y-m-d', strtotime("$turn_over + $months months"));
+$pmsCount++;
+}while($turn_over < $coverageInput);
+    try {
+		$checkPmsCountValid = 
+        $coverageTimestamp = strtotime($coverage);
+        $coverageInputTimestamp = strtotime($coverageInput);
+
+        if ($pmsCount<($pmTotal - $pmCount)) {
+            $response = array(
+                'message' => "Invalid coverage input. Please input later dates",
+                'status' => 0,
+				'pmsCount' => $pmsCount
+
+            );
+          
+        } else {
+            // Process the valid input
+            // ...
+			$newTotal = $pmsCount;
+			$newCount = $pmsCount - ($pmTotal - $pmCount);
+			if($newCount == 0){
+				$response = array(
+					'message' => "Success, PMS Count reached so the Contract will expired",
+					'status' => 1,
+					'pmsCount' => $newCount
+
+	
+				);
+				
+			}
+			else {	$response = array(
+                'message' => "Success",
+                'status' => 1,
+				'pmsCount' => $newTotal
+
+            );}
+		
+
+        }
+		echo json_encode($response);
+    } catch (Exception $e) {
+        echo "An error occurred. Please contact the administrator";
+    }
+}
+if (isset($_GET['action'])&& $_GET['action']=='show_contract_acrdn'){
+	$contract_id = $_GET['contract_id'];
+	$status = '';
+	$result = $client->viewPmsContract($contract_id,$status);
+	$output = '';
+			
+    // Generate the accordion content based on the rowData
+// Generate the accordion content based on the rowData
+$output .= '<div class="table-responsive" >
+        <table  class="table test-table " style="width:100%;">
+            <thead>
+                <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Id</th>
+                    <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Date</th>
+                    <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Accomplished Date</th>
+					 <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                </tr>
+            </thead>
+            <tbody  class="align-middle ">';
+foreach ($result as $row) {
+	if ($row['accomp_date']) {
+		$status = 'DONE';
+		$status_style='success';
+		$accomp_date = date('M-d-Y',strtotime($row['accomp_date']));
+		
+	}
+	else {
+		$status = 'NOT DONE';
+		$status_style='danger';
+		$accomp_date = '';
+	}
+	
+    $output .= '
+                <tr>
+                    <td >' . $row['sched_id'] . '</td>
+                    <td class="text-sm font-weight-bolder text-primary">' .date('M-d-Y',strtotime($row['schedule_date'])). '</td>
+                    <td class="text-sm font-weight-bolder text-success">' .$accomp_date . '</td>
+					  <td class="text-sm font-weight-bolder text-'.$status_style.'">' .$status.'</td>
+					  <td class="align-middle text-center text-sm">';
+					  
+					  if ($row['accomp_date']) {
+					  $output .= '
+                                   
+                        <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View MMR Report">
+                            <button type="button" data-id="' . $row['id'] . '"  class="btn btn-secondary no_margin viewContractPmReport ">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </span> ';
+					  }
+                        $output .='<span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit PM Details">
+                            <button data-bs-toggle = "modal" data-bs-target="#edit-pm-modal" type="button" data-id="' . $row['id'] . '" class="btn btn-warning no_margin editPm ">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                        </span>
+                        
+                    </td>
+                </tr>';
+}
+$output .= '
+            </tbody>
+        </table>
+</div>
+';
+
+
+    echo $output;
 }
 ?>
 

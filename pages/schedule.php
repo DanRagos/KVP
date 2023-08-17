@@ -157,7 +157,8 @@ $(document).on('click', '#addSvGModal', function (){
 				$.ajax({
 				url: '../php/process.php',
 				method : 'POST',
-				data: {client_id : client_id},
+				data: {client_id : client_id,
+                action:'isClient'},
 				success: function (response){	
 				$('#machine').html(response);
 				let contract_id1= $('#machine').val();

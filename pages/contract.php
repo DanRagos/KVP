@@ -82,7 +82,8 @@
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover - Coverage</th>
-					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contract</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Frequency</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contract</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. SV Call</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>

@@ -145,7 +145,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContracts') {
    
 	$name =  $result[0]['client_name'];
 	$machine = $result[0]['brand'].'/'.$result[0]['model'];
-
+    $contractFreq = ($result[0]['frequency'] == 1) ? 'Quarterly' : (($result[0]['frequency'] ==2) ? "Semi-Annual": "Annually" );
+    $contractType = ($result[0]['status'] == 1) ? "Installation Warranty": "PMS Contract";
+    $contractDate = date('M d, Y', strtotime($result[0]['turn_over'])).' - '.date('M d, Y', strtotime($result[0]['coverage']));
 		class MYPDF extends TCPDF {
 }
  $obj_pdf = new MYPDF('P', 'mm', 'A4'); 
@@ -192,7 +194,9 @@ $obj_pdf->AddPage();
 				
                 $content .= '</div>';    
 				//$content .= "<hr> </hr>";
-				$content .= '<h4 style= "text-align: center;"> '.$name.'</h4>';
+				$content .= '<h3 style= "text-align: center;"> '.$name.'</h3> 
+                <h4 style="text-align:center" > '.$contractFreq.' - '.$contractType.'</h4>
+                <h5 style="text-align:center" > '.$contractDate.'</h5>';
 				foreach ($result as $row) {
                     $service_by = $client->getServiceBy($row['schedule_id']);
                     $service = '';

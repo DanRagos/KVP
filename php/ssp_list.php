@@ -206,10 +206,18 @@ array( 'db' => 'coverage', 'dt' => 3,
 'formatter' => function($d,$row){
 return '
    <div class="d-flex flex-column justify-content-center">
-   <p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['turn_over'])).'/'.date('M-d-Y',strtotime($d)).'</p>
+   <a href="#" ><p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['turn_over'])).'/'.date('M-d-Y',strtotime($d)).'</p></a>
    </div>';
 }),
-array('db'=>'status', 'dt'=> '4',
+array( 'db' => 'frequency', 'dt' => 4,
+'formatter' => function($d,$row){
+	$contractFreq = ($row['frequency'] == 1) ? 'Quarterly' : (($row['frequency'] ==2) ? "Semi-Annual": "Annually" );
+return
+' <div class="d-flex flex-column justify-content-center">
+   <p class="badge badge-sm bg-gradient-info">'.$contractFreq.'</p>
+   </div>';
+}),
+array('db'=>'status', 'dt'=> 5,
 'formatter'=>function($d,$row){
 	$status = ($d == 1) ? "Installation Warranty": "PMS COntract";
 	return '
@@ -218,14 +226,14 @@ array('db'=>'status', 'dt'=> '4',
 	</div>';
 }),
 array('db'=>'total', 'dt'=> ''),
-array('db'=>'count', 'dt'=> '5',
+array('db'=>'count', 'dt'=> 6,
 'formatter'=> function($d, $row){
 	$count = 100 - (($row['count'] / $row['total'])*100) ;
 return '  <div class="align-middle text-center text-sm">
 <p class="text-xs font-weight-bold mb-0">'.number_format($count).'%'.'</p>
 </div>';
 }),
-array('db'=>'sv_call', 'dt'=> '6',
+array('db'=>'sv_call', 'dt'=>7,
 'formatter'=>function($d, $row){
 	return '
 	<div class="align-middle text-center text-sm">
@@ -238,7 +246,7 @@ array('db'=>'sv_call', 'dt'=> '6',
 array(
 
 'db'        => 'contract_id',
-'dt'        => 7,
+'dt'        => 8,
 'formatter' => function( $d, $row) {
 return
 '<div class ="align-middle text-center text-sm">
@@ -338,6 +346,60 @@ return
 
 );
 
+ }
+ else if(isset($_GET['db'])&& $_GET['db']==5){
+	$primaryKey = 'contract_id';
+	$isActive = 1;
+	$clientsId = $_GET['client_id'];
+
+	// DB table to use
+$table = <<<EOT
+(SELECT clients.client_id as clientId, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = $clientsId AND contract.isActive = 1 AND contract.count > 0) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'clientId', 'dt' => 'clientId'),
+array( 'db' => 'machine_name', 'dt' => 'machine_name'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'turn_over', 'dt'=>'turnover'),
+array('db' => 'coverage', 'dt'=>'coverage'),
+array('db' => 'status', 'dt'=>'status'),
+array('db' => 'frequency', 'dt'=>'frequency'),
+array('db' => 'count', 'dt'=>'count'),
+array('db' => 'total', 'dt'=>'total'),
+array('db' => 'sv_call', 'dt'=>'sv_call'),
+array('db' => 'contract_id', 'dt'=>'contract_id'),
+
+);
+ }
+ else if(isset($_GET['db'])&& $_GET['db']==6){
+	$primaryKey = 'contract_id';
+	$isActive = 1;
+	$clientsId = $_GET['client_id'];
+
+	// DB table to use
+$table = <<<EOT
+(SELECT clients.client_id as clientId, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.client_id = $clientsId AND contract.isActive = 1 AND contract.count <= 0) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'clientId', 'dt' => 'clientId'),
+array( 'db' => 'machine_name', 'dt' => 'machine_name'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'turn_over', 'dt'=>'turnover'),
+array('db' => 'coverage', 'dt'=>'coverage'),
+array('db' => 'status', 'dt'=>'status'),
+array('db' => 'frequency', 'dt'=>'frequency'),
+array('db' => 'count', 'dt'=>'count'),
+array('db' => 'total', 'dt'=>'total'),
+array('db' => 'sv_call', 'dt'=>'sv_call'),
+array('db' => 'contract_id', 'dt'=>'contract_id'),
+
+);
  }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * If you just want to use the basic configuration for DataTables with PHP

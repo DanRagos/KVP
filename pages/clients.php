@@ -169,7 +169,7 @@ $(this).val('');
 				method: 'post',
 				data: $("#edit-client-form").serialize()+"&action=update_client",
 				success:function(response){
-				swal("Tool Updated!", "", "success");
+				swal.fire("Client Updated!", "", "success");
 					displayAllclients();
 					$("#edit-client-form")[0].reset();
 					$("#editClient").modal('hide');

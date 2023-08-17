@@ -72,7 +72,7 @@
 				</div>
 			 <div class="col col-lg-2">
 				<div class="input-group input-group-static mb-3">
-				<label>Tool Type:</label>
+				<label>Schedule Type:</label>
 				<select class="form-control" name="tool_type" id="tool_type"> 
 				<option selected> Select </option>
 				<option value="1"> PMS </option>
