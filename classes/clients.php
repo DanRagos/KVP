@@ -96,12 +96,12 @@ class Clients extends Db {
 		
 	}
 		//Add Contract to Clients 
-	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $count, $type ) {
-		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `status`, `count`, `total`, `sv_call`)
-		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :status, :count, :total, :sv_call);";
+	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type ) {
+		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `pTurn_over`, `pCoverage`, `status`, `count`, `total`, `sv_call`)
+		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :pTurn_over, :pCoverage, :status, :count, :total, :sv_call);";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['client_id'=>$client_id,'machine_type' =>$machine_type,'brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency,
-		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count]);
+		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'pTurn_over'=>$pTurn_over, 'pCoverage' =>$pCoverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count]);
 		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
 		$last_id = $this->conn->lastInsertId();
 		$add_sched = $this->add_schedule_contract($last_id, $first_pms, $type);

@@ -131,7 +131,24 @@ $('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) 
 $(this).val('');
 });
 
+$('input[name="partsWarranty"]').daterangepicker({
+autoUpdateInput: false,
+locale: {
+cancelLabel: 'Clear'
+}
 });
+
+$('input[name="partsWarranty"]').on('apply.daterangepicker', function(ev, picker) {
+$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+});
+
+$('input[name="partsWarranty"]').on('cancel.daterangepicker', function(ev, picker) {
+$(this).val('');
+});
+
+});
+
+
    
 		
 		    displayAllclients();
@@ -169,10 +186,23 @@ $(this).val('');
 				method: 'post',
 				data: $("#edit-client-form").serialize()+"&action=update_client",
 				success:function(response){
-				swal.fire("Client Updated!", "", "success");
-					displayAllclients();
+          Swal.fire({
+            icon: 'success',
+            title: 'Client Update',
+            text: 'Client details updated successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+              displayAllclients();
 					$("#edit-client-form")[0].reset();
 					$("#editClient").modal('hide');
+            },
+          });
+				
 				
 					
 				}
@@ -209,20 +239,20 @@ $("body").on("click",".addContractBtn", function(e) {
 				data: $("#add-contract-form").serialize()+"&action=add_contract",
 				success: function (response){
 				console.log(response);
-				Swal.fire({
-            icon: 'success',
-            title: 'Contract Added',
-            timer: 1500,
-            timerProgressBar: true,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            willClose: () => {
-              Swal.hideLoading();
-            },
-          });
-					$("#add-contract-form")[0].reset();
-					$("#addContract").modal('hide');
+				// Swal.fire({
+        //     icon: 'success',
+        //     title: 'Contract Added',
+        //     timer: 1500,
+        //     timerProgressBar: true,
+        //     didOpen: () => {
+        //       Swal.showLoading();
+        //     },
+        //     willClose: () => {
+        //       Swal.hideLoading();
+        //     },
+        //   });
+				// 	$("#add-contract-form")[0].reset();
+				// 	$("#addContract").modal('hide');
 				/*data = JSON.parse(response);
 				$("#client_id").val(add_id);
 				$("#client_name").val(data.client_name);

@@ -174,7 +174,6 @@
 	 <div class="input-group input-group-static mb-4">
 	<label class="ms-0">Machine Type</label>
 	<select class="form-control" name="machine_type" required>
-	<option selected> Select </option>
 	<?php
 		$sql ="Select * from machine_type";
 		$stmt = $tool->conn->prepare($sql);
@@ -210,13 +209,23 @@
         <input type="text" class="form-control"name="datefilter" required>
       </div>
     </div>
+    <div class="col">
+      <div class="input-group input-group-static mb-4">
+        <label class="form-">Parts Warranty:</label>
+        <input type="text" class="form-control"name="partsWarranty" required>
+      </div>
+    </div>
 		<div class="col">
       <div class="input-group input-group-static mb-4">
         <label class="form-">First PMS date:</label>
         <input type="date" class="form-control"name="first_pms" required>
       </div>
     </div>
-	 <div class="col">
+	 
+	
+  </div>
+   <div class="row">
+   <div class="col">
 	 <div class="input-group input-group-static mb-4">
 	<label class="ms-0">Frequency</label>
 	<select class="form-control " name="frequency" required>
@@ -226,9 +235,6 @@
 	</select>
 	</div>
 	</div>
-	
-  </div>
-   <div class="row">
     <div class="col">
 	 <div class="input-group input-group-static mb-4"  >
 	<label class="ms-0" id="test">Type</label>

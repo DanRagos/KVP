@@ -521,9 +521,18 @@ $frequency = $_POST['frequency'];
 $contract_type = $_POST['contract_type'];
 $pms_count = $_POST['pms_count'];
 $datefilter = $_POST['datefilter'];
+$partsWarranty = $_POST['partsWarranty'];
 $first_pms = $_POST['first_pms'];
 $pms = $first_pms;
 $type= 1;
+
+$last_space = strrpos($partsWarranty, ' ');
+$last_word = substr($partsWarranty, $last_space);
+$first_chunk = substr($partsWarranty, 0, $last_space - 2);
+$pCoverage = date('Y-m-d', strtotime($last_word));
+$pTurn_over = date('Y-m-d', strtotime($first_chunk));
+
+
 $string=$datefilter;
 $last_space = strrpos($string, ' ');
 $last_word = substr($string, $last_space);
@@ -540,11 +549,11 @@ do {
 		$count++;
 } while($pms < $coverage);
 
-$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $count, $type );
+$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type );
 echo $result;
 
 
-print_r($_POST);
+
 	/*$id = $_POST['add_id'];
 	$row = $client ->add_contract($id);
 	echo json_encode($row);*/
@@ -1021,6 +1030,8 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	<input type="hidden" name="count" value = '.$result['count'].'>
 	<input type="hidden" name="total" value = '.$result['total'].'>
 	<input type="hidden" name="coverage" value = '.$result['coverage'].'>
+	<input type="hidden"  name="pms_count"  value = 0 class="form-control" required>
+	
    <div class="row">
 	 <div class="col">
 	<div class="input-group input-group-static mb-4">

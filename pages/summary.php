@@ -233,6 +233,7 @@ $client_img =$row['imglink'];
 			<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Hover</th>		  
 			<th class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">Machine</th>
 			<th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover-Coverage</th>
+            <th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Parts Warranty / Status</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. of Sv Call</th>
@@ -292,6 +293,9 @@ $client_img =$row['imglink'];
     $(document).ready(function() {
 
         schedDone();
+       activeContract();
+
+        function activeContract() {
         let db = 5;
 	let client_id = <?php echo $client_id;?>;
 	var table = $('#example').DataTable({
@@ -301,6 +305,7 @@ $client_img =$row['imglink'];
         url: '../php/ssp_list.php',
         type: 'GET',
 		data: {db:db,client_id: client_id},
+      
     },
     columns: [
         {
@@ -332,6 +337,23 @@ $client_img =$row['imglink'];
         return '<div class="align-middle text-center text-sm">' +
                '<p class="badge badge-sm bg-gradient-success">' + formattedTurnover + ' / ' + formattedCoverage + '</p>' +
                '</div>';
+    }
+},
+{	
+    data: 'pCoverage',
+    render: function(data, type, row) {
+        let tDate = new Date(row.pCoverage);
+        let currentDate = new Date();
+        let partStatus = (tDate<currentDate) ? "Expired": "Active" ;  
+        let partColor = (tDate<currentDate) ? "danger": "success" ;  
+        const formattedpTurnover = new Date(row.pTurn_over).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const formattedpCoverage = new Date(row.pCoverage).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        return '<div class="align-middle text-center text-sm">' +
+       '<p class="badge badge-sm bg-gradient-primary">' + formattedpTurnover + ' / ' + formattedpCoverage +  '</p>' +
+       ' <p class="badge badge-sm bg-gradient-' + partColor + '">' + partStatus + '</p>' +
+       '</div>';
+
     }
 },
 {	
@@ -399,8 +421,82 @@ $client_img =$row['imglink'];
         // Define other data columns...
     ]
 });
+$('#example tbody').on('click', 'td.details-control', function () {
+             var tr = $(this).closest('tr');
+             var tdi = tr.find("i.fa");
+             var row = table.row(tr);
+
+             if (row.child.isShown()) {
+                 // This row is already open - close it
+                 row.child.hide();
+                 tr.removeClass('shown');
+                 tdi.first().removeClass('fa-minus-square');
+                 tdi.first().addClass('fa-plus-square');
+             }
+             else {
+                 // Open this row
+				 let datas = row.data()
+				 $.ajax({
+					url:'../php/process.php?action=show_contract_acrdn',
+					method:'GET',
+					data: datas,
+					success: function (e){
+				 row.child(e).show();
+                 tr.addClass('shown');
+                 tdi.first().removeClass('fa-plus-square');
+                 tdi.first().addClass('fa-minus-square');
+				 var table2 =$('#test-table').DataTable();
+                 $(document).on('click', '.updatePm', function(e) {
+
+            if ($("#update_pm_form")[0].checkValidity()) {
+    e.preventDefault();
+    var formData = new FormData($("#update_pm_form")[0]);
+    formData.append('action', 'updatePms');
+    $.ajax({
+      url: '../php/process.php',
+      method: 'post',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        table2.ajax.reload();
+          $("#update_pm_form")[0].reset();
+          $("#edit-pm-modal").modal('hide');
+          row.child.hide();
+                 tr.removeClass('shown');
+                 tdi.first().removeClass('fa-minus-square');
+                 tdi.first().addClass('fa-plus-square');
+          Swal.fire({
+            icon: 'success',
+            title: 'PMS Update',
+            text: 'The PM details has been edited successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+       
+        
+      }
+    });
+  }
+        });
+					}
+				 });
+                
+             }
+         });
+
+       
+}
+
 
 let db1 = 6;
+let client_id = <?php echo $client_id; ?>;
 	var completeTable = $('#completedContract').DataTable({
     processing: true,
     serverSide: true,
@@ -471,42 +567,42 @@ let db1 = 6;
 		},
 
 
-         {   
-            orderable: false,
-            data: 'clientId',
-            defaultContent: '',
-			render: function (data, type, row) {
-				return `
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report">
-        <button type="button" data-id="${row.contract_id}" class="btn btn-secondary no_margin viewContractReport">
-            <i class="fa fa-eye"></i>
-        </button>
-    </span>
-   
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract">
-        <button type="button" data-id="${row.contract_id}" data-bs-toggle="modal" data-bs-target="#editContractModal"
-            class="btn btn-warning no_margin editContract">
-            <i class="fa fa-edit"></i>
-        </button>
-    </span>
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract">
-        <button type="button" data-id="${row.contract_id}" class="btn btn-danger no_margin delContract">
-            <i class="fa fa-trash"></i>
-        </button>
-    </span>`;
-
-},
-            width: "15px"
-        }, // Replace 'client_name' with the actual column name
+        {
+    orderable: false,
+    data: 'clientId',
+    defaultContent: '',
+    render: function (data, type, row) {
+        return `
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report">
+                <button type="button" data-id="${row.contract_id}" class="btn btn-secondary no_margin viewContractReport">
+                    <i class="fa fa-eye"></i>
+                </button>
+            </span>
+           
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract">
+                <button type="button" data-id="${row.contract_id}" data-bs-toggle="modal" data-bs-target="#editContractModal"
+                    class="btn btn-warning no_margin editContract">
+                    <i class="fa fa-edit"></i>
+                </button>
+            </span>
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract">
+                <button type="button" data-id="${row.contract_id}" class="btn btn-danger no_margin delContract">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </span>`;
+    },
+    width: "15px"
+}
+ // Replace 'client_name' with the actual column name
         // Define other data columns...
     ]
 });
 
-
-	$('#example tbody').on('click', 'td.details-control', function () {
+$('#completedContract tbody').on('click', 'td.details-control', function () {
+        
              var tr = $(this).closest('tr');
              var tdi = tr.find("i.fa");
-             var row = table.row(tr);
+             var row = completeTable.row(tr);
 
              if (row.child.isShown()) {
                  // This row is already open - close it
@@ -517,7 +613,7 @@ let db1 = 6;
              }
              else {
                  // Open this row
-				 let datas = row.data()
+                 let datas = row.data()
 				 $.ajax({
 					url:'../php/process.php?action=show_contract_acrdn',
 					method:'GET',
@@ -573,11 +669,7 @@ let db1 = 6;
              }
          });
 
-         table.on("user-select", function (e, dt, type, cell, originalEvent) {
-             if ($(cell.node()).hasClass("details-control")) {
-                 e.preventDefault();
-             }
-         });
+
         
 
      
