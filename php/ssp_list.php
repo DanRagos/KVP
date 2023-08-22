@@ -359,6 +359,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 EOT;
 // indexes
 $columns = array(
+array( 'db' => 'contract_id', 'dt' => 'contractId'),
 array( 'db' => 'clientId', 'dt' => 'clientId'),
 array( 'db' => 'machine_name', 'dt' => 'machine_name'),
 array('db' => 'brand', 'dt'=>'brand'),
@@ -389,11 +390,14 @@ EOT;
 // indexes
 $columns = array(
 array( 'db' => 'clientId', 'dt' => 'clientId'),
+array( 'db' => 'contract_id', 'dt' => 'contractId'),
 array( 'db' => 'machine_name', 'dt' => 'machine_name'),
 array('db' => 'brand', 'dt'=>'brand'),
 array('db' => 'model', 'dt'=>'model'),
 array('db' => 'turn_over', 'dt'=>'turnover'),
 array('db' => 'coverage', 'dt'=>'coverage'),
+array('db' => 'pTurn_over', 'dt'=>'pTurn_over'),
+array('db' => 'pCoverage', 'dt'=>'pCoverage'),
 array('db' => 'status', 'dt'=>'status'),
 array('db' => 'frequency', 'dt'=>'frequency'),
 array('db' => 'count', 'dt'=>'count'),

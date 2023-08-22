@@ -62,8 +62,7 @@
               </div>
             </div>
             <div class="card-body px-0 pb-2">
-              <div class="table-responsive" >
-			  <div class="row justify-content-md-center">
+            <div class="row justify-content-md-center">
 			 <div class="col col-lg-2">
 			 <div class="input-group input-group-static mt-4 is-filled">
 				<label class="form-label">PM/ SV Date</label>
@@ -82,6 +81,7 @@
 				</div>	
 				</div>				
 				</div>
+              <div class="table-responsive" >
 		 <table id="example" class="table align-items-center justify-content-center table-responsive" style="width:100%;" >
         <thead>
             <tr>

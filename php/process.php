@@ -184,6 +184,9 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
                          ';
 						
 						$output.='
+						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
+                        <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>
+						<button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button>
 						<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>';
@@ -1026,11 +1029,10 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	<form action="#" method="POST" id="edit-contract-form" autocomplete="off">
 	<input type="hidden" name="contract_id" value = '.$result['contract_id'].'>
 	<input type="hidden" name="cType" value = '.$result['status'].'>
-	<input type="hidden" name="frequency" value = '.$result['frequency'].'>
 	<input type="hidden" name="count" value = '.$result['count'].'>
 	<input type="hidden" name="total" value = '.$result['total'].'>
 	<input type="hidden" name="coverage" value = '.$result['coverage'].'>
-	<input type="hidden"  name="pms_count"  value = 0 class="form-control" required>
+	<input type="hidden"  name="sv_count"  value = 0 class="form-control" required>
 	
    <div class="row">
 	 <div class="col">
@@ -1044,29 +1046,61 @@ if (isset($_GET['action'])&& $_GET['action'] == 'editContract'){
 	  <label class="form-">Model :</label>
 	  <input type="text"  name="model" class="form-control" required value='.$result['model'].'> 
 	</div>
-  </div>
-  
-   </div>
+	</div> ';
+	$output .= '<div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Frequency :</label>
+	  <select name="frequency">';
+
+$options = array(
+  1 => 'Quarterly',
+  2 => 'Semi-Annual',
+  3 => 'Annual'
+);
+
+foreach ($options as $value => $label) {
+  $selected = ($value == $result['frequency']) ? 'selected' : '';
+  $output .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+}
+
+$output .= '</select>
+	</div>
+</div>
 <div class="row">
 	  <div class="col">
 	<div class="input-group input-group-static mb-4">
-	  <label class="form-">Turn Over</label>
-	  <input type="input" class="form-control"name="turn_over" readonly value='.date('m/d/Y', strtotime($result['turn_over'])).'>
+	  <label class="form-">Service Turn Over</label>
+	  <input type="input" class="form-control"name="turn_over" readonly value='.date('Y-m-d', strtotime($result['turn_over'])).'>
 	</div>
   </div>
   <div class="col">
   <div class="input-group input-group-static mb-4">
-	<label class="form-">Coverage:</label>
+	<label class="form-">Service Coverage:</label>
 	<input type="date" class="form-control"name="coverage_input" required value='.$result['coverage'].' min = '.$result['coverage'].'>
   </div>
 </div>
-</div>';
+</div>
+<div class="row">
+	  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Parts Warranty Turn Over</label>
+	  <input type="input" class="form-control" name="pTurn_over" readonly value='.date('Y-m-d', strtotime($result['pTurn_over'])).'>
+	</div>
+  </div>
+  <div class="col">
+  <div class="input-group input-group-static mb-4">
+	<label class="form-">Parts Warranty Coverage:</label>
+	<input type="date" class="form-control"name="pCoverage_input" required value='.$result['pCoverage'].' min = '.$result['pCoverage'].'>
+  </div>
+</div>
+</div>
+';
 if ($result['status'] != '1') {
 $output .='  <div class="row">
 <div class="col">
 <div class="input-group input-group-outline is-filled" >
 <label class="form-label">PMS Count:</label>
-<input type="number" min=1 name="pms_count"  value = '.$result['sv_call'].' class="form-control" required>
+<input type="number" min=1 name="sv_count"  value = '.$result['sv_call'].' class="form-control" required>
 </div>
 </div></div>';
 }
@@ -1560,38 +1594,43 @@ if (isset($_POST['action'])&& $_POST['action']=='updateProfileCover'){
 		echo $uploadFile;
 }
 if (isset($_POST['action']) && $_POST['action'] == 'update_contract') {
+	print_r(($_POST));
     $contract_id = $_POST['contract_id'];
     $brand = $_POST['brand'];
     $model = $_POST['model'];
     $turn_over = $_POST['turn_over'];
     $coverage = $_POST['coverage'];
     $coverageInput = $_POST['coverage_input'];
-    $sv_count = $_POST['pms_count'];
+	$pTurn_over = $_POST['pTurn_over'];
+	$pCoverage = $_POST['pCoverage_input'];
+    $sv_count = $_POST['sv_count'];
     $frequency = $_POST['frequency'];
     $contractType = $_POST['cType'];
 	$pmCount = $_POST['count'];
 	$pmTotal = $_POST['total'];
+	$nTurn_over = $_POST['turn_over'];
+	$status = $_POST['cType'];
 ////////////////
 $months = ($frequency == 1) ? "3":  (($frequency)== 2 ? "6":"12");
 $pmsCount = 0;
 $done = true;
 do {
-$turn_over = date('Y-m-d', strtotime("$turn_over + $months months"));
+$nTurn_over = date('Y-m-d', strtotime("$nTurn_over + $months months"));
 $pmsCount++;
-}while($turn_over < $coverageInput);
+}while($nTurn_over < $coverageInput);
     try {
-		$checkPmsCountValid = 
+		
         $coverageTimestamp = strtotime($coverage);
         $coverageInputTimestamp = strtotime($coverageInput);
 
-        if ($pmsCount<($pmTotal - $pmCount)) {
+        if (  strtotime($turn_over) > strtotime($coverageInput)) {
             $response = array(
                 'message' => "Invalid coverage input. Please input later dates",
                 'status' => 0,
 				'pmsCount' => $pmsCount
 
             );
-          
+        
         } else {
             // Process the valid input
             // ...
@@ -1599,11 +1638,9 @@ $pmsCount++;
 			$newCount = $pmsCount - ($pmTotal - $pmCount);
 			if($newCount == 0){
 				$response = array(
-					'message' => "Success, PMS Count reached so the Contract will expired",
+					'message' => "Success, PMS Count reached so the Contract will be expired",
 					'status' => 1,
 					'pmsCount' => $newCount
-
-	
 				);
 				
 			}
@@ -1613,6 +1650,7 @@ $pmsCount++;
 				'pmsCount' => $newTotal
 
             );}
+			$client->udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverageInput, $pTurn_over, $pCoverage, $status, $newCount, $newTotal, $sv_count );
 		
 
         }
@@ -1630,7 +1668,7 @@ if (isset($_GET['action'])&& $_GET['action']=='show_contract_acrdn'){
     // Generate the accordion content based on the rowData
 // Generate the accordion content based on the rowData
 $output .= '<div class="table-responsive" >
-        <table  class="table test-table " style="width:100%;">
+        <table  class="table test-table">
             <thead>
                 <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule Id</th>

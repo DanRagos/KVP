@@ -325,6 +325,15 @@ public function get_contract($id) {
 		return $result;
 		
 	}
+
+	public function udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverageInput, $pTurn_over, $pCoverage, $status, $newCount, $newTotal, $sv_count ) {
+		$sql = "Update contract SET brand = :brand, model = :model, frequency = :frequency, turn_over = :turn_over, coverage = :coverage, pTurn_over = :pTurn_over, pCoverage = :pCoverage,
+		status = :status, count = :newCount, total = :newTotal, sv_call = :sv_count WHERE contract_id = :contract_id";
+		$stmt = $this->conn->prepare($sql);
+		$result = $stmt->execute(['brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency, 'turn_over'=>$turn_over, 'coverage'=>$coverageInput, 'pTurn_over'=>$pTurn_over,
+	'pCoverage'=>$pCoverage, 'status'=>$status, 'newCount'=>$newCount, 'newTotal'=>$newTotal, 'sv_count'=>$sv_count, 'contract_id'=>$contract_id]);
+		return $result; 
+	}
 public function expire_sched($contract_id){
 	$sql = "Update contract SET status = 3 where contract_id = :contract_id";
 	$stmt = $this ->conn ->prepare($sql);
@@ -428,6 +437,15 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 			public function viewPmsContract($contract_id, $status) {
 		$sql = "select contract.* , clients.client_name, clients.client_address, schedule.schedule_date, schedule.schedule_id as sched_id, accomplished_schedule.* from contract right join schedule on contract.contract_id = schedule.contract_id left join clients on contract.client_id = clients.client_id left join accomplished_schedule on schedule.schedule_id = accomplished_schedule.schedule_id where 
 		contract.contract_id = :contract_id $status";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute(['contract_id'=>$contract_id]);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+		
+	}	
+	public function viewSvContract($contract_id, $status) {
+		$sql = "SELECT accomplished_schedule.*, schedule.schedule_date, service_call.rep_problem FROM accomplished_schedule LEFT JOIN schedule on accomplished_schedule.schedule_id = schedule.schedule_id 
+		LEFT JOIN service_call on schedule.sv_id = service_call.sv_id where service_call.contract_id = 2";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['contract_id'=>$contract_id]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);

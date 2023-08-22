@@ -142,11 +142,14 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContracts') {
 	$contract_id = $_GET['contract_id'];
     $status = 'AND schedule.status = 2';
 	$result = $client->viewPmsContract($contract_id, $status);
+    $result2 = $client->viewSvContract($contract_id, $status);
    
 	$name =  $result[0]['client_name'];
+    $client_address =  $result[0]['client_address'];
 	$machine = $result[0]['brand'].'/'.$result[0]['model'];
     $contractFreq = ($result[0]['frequency'] == 1) ? 'Quarterly' : (($result[0]['frequency'] ==2) ? "Semi-Annual": "Annually" );
     $contractType = ($result[0]['status'] == 1) ? "Installation Warranty": "PMS Contract";
+    $ctrType = $result[0]['status'];
     $contractDate = date('M d, Y', strtotime($result[0]['turn_over'])).' - '.date('M d, Y', strtotime($result[0]['coverage']));
 		class MYPDF extends TCPDF {
 }
@@ -222,6 +225,7 @@ $obj_pdf->AddPage();
     </tr>
 	<tr>
          <td ><b>Machine:</b> <br />$machine</td>
+       
 		 <td colspan="2"><b>Diagnosis :</b> <br />{$row['diagnosis']}</td>
 		 
 		  
@@ -242,6 +246,87 @@ $obj_pdf->AddPage();
 </div>
 EOD;
 				}
+$content .=" </br>";
+if ($ctrType != 1) {
+    $obj_pdf->SetFont('helvetica', '', 11); 
+    $obj_pdf->writeHTML($content, true, false, true, false, '');
+    $obj_pdf->AddPage(); 
+    $date_today = date('F d, Y');
+    $content = '';
+     $content .= '
+        <style>
+            th {
+                background-color: #ccc;
+            }
+                .table-container {
+    margin-bottom: 20px;
+}
+
+        </style>
+        <div class="header">';
+           $obj_pdf -> Image('../img/icon.jpg', 58, 7, 25);
+            $obj_pdf -> SetFont('Helvetica', 'B', 12);
+            $obj_pdf -> Cell(180, 7, "KVP Healthcare Inc.", 0, 1, 'C');
+            $obj_pdf -> SetFont('Helvetica', '', 11);
+            $obj_pdf -> Cell(180, 5, "Service Call", 0, 1, 'C');
+            $obj_pdf -> SetFont('Helvetica', 'B', 10);
+            $obj_pdf -> Ln(10);
+            
+            $content .= '</div>';    
+            //$content .= "<hr> </hr>";
+            $content .= '<h3 style= "text-align: center;"> '.$name.'</h3> 
+            <h4 style="text-align:center" > '.$contractFreq.' - '.$contractType.'</h4>
+            <h5 style="text-align:center" > '.$contractDate.'</h5>';
+            foreach ($result2 as $row1) {
+                $service_by = $client->getServiceBy($row1['schedule_id']);
+                $service = '';
+                foreach ($service_by as $user) {
+                   
+                    $service .= $user['firstname'].' '.$user['lastname'];
+                    if (count($service_by)>1){
+                        $service .= ', ';
+                    }
+                }
+                    $fSchedDate = date('M d, Y', strtotime($row1['schedule_date']));
+                    $fAccompDate = date('M d, Y', strtotime($row1['accomp_date']));
+                    $status  = $row1['accomp_status'] == 2 ? 'Done' : 'Unresolved';
+                    $withC  = $row1['withC'] == 1 ? 'W/Collection' : '';
+            $content .= <<<EOD
+        
+            <div class="table-container">
+
+<table cellspacing="0" cellpadding="3" border="1">
+<tr>
+    <td rowspan="1" ><b>Schedule Date :</b> <br />$fSchedDate</td>
+   <td rowspan="1"><b>Service Date :</b> <br />$fAccompDate</td>
+   <td rowspan="1" colspan="1"><b>Location :</b> <br/>$client_address</td>
+</tr>
+<tr>
+     <td ><b>Machine:</b> <br />$machine</td>
+     <td ><b>Reported Problem:</b> <br/>{$row1['rep_problem']}</td>
+     <td colspan="2"><b>Diagnosis :</b> <br />{$row1['diagnosis']}</td>
+     
+      
+   
+  
+</tr>
+<tr>
+     <td colspan="3"><b>Service Done:</b> <br />{$row1['service_don']}</td>   
+</tr>
+<tr colspan="3">
+     <td ><b>Remarks:</b> <br />{$row1['recomm']}</td>
+     <td ><b>Status:</b> <br />$status $withC</td>
+     <td><b>Service By:</b> <br />$service</td>    
+</tr>
+
+
+</table>
+</div>
+EOD;
+            }
+}
+// print a block of text using Write()
+		 
 $content .=" </br>";
 $content .=" \n Generated at $date_today";
 // print a block of text using Write()

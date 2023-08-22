@@ -226,11 +226,12 @@ $client_img =$row['imglink'];
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
-                            <div class="table-responsive" id="initial-table">
-                            <table id="example" class="table align-items-center mb-0 table-striped" style="width:100%;">
+                           
+                            <table id="example" class="table align-items-center mb-0 table-striped"  style="width:100%;" >
         <thead>
             <tr>
-			<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Hover</th>		  
+			<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Hover</th>
+            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Contract No.</th>		  
 			<th class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">Machine</th>
 			<th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover-Coverage</th>
             <th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Parts Warranty / Status</th>
@@ -244,7 +245,7 @@ $client_img =$row['imglink'];
         </thead>
  
     </table>  
-                            </div>
+                            
                         </div>
 
 
@@ -266,8 +267,10 @@ $client_img =$row['imglink'];
         <thead>
             <tr>
 			<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Hover</th>		  
+            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Contract No.</th>
 			<th class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">Machine</th>
 			<th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Turnover-Coverage</th>
+            <th class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Parts Warranty / Status</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Completion</th>
 			<th class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No. of Sv Call</th>
@@ -299,8 +302,11 @@ $client_img =$row['imglink'];
         let db = 5;
 	let client_id = <?php echo $client_id;?>;
 	var table = $('#example').DataTable({
-    processing: true,
-    serverSide: true,
+        stateSave: true,
+		processing: true,
+		serverSide: true,
+        scrollY: '45vh',
+        scrollX: true,
     ajax: {
         url: '../php/ssp_list.php',
         type: 'GET',
@@ -318,6 +324,14 @@ $client_img =$row['imglink'];
             },
             width: "15px"
         },
+        {	
+    data: 'contractId',
+    render: function(data, type, row) {
+        return '<div class="align-middle text-center text-sm">' +
+		'<p class="text-sm font-weight-bold mb-0">'+ row.contractId+'</p>'+
+               '</div>';
+   		 }
+		},
        // Replace 'client_id' with the actual column name
 	   {	
     data: 'brand',
@@ -498,8 +512,11 @@ $('#example tbody').on('click', 'td.details-control', function () {
 let db1 = 6;
 let client_id = <?php echo $client_id; ?>;
 	var completeTable = $('#completedContract').DataTable({
-    processing: true,
-    serverSide: true,
+        stateSave: true,
+		processing: true,
+		serverSide: true,
+        scrollY: '45vh',
+        scrollX: true,
     ajax: {
         url: '../php/ssp_list.php',
         type: 'GET',
@@ -516,6 +533,15 @@ let client_id = <?php echo $client_id; ?>;
             },
             width: "15px"
         },
+
+        {	
+    data: 'contractId',
+    render: function(data, type, row) {
+        return '<div class="align-middle text-center text-sm">' +
+		'<p class="text-sm font-weight-bold mb-0">'+ row.contractId+'</p>'+
+               '</div>';
+   		 }
+		},
        // Replace 'client_id' with the actual column name
 	   {	
     data: 'brand',
@@ -526,15 +552,35 @@ let client_id = <?php echo $client_id; ?>;
                '</div>';
    		 }
 		},
-		{	
+        {	
     data: 'turnover',
     render: function(data, type, row) {
         const formattedTurnover = new Date(row.turnover).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const formattedCoverage = new Date(row.coverage).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        let toTimestamp = Date.parse(row.turnover);
 
-        return '<div class="align-middle text-center text-sm">' +
+        return '<td data-sort="' + toTimestamp + '" class="align-middle text-center text-sm">' +
                '<p class="badge badge-sm bg-gradient-success">' + formattedTurnover + ' / ' + formattedCoverage + '</p>' +
-               '</div>';
+               '</td>';
+    }
+},
+
+{	
+    data: 'pCoverage',
+    render: function(data, type, row) {
+        let tDate = new Date(row.pCoverage);
+        let currentDate = new Date();
+        let partStatus = (tDate<currentDate) ? "Expired": "Active" ;  
+        let partColor = (tDate<currentDate) ? "danger": "success" ;  
+        const formattedpTurnover = new Date(row.pTurn_over).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const formattedpCoverage = new Date(row.pCoverage).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        let toTimestamp = Date.parse(row.pCoverage);
+
+        return '<td data-sort="' + toTimestamp + '" class="align-middle text-center text-sm">' +
+       '<p class="badge badge-sm bg-gradient-primary">' + formattedpTurnover + ' / ' + formattedpCoverage +  '</p>' +
+       ' <p class="badge badge-sm bg-gradient-' + partColor + '">' + partStatus + '</p>' +
+       '</td>';
+
     }
 },
 {	
@@ -579,10 +625,10 @@ let client_id = <?php echo $client_id; ?>;
                 </button>
             </span>
            
-            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract">
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Renew Contract">
                 <button type="button" data-id="${row.contract_id}" data-bs-toggle="modal" data-bs-target="#editContractModal"
-                    class="btn btn-warning no_margin editContract">
-                    <i class="fa fa-edit"></i>
+                    class="btn btn-success no_margin editContract">
+                    <i class="material-icons opacity-10">autorenew</i>
                 </button>
             </span>
             <span data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract">
@@ -683,24 +729,25 @@ $('#completedContract tbody').on('click', 'td.details-control', function () {
                method: 'POST',
                data: $('#edit-contract-form').serialize()+"&action=update_contract",       
                success: function(response){
-                data = JSON.parse(response);
-                console.log(data);
-                if (data.status === 0) {
-                    Swal.fire(
-                'Invalid',
-                data.message,
-                'error'
-            );
-                }
-                else {
-                    Swal.fire(
-                'Valid',
-                data.message,
-                'success'
-            );
-                }
+                console.log(response);
+            //     data = JSON.parse(response);
+            //     console.log(data);
+            //     if (data.status === 0) {
+            //         Swal.fire(
+            //     'Invalid',
+            //     data.message,
+            //     'error'
+            // );
+            //     }
+            //     else {
+            //         Swal.fire(
+            //     'Valid',
+            //     data.message,
+            //     'success'
+            // );
+            //     }
               
-            $('#editContractModal').modal('hide');
+            // $('#editContractModal').modal('hide');
                }
             });
          
