@@ -407,6 +407,34 @@ array('db' => 'contract_id', 'dt'=>'contract_id'),
 
 );
  }
+ else if(isset($_GET['db'])&& $_GET['db']==7){
+	$primaryKey = 'id';
+	$isActive = 1;
+	$clientsId = $_GET['client_id'];
+
+	// DB table to use
+$table = <<<EOT
+(select accomplished_schedule.*, schedule.schedule_date, COALESCE(service_call.brand, contract.brand) as brand, COALESCE(service_call.model, contract.model) as model, machine_type.machine_name, service_call.rep_problem, contract.contract_id as contract_id from accomplished_schedule LEFT JOIN schedule ON accomplished_schedule.schedule_id = schedule.schedule_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract ON service_call.contract_id = 
+contract.contract_id LEFT JOIN machine_type on contract.machine_type = machine_type.machine_id where service_call.client_id = $clientsId) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'id', 'dt' => 'accomp_id'),
+array( 'db' => 'schedule_id', 'dt' => 'sched_id'),
+array( 'db' => 'accomp_date', 'dt' => 'accomp_date'),
+array('db' => 'schedule_date', 'dt'=>'schedule_date'),
+array('db' => 'diagnosis', 'dt'=>'diagnosis'),
+array('db' => 'service_don', 'dt'=>'service_don'),
+array('db' => 'recomm', 'dt'=>'recomm'),
+array('db' => 'accomp_status', 'dt'=>'accomp_status'),
+array('db' => 'withC', 'dt'=>'withC'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'machine_name', 'dt'=>'machine_name'),
+array('db' => 'rep_problem', 'dt'=>'rep_problem'),
+
+);
+ }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * If you just want to use the basic configuration for DataTables with PHP
  * server-side, there is no need to edit below this line.

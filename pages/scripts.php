@@ -2,6 +2,7 @@
   <script src='../assets/js/plugins/main.js'></script>
   <script src="../assets/js/plugins/jquery.dataTables.min.js"></script>
     <script src="../assets/js/plugins/dataTables.fixedColumns.min.js"></script>
+    <script src="../assets/js/plugins/datatable-ellipsis.js"></script>
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>

@@ -1070,7 +1070,7 @@ $output .= '</select>
 	  <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Service Turn Over</label>
-	  <input type="input" class="form-control"name="turn_over" readonly value='.date('Y-m-d', strtotime($result['turn_over'])).'>
+	  <input type="date" class="form-control"name="turn_over"  value='.date('Y-m-d', strtotime($result['turn_over'])).'>
 	</div>
   </div>
   <div class="col">
@@ -1084,7 +1084,7 @@ $output .= '</select>
 	  <div class="col">
 	<div class="input-group input-group-static mb-4">
 	  <label class="form-">Parts Warranty Turn Over</label>
-	  <input type="input" class="form-control" name="pTurn_over" readonly value='.date('Y-m-d', strtotime($result['pTurn_over'])).'>
+	  <input type="date" class="form-control" name="pTurn_over"  value='.$result['pTurn_over'].'>
 	</div>
   </div>
   <div class="col">
@@ -1111,6 +1111,110 @@ $output .='  <div class="row">
 	</div>
 	<div class="modal-footer">
 	<button type="submit" class="btn btn-primary" data-id="'.$contract_id.'" id="edit-contract-btn" >Confirm</button>
+	  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+	  
+	</div>
+	</form>';
+
+echo $output;
+}
+
+if (isset($_GET['action'])&& $_GET['action'] == 'renewContract'){
+	$contract_id = $_GET['contract_id'];
+	$result = $client->get_contract_details($contract_id);
+	$output = '';
+	$output .= '<div class="modal-header">
+	<img src="../img/line_jpg.jpg" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
+	  <h5 class="modal-title ">Renew Contract no. '.$contract_id.'</h5>
+	  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	</div>
+	<div class="modal-body">
+	<div class="container">
+	<form action="#" method="POST" id="edit-contract-form" autocomplete="off">
+	<input type="hidden" name="contract_id" value = '.$result['contract_id'].'>
+	<input type="hidden" name="cType" value = '.$result['status'].'>
+	<input type="hidden" name="count" value = '.$result['count'].'>
+	<input type="hidden" name="total" value = '.$result['total'].'>
+	<input type="hidden" name="coverage" value = '.$result['coverage'].'>
+	<input type="hidden"  name="sv_count"  value = 0 class="form-control" required>
+	
+   <div class="row">
+	 <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Brand :</label>
+	  <input type="text" name="brand" class="form-control" required value='.$result['brand'].'>
+	</div>
+  </div>
+  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Model :</label>
+	  <input type="text"  name="model" class="form-control" required value='.$result['model'].'> 
+	</div>
+	</div> ';
+	$output .= '<div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Frequency :</label>
+	  <select name="frequency">';
+
+$options = array(
+  1 => 'Quarterly',
+  2 => 'Semi-Annual',
+  3 => 'Annual'
+);
+
+foreach ($options as $value => $label) {
+  $selected = ($value == $result['frequency']) ? 'selected' : '';
+  $output .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+}
+
+$output .= '</select>
+	</div>
+</div>
+<div class="row">
+	  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Service Turn Over</label>
+	  <input type="date" class="form-control"name="turn_over"  value='.date('Y-m-d', strtotime($result['turn_over'])).'>
+	</div>
+  </div>
+  <div class="col">
+  <div class="input-group input-group-static mb-4">
+	<label class="form-">Service Coverage:</label>
+	<input type="date" class="form-control"name="coverage_input" required value='.$result['coverage'].' min = '.$result['coverage'].'>
+  </div>
+</div>
+</div>
+<div class="row">
+	  <div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">Parts Warranty Turn Over</label>
+	  <input type="date" class="form-control" name="pTurn_over"  value='.$result['pTurn_over'].'>
+	</div>
+  </div>
+  <div class="col">
+  <div class="input-group input-group-static mb-4">
+	<label class="form-">Parts Warranty Coverage:</label>
+	<input type="date" class="form-control"name="pCoverage_input" required value='.$result['pCoverage'].' min = '.$result['pCoverage'].'>
+  </div>
+</div>
+</div>
+';
+if ($result['status'] != '1') {
+$output .='  <div class="row">
+<div class="col">
+<div class="input-group input-group-outline is-filled" >
+<label class="form-label">PMS Count:</label>
+<input type="number" min=1 name="sv_count"  value = '.$result['sv_call'].' class="form-control" required>
+</div>
+</div></div>';
+}
+  $output .= '
+ </div>
+
+</div>
+	</div>
+	<div class="modal-footer">
+	<button type="submit" class="btn btn-primary" data-id="'.$contract_id.'" id="renew-contract-btn" >Confirm</button>
 	  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 	  
 	</div>
@@ -1594,7 +1698,7 @@ if (isset($_POST['action'])&& $_POST['action']=='updateProfileCover'){
 		echo $uploadFile;
 }
 if (isset($_POST['action']) && $_POST['action'] == 'update_contract') {
-	print_r(($_POST));
+
     $contract_id = $_POST['contract_id'];
     $brand = $_POST['brand'];
     $model = $_POST['model'];
@@ -1658,6 +1762,9 @@ $pmsCount++;
     } catch (Exception $e) {
         echo "An error occurred. Please contact the administrator";
     }
+}
+if (isset($_POST['action']) && $_POST['action'] == 'renew_contract') {
+
 }
 if (isset($_GET['action'])&& $_GET['action']=='show_contract_acrdn'){
 	$contract_id = $_GET['contract_id'];

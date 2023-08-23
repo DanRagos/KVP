@@ -143,7 +143,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewContracts') {
     $status = 'AND schedule.status = 2';
 	$result = $client->viewPmsContract($contract_id, $status);
     $result2 = $client->viewSvContract($contract_id, $status);
-   
 	$name =  $result[0]['client_name'];
     $client_address =  $result[0]['client_address'];
 	$machine = $result[0]['brand'].'/'.$result[0]['model'];

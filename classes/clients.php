@@ -131,9 +131,9 @@ class Clients extends Db {
 	public function add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date){
 		$type = 2;
 	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, :brand, :model, :rep_problem)";
+		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, NULL, NULL, :rep_problem)";
 		$stmt = $this->conn-> prepare($sql);
-		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
+		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
 		$last_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
 		return $last_sched;
@@ -445,7 +445,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 	}	
 	public function viewSvContract($contract_id, $status) {
 		$sql = "SELECT accomplished_schedule.*, schedule.schedule_date, service_call.rep_problem FROM accomplished_schedule LEFT JOIN schedule on accomplished_schedule.schedule_id = schedule.schedule_id 
-		LEFT JOIN service_call on schedule.sv_id = service_call.sv_id where service_call.contract_id = 2";
+		LEFT JOIN service_call on schedule.sv_id = service_call.sv_id where service_call.contract_id = :contract_id";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['contract_id'=>$contract_id]);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
