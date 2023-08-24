@@ -251,7 +251,13 @@ $client_img =$row['imglink'];
           </div>
             </div>
             <div class="row" >
-                <div class="col">
+                <div class="col">   
+                <div class="d-flex justify-content-center" >
+                            <div id="spinner" class="spinner-border mt-4" style="width: 6rem; height: 6rem; display:none;" role="status">
+                            <span class="sr-only">Loading...</span>
+                            </div>
+                            </div>
+              
                     <div class="card my-4 card " id="tabActive">
 
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
@@ -260,7 +266,7 @@ $client_img =$row['imglink'];
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
-
+                         
                             <table id="example" class="table align-items-center mb-0 table-striped" style="width:100%;">
                                 <thead>
                                     <tr>
@@ -417,8 +423,13 @@ $client_img =$row['imglink'];
     <script>
     $(document).ready(function() {
         //Display Handler
+     
+        
         $('#liActive').click(function(){
-        $('#tabActive').show();
+            $('#spinner').show();
+            setTimeout(()=>{
+                $('#spinner').hide();
+                $('#tabActive').show();
         $('#tabComplete').hide();
         $('#tabService').hide();
 
@@ -427,9 +438,13 @@ $client_img =$row['imglink'];
     $('#example').DataTable().destroy();
         }
         activeContract();
-     
+        
+}, 300)
     });
     $('#liComplete').click(function(){
+        $('#spinner').show();
+        setTimeout(()=>{
+        $('#spinner').hide();
         $('#tabActive').hide();
         $('#tabComplete').show();
         $('#tabService').hide();
@@ -438,16 +453,23 @@ $client_img =$row['imglink'];
     $('#completedContract').DataTable().destroy();
         }
         completedContract();
+        }, 300)
+      
     });
     $('#liService').click(function(){
-        $('#tabActive').hide();
+        $('#spinner').show();
+        setTimeout(()=>{     
+            $('#spinner').hide();  
+            $('#tabActive').hide();
         $('#tabComplete').hide();
         $('#tabService').show();
         if ($.fn.DataTable.isDataTable('#serviceCall')) {
     // Destroy the DataTable instance
     $('#serviceCall').DataTable().destroy();
         }
-        serviceCall();
+        serviceCall(); }, 300);
+
+   
     });
 
 
@@ -1186,12 +1208,14 @@ $client_img =$row['imglink'];
         });
 
         $(document).on('click', '#renew-contract-btn', function() {
+           
                 let client_id = <?php echo $client_id; ?>;
                 $.ajax({
                     url: '../php/process.php',
                     method: 'POST',
-                    data: $('#edit-contract-form').serialize() + "&action=renew_contract",
+                    data: $('#renew-contract-form').serialize() + "&action=renew_contract",
                     success: function(response) {
+                     console.log(response);
                         // console.log(response);
                         // data = JSON.parse(response);
                         // console.log(data);
@@ -1250,13 +1274,7 @@ $client_img =$row['imglink'];
                     client_id: client_id
                 },
             },
-            columnDefs: [
-        // Apply ellipsis to the column with index 3 (replace with the actual index)
-        {
-            targets: 6, // Replace with the actual column index
-            render: $.fn.dataTable.render.ellipsis(6, true) // Set the number of characters
-        }
-    ],
+     
             columns: [
                 {
                     data: 'accomp_id',
@@ -1341,7 +1359,7 @@ $client_img =$row['imglink'];
     render: function(data, type, row) {
         return data.length > 25 ?
             '<div class="align-middle text-center text-sm">' +
-            '<p class="text-sm font-weight-bold mb-0">' + data.substr(0, 25) +
+            '<p class="text-sm font-weight-bold mb-0">' + data.substr(0, 20) +
             ' ...</p>' +
             '</div>' :
             '<div class="align-middle text-center text-sm">' +
@@ -1380,16 +1398,18 @@ $client_img =$row['imglink'];
                     defaultContent: '',
                     render: function(data, type, row) {
                         return `
-            <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Contract Report">
-                <button type="button" data-id="${row.accomp_id}" class="btn btn-secondary no_margin viewContractReport">
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Service Report">
+                <button type="button" data-id="${row.accomp_id}" class="btn btn-secondary no_margin viewPms">
                     <i class="fa fa-eye"></i>
                 </button>
             </span>
-            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Delete/Cancel Contract">
-                <button type="button" data-id="${row.accomp_id}" class="btn btn-danger no_margin delContract">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </span>`;
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Service Report">
+        <button type="button" data-id="${row.accomp_id}" data-bs-toggle="modal" data-bs-target="#edit-pm-modal"
+            class="btn btn-warning no_margin editPm">
+            <i class="fa fa-edit"></i>
+        </button>
+    </span>
+          `;
                     },
                     width: "15px"
                 }
@@ -1398,6 +1418,138 @@ $client_img =$row['imglink'];
             ],
        
         });
+
+        $(document).on('click', '.editPm', function() {
+            let accomp_id = $(this).attr('data-id');
+            $.ajax({
+                url: '../php/process.php',
+                method: 'GET',
+                data: {
+                    accomp_id: accomp_id,
+                    action: 'edit_pm_details'
+                },
+                success: function(response) {
+                  
+                    $('.update_pm_contents').html(response);
+                    const arrayValue = JSON.parse(document.getElementById('myDiv').dataset
+                        .arrayValue);
+                    $.ajax({
+                        url: '../php/process.php',
+                        method: 'GET',
+                        data: {
+                            'action': 'getServiceBy'
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+
+                            // Assuming the response data is an array of objects with label and value properties
+                            var optionsData = data.map(function(item) {
+                                var fullName = item.firstname + ' ' +
+                                    item.lastname;
+                                return {
+                                    label: fullName,
+                                    value: item.mem_id
+                                };
+                            });
+
+                            // Initialize Virtual Select with the fetched options
+                            VirtualSelect.init({
+                                ele: '.sample-select',
+                                options: optionsData,
+                                multiple: true,
+
+                            });
+
+                            document.querySelector('.sample-select').setValue(
+                                arrayValue);
+
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching options:', error);
+                        }
+                    });
+                }
+            });
+
+        });
+
+        $(document).on('click', '.updatePm', function(e) {
+            if ($("#update_pm_form")[0].checkValidity()) {
+    e.preventDefault();
+    var formData = new FormData($("#update_pm_form")[0]);
+    formData.append('action', 'updatePms');
+    $.ajax({
+      url: '../php/process.php',
+      method: 'post',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        console.log(response);
+          $("#update_pm_form")[0].reset();
+          $("#edit-pm-modal").modal('hide');
+          serviceCallTbl.ajax.reload( null, false );
+          Swal.fire({
+            icon: 'success',
+            title: 'PMS Update',
+            text: 'The Service details has been edited successfully.', // Add a custom success message here if needed
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+       
+        
+      }
+    });
+  }
+        });
+
+        $("body").on("click",".viewPms", function(e) {
+		let accomp_id = $(this).attr('data-id');
+		e.preventDefault();
+		$.ajax({
+			url: '../php/process.php',
+			method: 'get',
+			data: {
+				accomp_id: accomp_id,
+				action: 'view_report'
+			},
+			success: function (response) {
+				console.log(response);
+	$.ajax({
+    url: '../php/export_service.php',
+    type: 'POST',
+    data: { jsonData: response },
+    xhrFields: {
+        responseType: 'blob' // Set the response type to 'blob' to handle binary data
+    },
+    success: function(pdfResponse) {
+        console.log(pdfResponse);
+
+        // Create a blob object from the binary data
+        var blob = new Blob([pdfResponse], { type: 'application/pdf' });
+
+        // Create a temporary URL for the blob
+        var blobUrl = URL.createObjectURL(blob);
+
+        // Open the PDF in a new tab or window
+        window.open(blobUrl, '_blank');
+    },
+    error: function(error) {
+        // Handle the error
+    }
+});
+	
+
+			}
+			
+		});
+	}); 
         }
 
 

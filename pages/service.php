@@ -256,7 +256,7 @@ $('#tool_type').on('change', function() {
           Swal.fire({
             icon: 'success',
             title: 'PMS Update',
-            text: 'The PM details has been edited successfully.', // Add a custom success message here if needed
+            text: 'The Service details has been edited successfully.', // Add a custom success message here if needed
             timer: 1500,
             timerProgressBar: true,
             didOpen: () => {

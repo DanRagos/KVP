@@ -11,7 +11,7 @@ if (isset($_POST['jsonData'])) {
 	$name = $jsonData['brand'];
 	$schedule_type = ($jsonData['schedule_type'] == 2) ? "Service Call" : "PMS"; 
 	$client_name = $jsonData['client_name'];
-	$address = $jsonData['address'];
+	$address = $jsonData['client_address'];
 	$machine = $jsonData['brand'].' '.$jsonData['model'];
 	$rep_problem = $jsonData['rep_problem'];
 	$diagnosis = $jsonData['diagnosis'];
@@ -30,7 +30,8 @@ if (isset($_POST['jsonData'])) {
 
  $fSchedDate = date('M d, Y', strtotime($jsonData['schedule_date']));
  $fAccompDate = date('M d, Y', strtotime($jsonData['accomp_date']));
-  $status  = $row['accomp_status'] = 2 ? 'DONE' : 'Unresolved';               
+  $status  = $row['accomp_status'] = 2 ? 'Done' : 'Unresolved';     
+  $withC = $row['withC'] == 1 ? 'W/Collection' : '';   
 	
 	
     // Process the JSON data and generate the PDF using TCPDF or any other library
@@ -110,7 +111,7 @@ $obj_pdf->AddPage();
     </tr>
 	<tr colspan="3">
          <td ><b>Remarks:</b> <br />$remarks</td>
-		 <td ><b>Status:</b> <br />$status</td>
+		 <td ><b>Status:</b> <br />$status $withC</td>
 		 <td><b>Service By:</b> <br />$service</td>
 		 
 		

@@ -52,14 +52,17 @@
               </div>
             </div>
           <div class="card-body px-0 pb-2">
-			<div class="d-flex flex-row ms-1 row-2 gap-1">
-                 <!--<div class="input-group input-group-static mb-4">
+            <!-- <div class="col-3 mx-3">
+          <div class="input-group input-group-static mb-4">
      <label for="sl" class="ms-0">Select View</label>
      <select class="form-control" id="sl" name="view" >
        <option value=1 selected> Calendar View</option>
        <option value= 2> Table View</option>
      </select>
-   </div>-->
+   </div>
+</div> -->
+			<div class="d-flex flex-row ms-1 row-2 gap-1">
+           
                             <button type="button" class="btn btn-block bg-gradient-primary ms-3" data-bs-toggle="modal" data-bs-target="#addSchedule">
 							<span><i class="fa fa-info-circle"></i></span>
                             <span> Add Service Call (Client)</span>

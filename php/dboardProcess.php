@@ -50,7 +50,7 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingSvModal'){
 
 	  </td>
 	  <td class="align-middle text-center text-sm">
-	  <p class="badge badge-sm bg-gradient-success">'.date('M-d-Y',strtotime($row['schedule_date'])).'</p>
+	  <p class="badge badge-sm bg-gradient-danger">'.date('M-d-Y',strtotime($row['schedule_date'])).'</p>
 	</td>
 	</tr>';
 

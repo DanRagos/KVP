@@ -691,7 +691,6 @@ if (isset($_POST['ctr'])){
 //SV TYPE : 1 if client, 2 if contract, 0 if guest
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	print_r($_POST);
-
 	$client_id = $_POST['client_id'];
 	$contract_id = $_POST['contract_id'];
 	
@@ -703,10 +702,15 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	$model = $_POST['model'];
 	}
 	else {
+		
 	$result1= $client ->get_contract_details($contract_id);
 	$machine_type = $result1['machine_type'];
 	$brand = $result1['brand'];
 	$model = $result1['model'];
+	if ($contract_id) {
+		$brand = NULL;
+		 $model = NULL;
+	}
 	}
 	
 	$rep_problem = $_POST['rep_problem'];
@@ -1130,7 +1134,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'renewContract'){
 	</div>
 	<div class="modal-body">
 	<div class="container">
-	<form action="#" method="POST" id="edit-contract-form" autocomplete="off">
+	<form action="#" method="POST" id="renew-contract-form" autocomplete="off">
 	<input type="hidden" name="contract_id" value = '.$result['contract_id'].'>
 	<input type="hidden" name="cType" value = '.$result['status'].'>
 	<input type="hidden" name="count" value = '.$result['count'].'>
@@ -1204,7 +1208,7 @@ $output .='  <div class="row">
 <div class="col">
 <div class="input-group input-group-outline is-filled" >
 <label class="form-label">PMS Count:</label>
-<input type="number" min=1 name="sv_count"  value = '.$result['sv_call'].' class="form-control" required>
+<input type="number" min=1 name="sv_count"  value = "0" class="form-control" required>
 </div>
 </div></div>';
 }
@@ -1764,6 +1768,63 @@ $pmsCount++;
     }
 }
 if (isset($_POST['action']) && $_POST['action'] == 'renew_contract') {
+	print_r($_POST);
+$contract_id = $_POST['contract_id'];
+$cType = $_POST['cType'];
+$count = $_POST['count'];
+$total = $_POST['total'];
+$coverage = $_POST['coverage'];
+$sv_count = $_POST['sv_count'];
+$brand = $_POST['brand'];
+$model = $_POST['model'];
+$frequency = $_POST['frequency'];
+$turn_over = $_POST['turn_over'];
+$coverage_input = $_POST['coverage_input'];
+$pTurn_over = $_POST['pTurn_over'];
+$pCoverage_input = $_POST['pCoverage_input'];
+$nTurn_over = $_POST['turn_over'];
+
+$months = ($frequency == 1) ? "3":  (($frequency)== 2 ? "6":"12");
+$pmsCount = 0;
+
+do {
+	$nTurn_over = date('Y-m-d', strtotime("$nTurn_over + $months months"));
+	$pmsCount++;
+	}while($nTurn_over < $coverage_input);
+
+	try {
+		
+        $coverageTimestamp = strtotime($coverage);
+        $coverageInputTimestamp = strtotime($coverage_input);
+
+        if (strtotime($turn_over) > strtotime($coverage_input)) {
+            $response = array(
+                'message' => "Invalid coverage input. Please input later dates",
+                'status' => 0,
+				'pmsCount' => $pmsCount
+
+            );
+        
+        } else {
+            // Process the valid input
+            // ...
+			$newTotal = $pmsCount;
+			$newCount = $pmsCount;
+				$response = array(
+                'message' => "Success",
+                'status' => 1,
+				'pmsCount' => $newTotal
+
+            );
+			$client->udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverage_input, $pTurn_over, $pCoverage_input, $cType, $newCount, $newTotal, $sv_count );
+        }
+		echo json_encode($response);
+    } catch (Exception $e) {
+        echo "An error occurred. Please contact the administrator";
+    }
+
+
+
 
 }
 if (isset($_GET['action'])&& $_GET['action']=='show_contract_acrdn'){

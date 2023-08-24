@@ -131,9 +131,9 @@ class Clients extends Db {
 	public function add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date){
 		$type = 2;
 	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, NULL, NULL, :rep_problem)";
+		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, :brand, :model, :rep_problem)";
 		$stmt = $this->conn-> prepare($sql);
-		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'machine_type'=>$machine_type, 'rep_problem'=>$rep_problem]);
+		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'brand'=> $brand, 'model'=>$model, 'machine_type'=>$machine_type, 'rep_problem'=>$rep_problem]);
 		$last_id = $this->conn->lastInsertId();
 		$last_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
 		return $last_sched;
@@ -197,19 +197,20 @@ WHERE schedule.status != 2;";
 		COALESCE(clients.client_address, service_call.guest_address,
 		 COALESCE((SELECT clients.client_address FROM clients where clients.client_id = service_call.client_id), 'Null'))as client_address,
 		  COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') AS imglink, COALESCE(contract.brand, service_call.brand) AS brand, 
-		  COALESCE(contract.model, service_call.model) AS model FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id 
-		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN clients ON contract.client_id = clients.client_id 
+		  COALESCE(contract.model, service_call.model) AS model FROM schedule 
+		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id
+          LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+          LEFT JOIN clients ON contract.client_id = clients.client_id 
 		  WHERE schedule.schedule_date 
-		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0;";
+		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0;;";
 $stmt = $this ->conn ->prepare($sql);
 $stmt -> execute([]);
 $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 return $result;
 	}
 	public function display_pend_sv (){
-		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, service_call.brand, service_call.model
-		from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
-		LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
+		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract on service_call.contract_id = contract.contract_id LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
+		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01');";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -224,24 +225,33 @@ return $result;
 		return $result;
 	}
 	public function display_resolved_month (){
-		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, clients.imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
-		AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
+		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
+		schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+		COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, 
+		COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date 
+		FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
+		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
+		WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
+				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
 	}
 		public function get_schedule ($id) {
-			$sql = "SELECT schedule.*, clients.client_name, COALESCE(contract.contract_id, service_call.sv_id) AS id,
-			COALESCE(contract.brand, service_call.brand) as brand, 
-			COALESCE(contract.model, service_call.model) as model, 
-			COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END)
-			AS client_name,COALESCE(clients.client_address, service_call.guest_address) 
-			AS address, service_call.rep_problem, schedule.schedule_type, service_call.contract_id as sv_contract, contract.frequency, contract.count, contract.total, contract.sv_call FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1
-			AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON
-			(schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id)
-			LEFT JOIN clients ON (contract.client_id = clients.client_id) 
-			OR (service_call.client_id = clients.client_id) WHERE schedule.schedule_id= :id";
+			$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
+			COALESCE(clients.client_address, service_call.guest_address) as address, 
+			CASE WHEN service_call.contract_id IS NOT NULL THEN COALESCE(contract.brand, service_call.brand) 
+			ELSE COALESCE(service_call.brand, contract.brand) END AS brand, CASE WHEN service_call.contract_id 
+			IS NOT NULL THEN COALESCE(contract.model, service_call.model) ELSE COALESCE(service_call.model, contract.model) END AS model,
+			 COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, service_call.rep_problem, 
+			 service_call.contract_id as sv_contract, contract.frequency, contract.contract_id, service_call.sv_id, contract.count, contract.total, contract.sv_call  FROM schedule
+			  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
+
+			  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+			LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
+			WHERE schedule.status != 2 AND schedule.schedule_id= :id";
 			$stmt = $this->conn->prepare($sql);
 			$stmt->execute(['id'=>$id]);
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -404,12 +414,14 @@ public function get_contract_details($id) {
 		
 	}	
 		public function get_pms_report($accomp_id) {
-		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_date, accomplished_schedule.accomp_status, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) 
-		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, 
-		CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
-		AS client_name,COALESCE(clients.client_address, service_call.guest_address)
-		AS address, service_call.rep_problem, accomplished_schedule.accomp_date, accomplished_schedule.diagnosis, accomplished_schedule.service_don
-, accomplished_schedule.recomm FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) WHERE schedule.status IN (2, 3) AND accomplished_schedule.id = :accomp_id";
+		$sql = "SELECT accomplished_schedule.id as accomp_id,  accomplished_schedule.diagnosis,  accomplished_schedule.service_don,  accomplished_schedule.recomm ,accomplished_schedule.accomp_status, accomplished_schedule.withC, 
+		schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+		COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, 
+		COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date 
+		FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
+		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
+		WHERE schedule.status IN (2, 3) and accomplished_schedule.id = :accomp_id ORDER BY schedule.schedule_id DESC;";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['accomp_id'=>$accomp_id]);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
