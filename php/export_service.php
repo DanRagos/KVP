@@ -30,8 +30,8 @@ if (isset($_POST['jsonData'])) {
 
  $fSchedDate = date('M d, Y', strtotime($jsonData['schedule_date']));
  $fAccompDate = date('M d, Y', strtotime($jsonData['accomp_date']));
-  $status  = $row['accomp_status'] = 2 ? 'Done' : 'Unresolved';     
-  $withC = $row['withC'] == 1 ? 'W/Collection' : '';   
+  $status  = $jsonData['accomp_status'] == 2 ? 'Done' : 'Unresolved';     
+  $withC = $jsonData['withC'] == 1 ? 'W/Collection' : '';   
 	
 	
     // Process the JSON data and generate the PDF using TCPDF or any other library

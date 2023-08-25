@@ -239,28 +239,28 @@ $("body").on("click",".addContractBtn", function(e) {
 				data: $("#add-contract-form").serialize()+"&action=add_contract",
 				success: function (response){
 				console.log(response);
-				// Swal.fire({
-        //     icon: 'success',
-        //     title: 'Contract Added',
-        //     timer: 1500,
-        //     timerProgressBar: true,
-        //     didOpen: () => {
-        //       Swal.showLoading();
-        //     },
-        //     willClose: () => {
-        //       Swal.hideLoading();
-        //     },
-        //   });
-				// 	$("#add-contract-form")[0].reset();
-				// 	$("#addContract").modal('hide');
-				/*data = JSON.parse(response);
+				Swal.fire({
+            icon: 'success',
+            title: 'Contract Added',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+            },
+            willClose: () => {
+              Swal.hideLoading();
+            },
+          });
+					$("#add-contract-form")[0].reset();
+					$("#addContract").modal('hide');
+				data = JSON.parse(response);
 				$("#client_id").val(add_id);
 				$("#client_name").val(data.client_name);
 				$("#address").val(data.client_address);
 				$("#cPerson").val(data.contact_person);
 				$("#email").val(data.contact_email);
 				$("#title1").text('Add contract for '+data.client_name);
-				*/
+				
 	
 				}
 			});

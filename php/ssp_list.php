@@ -442,6 +442,72 @@ array('db' => 'rep_problem', 'dt'=>'rep_problem'),
 
 );
  }
+ else if(isset($_GET['db'])&& $_GET['db']==8){
+	$primaryKey = 'contract_id';
+	$isActive = 1;
+
+
+	// DB table to use
+$table = <<<EOT
+(SELECT clients.client_id as clientId, clients.client_name, clients.client_address, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.isActive = 1 AND contract.count > 0) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'contract_id', 'dt' => 'contractId'),
+array('db' => 'client_name', 'dt'=>'client_name'),
+array('db' => 'client_address', 'dt'=>'client_address'),
+array( 'db' => 'clientId', 'dt' => 'clientId'),
+array( 'db' => 'machine_name', 'dt' => 'machine_name'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'turn_over', 'dt'=>'turnover'),
+array('db' => 'coverage', 'dt'=>'coverage'),
+array('db' => 'pTurn_over', 'dt'=>'pTurn_over'),
+array('db' => 'pCoverage', 'dt'=>'pCoverage'),
+array('db' => 'status', 'dt'=>'status'),
+array('db' => 'frequency', 'dt'=>'frequency'),
+array('db' => 'count', 'dt'=>'count'),
+array('db' => 'total', 'dt'=>'total'),
+array('db' => 'sv_call', 'dt'=>'sv_call'),
+array('db' => 'contract_id', 'dt'=>'contract_id'),
+
+
+);
+ }
+ else if(isset($_GET['db'])&& $_GET['db']==9){
+	$primaryKey = 'contract_id';
+	$isActive = 1;
+
+
+	// DB table to use
+$table = <<<EOT
+(SELECT clients.client_id as clientId, clients.client_name, clients.client_address, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+left join machine_type on contract.machine_type = machine_type.machine_id where contract.isActive = 1 AND contract.count <= 0) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'contract_id', 'dt' => 'contractId'),
+array('db' => 'client_name', 'dt'=>'client_name'),
+array('db' => 'client_address', 'dt'=>'client_address'),
+array( 'db' => 'clientId', 'dt' => 'clientId'),
+array( 'db' => 'machine_name', 'dt' => 'machine_name'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'turn_over', 'dt'=>'turnover'),
+array('db' => 'coverage', 'dt'=>'coverage'),
+array('db' => 'pTurn_over', 'dt'=>'pTurn_over'),
+array('db' => 'pCoverage', 'dt'=>'pCoverage'),
+array('db' => 'status', 'dt'=>'status'),
+array('db' => 'frequency', 'dt'=>'frequency'),
+array('db' => 'count', 'dt'=>'count'),
+array('db' => 'total', 'dt'=>'total'),
+array('db' => 'sv_call', 'dt'=>'sv_call'),
+array('db' => 'contract_id', 'dt'=>'contract_id'),
+
+
+);
+ }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * If you just want to use the basic configuration for DataTables with PHP
  * server-side, there is no need to edit below this line.

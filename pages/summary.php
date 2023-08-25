@@ -1216,32 +1216,33 @@ $client_img =$row['imglink'];
                     data: $('#renew-contract-form').serialize() + "&action=renew_contract",
                     success: function(response) {
                      console.log(response);
-                        // console.log(response);
-                        // data = JSON.parse(response);
-                        // console.log(data);
-                        // if (data.status === 0) {
-                        //     Swal.fire(
-                        //         'Invalid',
-                        //         data.message,
-                        //         'error'
-                        //     );
-                        // } else {
-                        //     Swal.fire({
-                        //         icon: 'success',
-                        //         title: 'Contract Updated',
-                        //         text: 'Contract has been edited successfully.', // Add a custom success message here if needed
-                        //         timer: 1500,
-                        //         timerProgressBar: true,
-                        //         didOpen: () => {
-                        //             Swal.showLoading();
-                        //         },
-                        //         willClose: () => {
-                        //             Swal.hideLoading();
-                        //             $('#editContractModal').modal('hide');
-                        //             table.ajax.reload();
-                        //         },
-                        //     });
-                        // }
+                        console.log(response);
+                        data = JSON.parse(response);
+                        console.log(data);
+                        if (data.status === 0) {
+                            Swal.fire(
+                                'Invalid',
+                                data.message,
+                                'error'
+                            );
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Contract Updated',
+                                text: 'Contract has been edited successfully.', // Add a custom success message here if needed
+                                timer: 1500,
+                                timerProgressBar: true,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                willClose: () => {
+                                    Swal.hideLoading();
+                                    $('#renewContractModal').modal('hide');
+                                    $("#renew-contract-form")[0].reset();
+                                    completeTable.ajax.reload();
+                                },
+                            });
+                        }
 
 
                     }

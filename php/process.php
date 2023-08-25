@@ -1416,7 +1416,7 @@ if(isset($_POST['action'])&& $_POST['action']=='updatePms'){
 
 	//update accomp table;
 	$update_accomp = $client->update_accomp($serv_date, $diagnosis, $service_done, $recomm, $accomp_id);
-print_r( $update_accomp);
+
 
 
 }
@@ -1768,7 +1768,7 @@ $pmsCount++;
     }
 }
 if (isset($_POST['action']) && $_POST['action'] == 'renew_contract') {
-	print_r($_POST);
+	
 $contract_id = $_POST['contract_id'];
 $cType = $_POST['cType'];
 $count = $_POST['count'];
