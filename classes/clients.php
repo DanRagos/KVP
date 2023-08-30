@@ -162,17 +162,19 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 	}
 	// Display Schedule
 	public function display_schedule () {
-		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type,
-COALESCE(contract.brand, service_call.brand) as brand,
-COALESCE(contract.model, service_call.model) as model,
-COALESCE(clients.client_name,
-CASE WHEN service_call.guest = 0 THEN service_call.guest_name
-END) AS client_name
-FROM schedule
-LEFT JOIN contract ON schedule.contract_id = contract.contract_id
-LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id
-LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
-WHERE schedule.status != 2;";
+		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
+		COALESCE(clients.client_address, service_call.guest_address) as address, 
+		CASE WHEN service_call.contract_id IS NOT NULL THEN COALESCE(contract.brand, service_call.brand) 
+		ELSE COALESCE(service_call.brand, contract.brand) END AS brand, CASE WHEN service_call.contract_id 
+		IS NOT NULL THEN COALESCE(contract.model, service_call.model) ELSE COALESCE(service_call.model, contract.model) END AS model,
+		 COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, service_call.rep_problem, machine_type.machine_name, 
+		 service_call.contract_id as sv_contract, contract.frequency, contract.contract_id, service_call.sv_id, contract.count, contract.total, contract.sv_call  FROM schedule
+		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		
+		  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
+		LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id)
+		WHERE schedule.status != 2";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute();
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);

@@ -46,7 +46,7 @@
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
             <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Schedule</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Calendar</h6>
+          <h6 class="font-weight-bolder mb-0">Service Done</h6>
         </nav>
         <?php include 'nav.php'; ?>
       </div>
@@ -86,6 +86,7 @@
         <thead>
             <tr>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Service no.</th>
 					  <th class="text-center text-uppercase text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Name</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client Address</th>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>

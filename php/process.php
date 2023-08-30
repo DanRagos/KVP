@@ -148,7 +148,10 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
 	$id = $_POST['id'];
 	$result = $client->get_schedule($id);
 	$output ='';
-	$status = $result['status'] == 1 ? "Delayed" : ($result['status'] == 3 ? "Unresolved" : " ");
+	$status = $result['status'] == 1 ? "Delayed" : ($result['status'] == 3 ? "Unresolved" : "Not Done");
+	if(date('Y-m', strtotime($result['schedule_date']) ) < date('Y-m') ) {
+		$status = "Delayed";
+	}
 	$check_collection = $client->with_collection ($result['sv_contract']);
 	$output.='  <div class="modal-header rounded-0">
                 <h5 class="modal-title">Schedule Details</h5>
@@ -171,7 +174,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
 							<dt class="text-primary">Client Address</dt>
                             <dd id="address" class="">'.$result['address'].'</dd>
                             <dt class="text-primary">Schedule</dt>
-                            <dd id="start" class="">'.$result['schedule_date'].'</dd>
+                            <dd id="start" class="">'.date('M d, Y', strtotime($result['schedule_date'])).'</dd>
 							<dt class="text-primary">Status</dt>
                             <dd id="stats" class="">'.$status.'</dd>
 							<dt class="text-primary">Problem</dt>
@@ -1187,6 +1190,12 @@ $output .= '</select>
 	<input type="date" class="form-control"name="coverage_input" required value='.$result['coverage'].' min = '.$result['coverage'].'>
   </div>
 </div>
+<div class="col">
+	<div class="input-group input-group-static mb-4">
+	  <label class="form-">First Pm Schedule</label>
+	  <input type="date" class="form-control"name="firstPm"  value='.date('Y-m-d').' required>
+	</div>
+  </div>
 </div>
 <div class="row">
 	  <div class="col">
@@ -1768,7 +1777,7 @@ $pmsCount++;
     }
 }
 if (isset($_POST['action']) && $_POST['action'] == 'renew_contract') {
-	
+$firstPm = $_POST['firstPm'];	
 $contract_id = $_POST['contract_id'];
 $cType = $_POST['cType'];
 $count = $_POST['count'];
@@ -1816,6 +1825,7 @@ do {
 				'pmsCount' => $newTotal
 
             );
+			$client->add_schedule_contract($contract_id, $firstPm, 1);
 			$client->udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverage_input, $pTurn_over, $pCoverage_input, $cType, $newCount, $newTotal, $sv_count );
         }
 		echo json_encode($response);

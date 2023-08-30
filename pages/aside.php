@@ -19,33 +19,13 @@
           </a>
         </li>
    
-			<li class="nav-item">
-         <a data-bs-toggle="collapse" href="#clients" class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>" role="button" aria-expanded="false">
-<i class="material-icons-round opacity-10">face</i>
-<span class="nav-link-text ms-2 ps-1">Clients</span>
-</a>
-<div class="collapse" id="clients" style="">
-<ul class="nav ">
-<li class="nav-item active">
-<a class="nav-link text-white  <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/clients.php">
-<span class="sidenav-mini-icon">CL</span>
-<span class="sidenav-normal  ms-2  ps-1">Clients List</span>
-</a>
-</li>
-<li class="nav-item ">
-<a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "service.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/service.php">
-<span class="sidenav-mini-icon"> S </span>
-<span class="sidenav-normal  ms-2  ps-1"> Service Done </span>
-</a>
-</li>
-<li class="nav-item ">
-<a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "contract.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/contract.php">
-<span class="sidenav-mini-icon"> P </span>
-<span class="sidenav-normal  ms-2  ps-1"> PMS Masterlist </span>
-</a>
-</li>
-</ul>
-</div>
+        <li class="nav-item">
+          <a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "clients.php")?  "bg-gradient-primary active" : "";?>" href="../pages/clients.php">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">face</i>
+            </div>
+            <span class="nav-link-text ms-1">Clients</span>
+          </a>
         </li>
 		<li class="nav-item">
          <a data-bs-toggle="collapse" href="#schedule" class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "schedule.php")?  "bg-gradient-primary active" : "";?>"" aria-controls="dashboardsExamples" role="button" aria-expanded="false">

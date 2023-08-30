@@ -32,21 +32,28 @@ return '<div class="d-flex px-2 py-1">
 	<h6 class="text-center mb-0 text-sm">'.$row['schedule_id'].'</h6>
 	</div>';
 }),
-array( 'db' => 'client_name', 'dt' => 1,
+array( 'db' => 'accomp_id', 'dt' => 1,
+'formatter' => function($d,$row){
+return '<div class="d-flex px-2 py-1">
+	<div class="d-flex flex-column justify-content-center">
+	<h6 class="text-center mb-0 text-sm">'.$row['accomp_id'].'</h6>
+	</div>';
+}),
+array( 'db' => 'client_name', 'dt' => 2,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
 	<h5 class="text-center text-xs text-secondary mb-0">'.$d.'</h5>
 	</div>';
 }),
-array( 'db' => 'client_address', 'dt' => 2,
+array( 'db' => 'client_address', 'dt' => 3,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
 	<h5 class="text-center text-xs text-secondary mb-0">'.$d.'</h5>
 	</div>';
 }),
-array( 'db' => 'schedule_type',  'dt' => 3,
+array( 'db' => 'schedule_type',  'dt' => 4,
 'formatter'=> function($d,$row){
 $type = $d == 2 ? "SV" : "PMS";
 $color = $row['schedule_type'] == 1 ? "primary" :  "success";
@@ -55,7 +62,7 @@ return '   <td class="align-middle text-center text-sm">
                       </td>';
 }),
 
-array( 'db' => 'brand', 'dt' => 4,
+array( 'db' => 'brand', 'dt' => 5,
 'formatter' => function($d,$row){
 return '
 	<div class="d-flex flex-column justify-content-center">
@@ -63,16 +70,16 @@ return '
 	</div>';
 }),
 
-array( 'db' => 'model', 'dt' => 5, 'formatter' => function($d,$row){
+array( 'db' => 'model', 'dt' => 6, 'formatter' => function($d,$row){
 return '<align-middle text-center text-sm">
 	<div class="align-middle text-center text-sm">
 	<h6 class="text-xs text-uppercase text-secondary mb-0">'.$d.'</h6> </div>';}),
-array( 'db' => 'rep_problem', 'dt' => 6,
+array( 'db' => 'rep_problem', 'dt' => 7,
 'formatter'=> function($d,$row){
 return '<div class ="align-middle text-center text-sm">'.$d.'</div>';}),
 array(
 'db'        => 'accomp_date',
-'dt'        => 7,
+'dt'        => 8,
 'formatter' => function( $d, $row) {
 return ($d!==null) ? '<td class ="align-middle text-center text-sm"  "'.strtotime($d).'">
 <span class="badge badge-sm bg-gradient-info">'.date( 'M d, Y', strtotime($d)).'</span>
@@ -80,7 +87,7 @@ return ($d!==null) ? '<td class ="align-middle text-center text-sm"  "'.strtotim
 array('db'=> 'withC', 'dt'=> ''), 
 array(
 	'db'        => 'accomp_status',
-	'dt'        => 8,
+	'dt'        => 9,
 	'formatter' => function( $d, $row) {
 		$aStats = ($row['withC'] >0 )? "W/Collection": " ";
 	$status =  ($row['accomp_status'] == 2) ? '<span class="badge badge-sm bg-gradient-success">DONE '. $aStats.'</span>' 
@@ -91,7 +98,7 @@ array(
 
 array(
 'db'        => 'accomp_id',
-'dt'        => 9,
+'dt'        => 10,
 'formatter' => function( $d, $row) {
 return
 '<div class ="align-middle text-center text-sm">
@@ -504,6 +511,50 @@ array('db' => 'count', 'dt'=>'count'),
 array('db' => 'total', 'dt'=>'total'),
 array('db' => 'sv_call', 'dt'=>'sv_call'),
 array('db' => 'contract_id', 'dt'=>'contract_id'),
+
+
+);
+ }
+ else if(isset($_GET['db'])&& $_GET['db']==10){
+	$primaryKey = 'schedule_id';
+	$isActive = 1;
+
+
+	// DB table to use
+$table = <<<EOT
+(SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
+COALESCE(clients.client_address, service_call.guest_address) as address, 
+CASE WHEN service_call.contract_id IS NOT NULL THEN COALESCE(contract.brand, service_call.brand) 
+ELSE COALESCE(service_call.brand, contract.brand) END AS brand, CASE WHEN service_call.contract_id 
+IS NOT NULL THEN COALESCE(contract.model, service_call.model) ELSE COALESCE(service_call.model, contract.model) END AS model,
+ COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, service_call.rep_problem, machine_type.machine_name, 
+ service_call.contract_id as sv_contract, contract.frequency, contract.contract_id, service_call.sv_id, contract.count, contract.total, contract.sv_call  FROM schedule
+  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
+
+  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
+LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id)
+WHERE schedule.status != 2) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'schedule_id', 'dt' => 'schedule_id'),
+array('db' => 'schedule_date', 'dt'=>'schedule_date'),
+array('db' => 'status', 'dt'=>'status'),
+array( 'db' => 'schedule_type', 'dt' => 'schedule_type'),
+array( 'db' => 'address', 'dt' => 'address'),
+array('db' => 'brand', 'dt'=>'brand'),
+array('db' => 'model', 'dt'=>'model'),
+array('db' => 'machine_name', 'dt'=>'machine_name'),
+array('db' => 'client_name', 'dt'=>'client_name'),
+array('db' => 'rep_problem', 'dt'=>'rep_problem'),
+array('db' => 'sv_contract', 'dt'=>'sv_contract'),
+array('db' => 'frequency', 'dt'=>'frequency'),
+array('db' => 'contract_id', 'dt'=>'contract_id'),
+array('db' => 'sv_id', 'dt'=>'sv_id'),
+array('db' => 'count', 'dt'=>'count'),
+array('db' => 'total', 'dt'=>'total'),
+array('db' => 'sv_call', 'dt'=>'sv_call'),
 
 
 );
