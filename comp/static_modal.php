@@ -541,21 +541,22 @@
 <!-- Modal for Report New Db -->
 <div class="modal fade" id="reportNewModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="staticBackdropLabel">Report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <form id="report-form" autocomplete="off">
                 <div class="row d-flex justify-content-start">
                     <div class="col-6">
                         <div class="input-group input-group-static mb-4">
                             <label for="reportType" class="ms-0">Report Type</label>
-                            <select class="form-control" id="reportType">
+                            <select class="form-control" id="reportType" name="reportType">
                                 <option value=1>Schedules</option>
                                 <option value=2>Contracts</option>
-                                <option value=3>Serviced By</option>
+                                <option value=3>Service Report</option>
                             </select>
                         </div>
                     </div>
@@ -565,13 +566,13 @@
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label>Report Name</label>
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="reportName">
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus">
+                                    <select class="form-control" id="schedType" name="schedType">
                                         <option value=1 selected>PMS</option>
                                         <option value=2>Service Call</option>
                                     </select>
@@ -580,11 +581,10 @@
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Schedule Status</label>
-                                    <select class="form-control" id="scheduleStatus">
+                                    <select class="form-control" id="scheduleStatus" name="schedStatus">
                                         <option value=0 selected>Not Done</option>
-                                        <option value=1>Delayed</option>
-                                        <option value=2 >Not Done</option>
-                                        <option value=3>Unresolved</option>
+                                        <option value=2 >Done</option>
+                                        <option class="unresolved" value=3 style="display:none;">Unresolved</option>
                                     </select>
                                 </div>
                             </div>
@@ -593,112 +593,112 @@
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label>Schedule Date</label>
-                                    <input name="datefilter" class="form-control">
+                                    <input name="datefilter" class="form-control" name="schedDate">
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Client (Optional) </label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
-                                    </select>
+                                    <label for="scheduleStatus1" class="ms-0">Client (Optional) </label>
+                                    <div  class="form-control p-0 sample-select1" id="myDiv" name="client"></div>    
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col" id="servicedBy" style="display:none;">
                                 <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Serviced By (Optional) </label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
-                                    </select>
+                                    <label for="scheduleStatus1" class="ms-0">Serviced By (Optional) </label>
+                                    <div  class="form-control p-0 sample-select" id="myDiv1" name="service_by"></div>    
                                 </div>
                             </div>
                         </div>
-                        <div class="row" id="svType" style="display:none;">
-                            <div class="col">
-
-                                <div class="input-group input-group-static mb-4">
-                                    <label>Report Name</label>
-                                    <input type="text" class="form-control">
-                                </div>
-
-                            </div>
-                            <div class="col">
-                                <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                       
                     </div>
-                            <!----- Report for Contrac Report Report -->
+                            <!----- Report for Contract Report Report -->
                             <div id="contractReport" style="display:none;">
                         <div class="row">
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label>Report Name</label>
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="reportName" >
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
+                                    <label for="scheduleStatus" class="ms-0">Contract Status</label>
+                                    <select class="form-control" id="scheduleStatus" name="contractStatus">
+                                        <option value=1 selected>Active Contract</option>
+                                        <option value=2>Completed Contract</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <div class="row" id="pmsType">
-                            <div class="col">
-
+                        <div class="row">
+                        <div class="col-4">
                                 <div class="input-group input-group-static mb-4">
-                                    <label>Report Name</label>
-                                    <input type="text" class="form-control">
+                                    <label>Date Coverage</label>
+                                    <input name="datefilter" class="form-control" >
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
-                                    </select>
+                                    <label for="scheduleStatus1" class="ms-3">Client (Optional) </label>
+                                    <div  class="form-control p-0 sample-select1" id="myDiv" name="client"></div>    
                                 </div>
                             </div>
                         </div>
-                        <div class="row" id="svType">
-                            <div class="col">
-
-                                <div class="input-group input-group-static mb-4">
-                                    <label>Report Name</label>
-                                    <input type="text" class="form-control">
-                                </div>
-
-                            </div>
-                            <div class="col">
-                                <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus">
-                                        <option value=1 selected>PMS</option>
-                                        <option value=2>Service Call</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                       
                     </div>
+
+                       <!----- Report for Service By -->
+                       <div id="serviceReport" style="display:none;">
+                        <div class="row">
+                            <div class="col">
+                                <div class="input-group input-group-static mb-4">
+                                    <label>Report Name</label>
+                                    <input type="text" class="form-control" name="reportName" >
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group input-group-static mb-4">
+                                    <label for="scheduleStatus" class="ms-0">Schedule Type</label>
+                                    <select class="form-control" id="scheduleStatus" name="contractStatus">
+                                        <option value=0 selected> All </option>
+                                        <option value=1 >PMS</option>
+                                        <option value=2>Service Call</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-4">
+                                <div class="input-group input-group-static mb-4">
+                                    <label>Service Date</label>
+                                    <input name="datefilter" class="form-control" >
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group input-group-static mb-4">
+                                    <label for="scheduleStatus1" class="ms-3">Client (Optional) </label>
+                                    <div  class="form-control p-0 sample-select1" id="myDiv" name="client"></div>    
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group input-group-static mb-4">
+                                    <label for="scheduleStatus1" class="ms-0">Serviced By (Optional) </label>
+                                    <div  class="form-control p-0 sample-select" id="myDiv1" name="service_by"></div>    
+                                </div>
+                            </div>
+                        </div>
+                       
+                    </div>
+
                 </div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Confirm</button>
+                <button type="button" class="btn btn-primary" id="report-confirm-btn">Confirm</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
             </div>
+            </form>
         </div>
     </div>
 </div>

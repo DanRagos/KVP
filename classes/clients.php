@@ -682,6 +682,13 @@ public function getUserServ($client_id){
 
 }
 
+public function reportQuery($query){
+	$sql = "$query";
+	$stmt= $this->conn->prepare($sql);
+	$stmt->execute([]);
+	return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }
 
 

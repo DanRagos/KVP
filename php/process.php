@@ -1331,6 +1331,19 @@ if (isset($_GET['action'])&& $_GET['action'] == 'getServiceBy'){
 
 }
 
+if (isset($_GET['action'])&& $_GET['action'] == 'reportServiceClient'){
+	$result = array();
+	$users = $client->showUsers();
+	$clients = $client->showClients();
+	header('Content-Type: application/json');
+	$result = array(
+		'users' => $users,
+		'clients' => $clients,
+	);
+	echo json_encode($result);
+
+}
+
 
 if (isset($_GET['action'])&& $_GET['action'] == 'edit_pm_details'){
 	$accomp_id = $_GET['accomp_id'];
@@ -1904,6 +1917,98 @@ $output .= '
 
 
     echo $output;
+}
+if (isset($_POST['action'])&& $_POST['action']== 'reportProcess') {
+	print_r($_POST);
+	$query = '';
+	$query1='';
+	if ($_POST['reportType']== 1){
+		$schedType = $_POST['schedType'];
+		$schedStatus = $_POST['schedStatus'];
+		$stringDate = $_POST['datefilter'];
+		$client_t= $_POST['client'];
+		$serviceBy = $_POST['service_by'];
+		$string=$stringDate;
+		$last_space = strrpos($string, ' ');
+		$last_word = substr($string, $last_space);
+		$first_chunk = substr($string, 0, $last_space - 2);
+		$dateTo = date('Y-m-d', strtotime($last_word));
+		$dateFrom = date('Y-m-d', strtotime($first_chunk));
+		if($schedStatus ==0){
+		$query1.="WHERE schedule.schedule_type = $schedType AND schedule.status =$schedStatus AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";		
+		($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+		$query.= "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
+		COALESCE(clients.client_address, service_call.guest_address) as address, clients.client_id,
+		CASE WHEN service_call.contract_id IS NOT NULL THEN COALESCE(contract.brand, service_call.brand) 
+		ELSE COALESCE(service_call.brand, contract.brand) END AS brand, CASE WHEN service_call.contract_id 
+		IS NOT NULL THEN COALESCE(contract.model, service_call.model) ELSE COALESCE(service_call.model, contract.model) END AS model,
+		 COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, service_call.rep_problem, machine_type.machine_name, 
+		 service_call.contract_id as sv_contract, contract.frequency, contract.contract_id, service_call.sv_id, contract.count, contract.total, contract.sv_call  FROM schedule
+		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 		
+		  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
+		LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id) $query1";
+		}
+		if($schedStatus ==2){		
+			$query1.="WHERE schedule.schedule_type = $schedType AND schedule.status =$schedStatus AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";		
+			($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+			($serviceBy) ? $query1.=' AND user_sched.uid in ('.$serviceBy.')' : '';
+			$query.= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
+			schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+			COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, users.mem_id, users.firstname, users.lastname,
+			COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address,
+			clients.client_id,service_call.rep_problem, accomplished_schedule.accomp_date 
+			FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
+			 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+			LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
+		   LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id
+		   LEFT JOIN users on user_sched.uid = users.mem_id $query1";
+			}
+			if($schedStatus ==3){		
+				$query1.="WHERE schedule.schedule_type = $schedType AND schedule.status =$schedStatus AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";		
+				($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+				($serviceBy) ? $query1.=' AND user_sched.uid in ('.$serviceBy.')' : '';
+				$query.= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
+				schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+				COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, users.mem_id, users.firstname, users.lastname,
+				COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address,
+				clients.client_id,service_call.rep_problem, accomplished_schedule.accomp_date 
+				FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
+				 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+				LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
+			   LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id
+			   LEFT JOIN users on user_sched.uid = users.mem_id $query1";
+				}
+
+				$result  = $client->reportQuery($query);
+
+	}
+	if ($_POST['reportType']== 2){
+		$contractStatus = $_POST['contractStatus'];
+		$client_t = $_POST['client'];
+		$datefilter = $_POST['datefilter'];
+	
+		$string=$datefilter;
+		$last_space = strrpos($string, ' ');
+		$last_word = substr($string, $last_space);
+		$first_chunk = substr($string, 0, $last_space - 2);
+		$dateTo = date('Y-m-d', strtotime($last_word));
+		$dateFrom = date('Y-m-d', strtotime($first_chunk));
+		if($contractStatus == 1){
+			$query1.= "where contract.isActive = 1 AND contract.count > 0 AND (contract.turn_over BETWEEN '$dateFrom' AND '$dateTo' OR contract.coverage BETWEEN '$dateFrom' AND '$dateTo') ";
+			($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+		}
+		else {
+			$query1.= "where contract.isActive = 1 AND contract.count <= 0 AND (contract.turn_over BETWEEN '$dateFrom' AND '$dateTo' OR contract.coverage BETWEEN '$dateFrom' AND '$dateTo') ";
+			($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+		}
+		$query.= "SELECT clients.client_id as clientId, clients.client_name, clients.client_address, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
+		left join machine_type on contract.machine_type = machine_type.machine_id $query1";
+
+		$result  = $client->reportQuery($query);
+	}
+echo json_encode($result);
+echo $query;
 }
 ?>
 
