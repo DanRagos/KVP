@@ -294,24 +294,31 @@ $(this).val('');
           if (choice == 1){
             $('#scheduleReport input, #scheduleReport select').prop('disabled', false);
             $('#contractReport input, #contractReport select').prop('disabled', true);
+            $('#serviceReport input, #serviceReport select').prop('disabled', true);
             $("#scheduleReport").show();
             $("#contractReport").hide();
             $("#serviceReport").hide();
           }
           else if (choice == 2){
             $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
+            $('#serviceReport input, #serviceReport select').prop('disabled', true);
             $('#contractReport input, #contractReport select').prop('disabled', false);
             $("#scheduleReport").hide();
             $("#contractReport").show();
             $("#serviceReport").hide();
           }
           else if (choice == 3){
+            $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
+            $('#contractReport input, #contractReport select').prop('disabled', true);
+            $('#serviceReport input, #serviceReport select').prop('disabled', false);
             $("#serviceReport").show();
             $("#contractReport").hide();
             $("#scheduleReport").hide();
           }
-          else if (choice == 4){
-            $("#serviceReport").show();
+          else if (choice == 0){
+            $("#scheduleReport").hide();
+            $("#contractReport").hide();
+            $("#serviceReport").hide();
           }
         });
 
@@ -348,7 +355,7 @@ $(this).val('');
                         },
                         dataType: 'json',
                         success: function(data) {
-                            console.log(data);
+                          
                            
 
                             // Assuming the response data is an array of objects with label and value properties
@@ -396,13 +403,17 @@ $(this).val('');
         var formData = new FormData($("#report-form")[0]);
         formData.append('action', 'reportProcess');
 
-        if ($('#reportType').val() == 1) {
-            formData.append('selectInsideDiv', $('#scheduleReport select').val());
-            formData.append('inputInsideDiv', $('#scheduleReport input').val());
-        } else if ($('#selectOption').val() == 2) {
-            formData.append('selectInsideDiv', $('#secondDiv select').val());
-            formData.append('inputInsideDiv', $('#secondDiv input').val());
-        }
+        // if ($('#reportType').val() == 1) {
+        //     formData.append('selectInsideDiv', $('#scheduleReport select').val());
+        //     formData.append('inputInsideDiv', $('#scheduleReport input').val());
+        // } else if ($('#reportType').val() == 2) {
+        //     formData.append('selectInsideDiv', $('#contractReport select').val());
+        //     formData.append('inputInsideDiv', $('#contractReport input').val());
+        // }
+        // else if ($('#reportType').val() == 3) {
+        //     formData.append('selectInsideDiv', $('#serviceReport select').val());
+        //     formData.append('inputInsideDiv', $('#serviceReport input').val());
+        // }
 
        $.ajax({
         url: '../php/process.php',
@@ -411,7 +422,18 @@ $(this).val('');
         contentType: false,
       processData: false,
         success: function(e){
-            console.log(e);
+            $.ajax({
+                url: '../php/export_service.php',
+                method:'GET',
+                data: {rData: e, 
+                    action:'viewReport'
+                },
+                
+                success: function (response){
+                    console.log(response);
+                  
+                                }
+            });
         }
        });
      }) ;              

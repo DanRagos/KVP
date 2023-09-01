@@ -554,6 +554,7 @@
                         <div class="input-group input-group-static mb-4">
                             <label for="reportType" class="ms-0">Report Type</label>
                             <select class="form-control" id="reportType" name="reportType">
+                                <option value=0 selected>Select</option>
                                 <option value=1>Schedules</option>
                                 <option value=2>Contracts</option>
                                 <option value=3>Service Report</option>
@@ -561,7 +562,7 @@
                         </div>
                     </div>
                     <!----- Report for Schedule Report -->
-                    <div id="scheduleReport"">
+                    <div id="scheduleReport"" style="display:none;">
                         <div class="row">
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
@@ -659,7 +660,7 @@
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Schedule Type</label>
-                                    <select class="form-control" id="scheduleStatus" name="contractStatus">
+                                    <select class="form-control" id="scheduleStatus" name="serviceType">
                                         <option value=0 selected> All </option>
                                         <option value=1 >PMS</option>
                                         <option value=2>Service Call</option>

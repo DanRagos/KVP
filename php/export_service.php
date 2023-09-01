@@ -458,6 +458,10 @@ $content .=" \n Generated at $date_today";
 	exit;
 
 }
+if (isset($_GET['action']) && $_GET['action'] == 'viewReport')
+{
+    print_r($_GET);
+}
 else {
     // Return an error response
     $response = array('status' => 'error', 'message' => 'JSON data not received');
