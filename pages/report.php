@@ -104,30 +104,7 @@
         </nav>
         <!-- End Navbar -->
         <div class="container-fluid py-4">
-            <div class="row">
-                <!-- Tabs navs -->
-                <div class="col-lg-6 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
-                    <div class="nav-wrapper position-relative end-0">
-                        <ul class="nav nav-pills nav-fill p-1" role="tablist" id="tabslist">
-                            <li class="nav-item" id="liActive">
-                                <a class="nav-link mb-0 px-0 py-1 active " data-bs-toggle="tab" href="javascript:;"
-                                    role="tab" aria-selected="true">
-                                    <i class="material-icons text-lg position-relative">home</i>
-                                    <span class="ms-1">Generate Report</span>
-                                </a>
-                            </li>
-                            <li class="nav-item" id="liComplete">
-                                <a class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" href="javascript:;" role="tab"
-                                    aria-selected="false">
-                                    <i class="material-icons text-lg position-relative">event_available</i>
-                                    <span class="ms-1">Generated Reports</span>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
-                </div>
-            </div>
+           
             <div class="row">
                 <div class="col-12">
                     <div class="d-flex justify-content-center">
@@ -147,10 +124,11 @@
               </div>
             </div>
           </div> -->
-                    <div class="card my-4" id="tabActive">
+
+                    <div class="card my-4 card " id="tabComplete">
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                                <h6 class="text-white text-capitalize ps-3">Generate Report</h6>
+                                <h6 class="text-white text-capitalize ps-3">Generated Reports</h6>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
@@ -167,15 +145,6 @@
                                     <span> OLD Database (Guest)</span>
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card my-4 card " id="tabComplete" style="display:none">
-                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                                <h6 class="text-white text-capitalize ps-3">Completed Contract</h6>
-                            </div>
-                        </div>
-                        <div class="card-body px-0 pb-2">
                             <div class="table-responsive">
                                 <table id="completedContract" class="table align-items-center mb-0 table-striped"
                                     style="width:100%;">
@@ -231,213 +200,188 @@
     <?php include 'scripts.php' ?>
     <script>
     $(document).ready(function() {
-       //Date Range Picker
-$(function() {
+        //Date Range Picker
+        $(function() {
 
-$('input[name="datefilter"]').daterangepicker({
-autoUpdateInput: false,
-locale: {
-cancelLabel: 'Clear'
-}
-});
+            $('input[name="datefilter"]').daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Clear'
+                }
+            });
 
-$('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
-$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-});
+            $('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate
+                    .format('MM/DD/YYYY'));
+            });
 
-$('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
-$(this).val('');
-});
+            $('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
 
-$('input[name="partsWarranty"]').daterangepicker({
-autoUpdateInput: false,
-locale: {
-cancelLabel: 'Clear'
-}
-});
+            $('input[name="partsWarranty"]').daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Clear'
+                }
+            });
 
-$('input[name="partsWarranty"]').on('apply.daterangepicker', function(ev, picker) {
-$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-});
+            $('input[name="partsWarranty"]').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate
+                    .format('MM/DD/YYYY'));
+            });
 
-$('input[name="partsWarranty"]').on('cancel.daterangepicker', function(ev, picker) {
-$(this).val('');
-});
-
-});
-
-
-        $('#liActive').click(function() {
-            $('#spinner').show();
-            setTimeout(() => {
-                $('#spinner').hide();
-                $('#tabActive').show();
-                $('#tabComplete').hide();
-                $('#tabService').hide();
-
-              
-            }, 300)
-        });
-        $('#liComplete').click(function() {
-            $('#spinner').show();
-            setTimeout(() => {
-                $('#spinner').hide();
-                $('#tabActive').hide();
-                $('#tabComplete').show();
-                $('#tabService').hide();
-            
-            }, 300)
+            $('input[name="partsWarranty"]').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
 
         });
+
         $('#reportType').change(function() {
             let choice = $(this).val();
-          if (choice == 1){
-            $('#scheduleReport input, #scheduleReport select').prop('disabled', false);
-            $('#contractReport input, #contractReport select').prop('disabled', true);
-            $('#serviceReport input, #serviceReport select').prop('disabled', true);
-            $("#scheduleReport").show();
-            $("#contractReport").hide();
-            $("#serviceReport").hide();
-          }
-          else if (choice == 2){
-            $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
-            $('#serviceReport input, #serviceReport select').prop('disabled', true);
-            $('#contractReport input, #contractReport select').prop('disabled', false);
-            $("#scheduleReport").hide();
-            $("#contractReport").show();
-            $("#serviceReport").hide();
-          }
-          else if (choice == 3){
-            $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
-            $('#contractReport input, #contractReport select').prop('disabled', true);
-            $('#serviceReport input, #serviceReport select').prop('disabled', false);
-            $("#serviceReport").show();
-            $("#contractReport").hide();
-            $("#scheduleReport").hide();
-          }
-          else if (choice == 0){
-            $("#scheduleReport").hide();
-            $("#contractReport").hide();
-            $("#serviceReport").hide();
-          }
+            if (choice == 1) {
+                $('#scheduleReport input, #scheduleReport select').prop('disabled', false);
+                $('#contractReport input, #contractReport select').prop('disabled', true);
+                $('#serviceReport input, #serviceReport select').prop('disabled', true);
+                $("#scheduleReport").show();
+                $("#contractReport").hide();
+                $("#serviceReport").hide();
+            } else if (choice == 2) {
+                $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
+                $('#serviceReport input, #serviceReport select').prop('disabled', true);
+                $('#contractReport input, #contractReport select').prop('disabled', false);
+                $("#scheduleReport").hide();
+                $("#contractReport").show();
+                $("#serviceReport").hide();
+            } else if (choice == 3) {
+                $('#scheduleReport input, #scheduleReport select').prop('disabled', true);
+                $('#contractReport input, #contractReport select').prop('disabled', true);
+                $('#serviceReport input, #serviceReport select').prop('disabled', false);
+                $("#serviceReport").show();
+                $("#contractReport").hide();
+                $("#scheduleReport").hide();
+            } else if (choice == 0) {
+                $("#scheduleReport").hide();
+                $("#contractReport").hide();
+                $("#serviceReport").hide();
+            }
         });
 
         $('#schedType').change(function() {
             let sched = $(this).val();
-          if (sched == 1){
-            $(".unresolved").hide();
-          }
-          else if (sched == 2){
-            $(".unresolved").show();
-           
-          }
+            if (sched == 1) {
+                $(".unresolved").hide();
+            } else if (sched == 2) {
+                $(".unresolved").show();
+
+            }
         });
 
         $('#scheduleStatus').change(function() {
             let schedS = $(this).val();
-          if (schedS == 0 || schedS == 1){
-            $("#servicedBy").hide();
-            
-           
-          }
-          else{
-            $("#servicedBy").show();
-           
-          }
+            if (schedS == 0 || schedS == 1) {
+                $("#servicedBy").hide();
+
+
+            } else {
+                $("#servicedBy").show();
+
+            }
         });
-            
+
         // Virtual Select for Service By
         $.ajax({
-                        url: '../php/process.php',
+            url: '../php/process.php',
+            method: 'GET',
+            data: {
+                'action': 'reportServiceClient'
+            },
+            dataType: 'json',
+            success: function(data) {
+
+
+
+                // Assuming the response data is an array of objects with label and value properties
+                var serviceBy = data.users.map(function(item) {
+                    var fullName = item.firstname + ' ' +
+                        item.lastname;
+                    return {
+                        label: fullName,
+                        value: item.mem_id
+                    };
+                });
+
+                var clients = data.clients.map(function(item) {
+                    var fullName = item.client_name;
+                    return {
+                        label: fullName,
+                        value: item.client_id
+                    };
+                });
+
+                // Initialize Virtual Select with the fetched options
+                VirtualSelect.init({
+                    ele: '.sample-select',
+                    options: serviceBy,
+                    multiple: true,
+
+                });
+                VirtualSelect.init({
+                    ele: '.sample-select1',
+                    options: clients,
+                    multiple: true,
+
+                });
+
+                document.querySelector('.sample-select').setValue(
+                    arrayValue);
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching options:', error);
+            }
+        });
+
+        $(document).on('click', '#report-confirm-btn', function(e) {
+            var formData = new FormData($("#report-form")[0]);
+            formData.append('action', 'reportProcess');
+
+            // if ($('#reportType').val() == 1) {
+            //     formData.append('selectInsideDiv', $('#scheduleReport select').val());
+            //     formData.append('inputInsideDiv', $('#scheduleReport input').val());
+            // } else if ($('#reportType').val() == 2) {
+            //     formData.append('selectInsideDiv', $('#contractReport select').val());
+            //     formData.append('inputInsideDiv', $('#contractReport input').val());
+            // }
+            // else if ($('#reportType').val() == 3) {
+            //     formData.append('selectInsideDiv', $('#serviceReport select').val());
+            //     formData.append('inputInsideDiv', $('#serviceReport input').val());
+            // }
+
+            $.ajax({
+                url: '../php/process.php',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(e) {
+                    $.ajax({
+                        url: '../php/export_service.php',
                         method: 'GET',
                         data: {
-                            'action': 'reportServiceClient'
+                            rData: e,
+                            action: 'viewReport'
                         },
-                        dataType: 'json',
-                        success: function(data) {
-                          
-                           
+                        success: function(response) {
+                            console.log(response);
 
-                            // Assuming the response data is an array of objects with label and value properties
-                            var serviceBy = data.users.map(function(item) {
-                                var fullName = item.firstname + ' ' +
-                                    item.lastname;
-                                return {
-                                    label: fullName,
-                                    value: item.mem_id
-                                };
-                            });
-
-                            var clients = data.clients.map(function(item) {
-                                var fullName = item.client_name;
-                                return {
-                                    label: fullName,
-                                    value: item.client_id
-                                };
-                            });
-
-                            // Initialize Virtual Select with the fetched options
-                            VirtualSelect.init({
-                                ele: '.sample-select',
-                                options: serviceBy,
-                                multiple: true,
-
-                            });
-                            VirtualSelect.init({
-                                ele: '.sample-select1',
-                                options: clients,
-                                multiple: true,
-
-                            });
-
-                            document.querySelector('.sample-select').setValue(
-                                arrayValue);
-
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error fetching options:', error);
                         }
                     });
-
-     $(document).on('click','#report-confirm-btn', function (e){
-        var formData = new FormData($("#report-form")[0]);
-        formData.append('action', 'reportProcess');
-
-        // if ($('#reportType').val() == 1) {
-        //     formData.append('selectInsideDiv', $('#scheduleReport select').val());
-        //     formData.append('inputInsideDiv', $('#scheduleReport input').val());
-        // } else if ($('#reportType').val() == 2) {
-        //     formData.append('selectInsideDiv', $('#contractReport select').val());
-        //     formData.append('inputInsideDiv', $('#contractReport input').val());
-        // }
-        // else if ($('#reportType').val() == 3) {
-        //     formData.append('selectInsideDiv', $('#serviceReport select').val());
-        //     formData.append('inputInsideDiv', $('#serviceReport input').val());
-        // }
-
-       $.ajax({
-        url: '../php/process.php',
-        method: 'POST',
-        data: formData,
-        contentType: false,
-      processData: false,
-        success: function(e){
-            $.ajax({
-                url: '../php/export_service.php',
-                method:'GET',
-                data: {rData: e, 
-                    action:'viewReport'
-                },
-                success: function (response){
-                    console.log(response);
-                  
-                                }
+                }
             });
-        }
-       });
-     }) ;              
+        });
 
-      
+
     });
     </script>
 
