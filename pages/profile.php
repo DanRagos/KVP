@@ -778,6 +778,141 @@ window.lineGraph.destroy();
                 }
             });
           }
+
+
+               // Confirm Schedule
+               $("body").on("click", "#updateBtn", function(e) {
+              let sched_id = $(this).attr('data-id');
+
+              var edit_id = $(this).attr('data-id');
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: {
+                      sched_id: sched_id,
+                      action: 'updateSchedule'
+                  },
+                  success: function(response) {
+                      $("#confirm-sched-modal .update_contents").html(response);
+                      $("#confirm-sched-modal").modal("show");
+                      const arrayValue = JSON.parse(document.getElementById('serviceByDiv')
+                          .dataset
+                          .arrayValue);
+
+                      $.ajax({
+                          url: '../php/process.php',
+                          method: 'GET',
+                          data: {
+                              action: 'getServiceBy'
+                          },
+                          dataType: 'json',
+                          success: function(data) {
+                              var optionsData = data.map((item) => {
+                                  let fullname = item.firstname + ' ' +
+                                      item.lastname
+
+                                  return {
+                                      label: fullname,
+                                      value: item.mem_id
+                                  }
+                              })
+
+                              VirtualSelect.init({
+                                  ele: '.sample-select-update',
+                                  options: optionsData,
+                                  multiple: true,
+
+                              });
+                              document.querySelector('.sample-select-update')
+                                  .setValue(arrayValue);
+
+                          }
+                      })
+                  }
+              });
+          });
+
+          $("body").on("click", "#c_confirmBtn", function(e) {
+              let service_by = $('.sample-select').val();
+              if ($("#confirm_form")[0].checkValidity()) {
+                  e.preventDefault();
+                  var formData = new FormData($("#confirm_form")[0]);
+                  formData.append('action', 'update_sched');
+                  $.ajax({
+                      url: '../php/process.php',
+                      method: 'post',
+                      data: formData,
+                      contentType: false,
+                      processData: false,
+                      success: function(response) {
+                          console.log(response);
+                          Swal.fire({
+                              icon: 'success',
+                              title: 'Saved',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  showSchedules();
+                              },
+                          });
+                          $("#confirm-sched-modal").modal('hide');
+                          $("#confirm_form")[0].reset();
+                          
+                      }
+                  });
+              }
+          });  
+          $("body").on("click", ".reschedBtn", function(e) {
+              let resched_id = $(this).attr('data-id');
+              e.preventDefault();
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: {
+                      resched_id: resched_id
+                  },
+                  success: function(response) {
+                      $("#reschedModal .reschedContent").html(response);
+                      $("#reschedModal").modal("show");
+                  }
+              });
+          });
+          $("body").on("click", "#reschedConfirm", function(e) {
+              let resched_cId = $(this).attr('data-id');
+              e.preventDefault();
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: $("#resched_form").serialize() + "&action=confirm_resched",
+                  success: function(response) {
+                      var formattedDate = new Date(response).toISOString().substring(0, 10);
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Rescheduled',
+                          text: '.', // Add a custom success message here if needed
+                          timer: 1500,
+                          timerProgressBar: true,
+                          didOpen: () => {
+                              Swal.showLoading();
+                          },
+                          willClose: () => {
+                              Swal.hideLoading();
+                             
+                          },
+                      });
+                      $("#add-sched-form")[0].reset();
+                      $("#reschedModal").modal('hide');
+                      showSchedules(formattedDate);
+
+                  }
+              });
+          });
+
+
 function showCalendar() {
   let user_id = <?php echo $id; ?>;
   $.ajax({

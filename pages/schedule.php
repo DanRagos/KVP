@@ -21,7 +21,7 @@
 
   <head>
       <title>
-          Dashboard
+          Schedule
       </title>
   </head>
 
@@ -604,6 +604,49 @@
               }
           });  
 
+                 //Cancel Service Call
+                 $("body").on("click", ".cancelSv", function(e) {
+              e.preventDefault();
+              del_id = $(this).attr('data-id');
+              swal.fire({
+                      title: "Are you sure?",
+                      text: "This will cancel this schedule",
+                      showCancelButton: true,
+                      denyButtonText: `Don't save`,
+                      icon: "warning",
+                      buttons: true,
+                      dangerMode: true,
+                  })
+                  .then((result) => {
+                      if (result.isConfirmed) {
+                          $.ajax({
+                              url: '../php/process.php',
+                              method: 'post',
+                              data: {
+                                  del_id: del_id,
+                                  action: 'deleteSchedule'
+                              },
+                              success: function(response) {
+                                Swal.fire({
+                              icon: 'success',
+                              title: 'Schedule Cancelled',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  $("#schedule_details_modal").modal('hide');
+                                  table.ajax.reload(null,false);
+                              },
+                          });
+                              }
+                          });
+                      }
+                  });
+          });
+
           
           }
           //Resched
@@ -719,36 +762,7 @@
     
 
 
-          //Cancel Service Call
-          $("body").on("click", ".cancelSv", function(e) {
-              e.preventDefault();
-              del_id = $(this).attr('data-id');
-              swal({
-                      title: "Are you sure?",
-                      text: "This will cancel this schedule",
-                      icon: "warning",
-                      buttons: true,
-                      dangerMode: true,
-                  })
-                  .then((willDelete) => {
-                      if (willDelete) {
-                          $.ajax({
-                              url: '../php/process.php',
-                              method: 'post',
-                              data: {
-                                  del_id: del_id
-                              },
-                              success: function(response) {
-                                  swal("Schedule Cancelled", {
-                                      icon: "success",
-                                  });
-                                  $("#schedule_details_modal").modal('hide');
-                                  showSchedules();
-                              }
-                          });
-                      }
-                  });
-          });
+   
           //Calendar show Schedule function
           function showSchedules(initialDate) {
               $.ajax({
@@ -960,6 +974,91 @@
                       }
                   });
               }
+          });
+
+                 //Cancel Service Call
+                 $("body").on("click", ".cancelSv", function(e) {
+              e.preventDefault();
+              del_id = $(this).attr('data-id');
+              swal.fire({
+                      title: "Are you sure?",
+                      text: "This will cancel this schedule",
+                      showCancelButton: true,
+                      denyButtonText: `Don't save`,
+                      icon: "warning",
+                      buttons: true,
+                      dangerMode: true,
+                  })
+                  .then((result) => {
+                      if (result.isConfirmed) {
+                          $.ajax({
+                              url: '../php/process.php',
+                              method: 'post',
+                              data: {
+                                  del_id: del_id,
+                                  action: 'deleteSchedule'
+                              },
+                              success: function(response) {
+                                Swal.fire({
+                              icon: 'success',
+                              title: 'Schedule Cancelled',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  $("#schedule_details_modal").modal('hide');
+                                  showSchedules();
+                              },
+                          });
+                              }
+                          });
+                      }
+                  });
+          });
+                 //Cancel Service Call
+          $("body").on("click", ".cancelSv", function(e) {
+              e.preventDefault();
+              del_id = $(this).attr('data-id');
+              swal.fire({
+                      title: "Are you sure?",
+                      text: "This will cancel this schedule",
+                      showCancelButton: true,
+                      denyButtonText: `Don't save`,
+                      icon: "warning",
+                      buttons: true,
+                      dangerMode: true,
+                  })
+                  .then((result) => {
+                      if (result.isConfirmed) {
+                          $.ajax({
+                              url: '../php/process.php',
+                              method: 'post',
+                              data: {
+                                  del_id: del_id,
+                                  action: 'deleteSchedule'
+                              },
+                              success: function(response) {
+                                Swal.fire({
+                              icon: 'success',
+                              title: 'Schedule Cancelled',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  $("#schedule_details_modal").modal('hide');
+                                  showSchedules();
+                              },
+                          });
+                              }
+                          });
+                      }
+                  });
           });
           }
       });

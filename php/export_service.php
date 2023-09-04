@@ -460,7 +460,10 @@ $content .=" \n Generated at $date_today";
 }
 if (isset($_GET['action']) && $_GET['action'] == 'viewReport')
 {
-    print_r($_GET);
+ $data = json_decode($_GET['rData'], true);
+ $headers = $data['headers'];
+ $arrData = $data['data'];
+ print_r($headers);
 }
 else {
     // Return an error response

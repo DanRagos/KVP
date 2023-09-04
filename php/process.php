@@ -188,11 +188,15 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
 						
 						$output.='
 						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
-                        <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>
-						<button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button>
-						<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>';
+                        <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>					 ';
+						if ($result['schedule_type'] == 2) {
+							$output.=' <button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button> </div> ';
+						}
+					
+						$output .= '<button type="button" class="btn btn-secondary btn-sm rounded-0" data-bs-dismiss="modal">Close</button> ';
+						
+              
+             $output .='</div>';
 	echo $output;
 	
 	
@@ -425,17 +429,8 @@ print_r($_POST);
 print_r($s_by);
 }
 
-//CancelSv
-if (isset($_POST['del_id'])){
-$id = $_POST['del_id'];
-$result = $client->get_schedule($id);
-$sv_call = $result['sv_id'];
-$deleteSv = $client->delete_schedule($id);
-$client->delete_svcall($sv_call);
-echo true;
 
 
-}
 
 if (isset($_GET['action'])&& $_GET['action'] == 'display_schedule2'){
 $result = $client ->display_schedule();
@@ -760,6 +755,16 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
 		$client->user_notification($row, $last_notif);
 	}
 
+}
+
+if(isset( $_POST['action'])&& $_POST['action']== 'deleteSchedule'){
+	$result = $client->delete_schedule($_POST['del_id']);
+	if($result){
+		echo 'good';
+	}
+	else {
+		echo 'Not GOOD';
+	}
 }
 
 
@@ -1988,6 +1993,9 @@ array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Repo
 					$query1.=' AND user_sched.uid in ('.$serviceBy.')';
 					array_push($header, 'Service By');
 				}
+				else {
+					$query.= 'GROUP BY accomplished_schedule.id';
+				}
 				$query.= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
 				schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
 				COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, users.mem_id, users.firstname, users.lastname,
@@ -2001,7 +2009,7 @@ array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Repo
 
 				array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Reported Problem');
 				}
-
+			
 				$result  = $client->reportQuery($query);
 
 	}
@@ -2043,15 +2051,17 @@ array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Repo
 		$dateFrom = date('Y-m-d', strtotime($first_chunk));
 
 		$query .= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
-		schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
-		COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, users.mem_id, users.firstname, users.lastname,
-		COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address,
-		clients.client_id,service_call.rep_problem, accomplished_schedule.accomp_date 
-		FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
-		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
-		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
-	   LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id
-	   LEFT JOIN users on user_sched.uid = users.mem_id";
+        schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+        COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, GROUP_CONCAT(users.mem_id) AS ServicedBy, 
+        COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address,
+        clients.client_id,service_call.rep_problem, accomplished_schedule.accomp_date 
+        FROM schedule 
+        LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
+        LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
+        LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
+        LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
+        LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id
+        LEFT JOIN users on user_sched.uid = users.mem_id ";
 
 		if ($schedType == 0) {
 			$query.=" WHERE schedule.status =2 AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";	

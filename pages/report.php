@@ -164,7 +164,7 @@
                                 <button type="button" class="btn btn-block bg-gradient-success  ml-3"
                                     data-bs-toggle="modal" data-bs-target="#addSvGModal">
                                     <span><i class="fa fa-info-circle"></i></span>
-                                    <span> Add Service Call (Guest)</span>
+                                    <span> OLD Database (Guest)</span>
                                 </button>
                             </div>
                         </div>
@@ -428,7 +428,6 @@ $(this).val('');
                 data: {rData: e, 
                     action:'viewReport'
                 },
-                
                 success: function (response){
                     console.log(response);
                   

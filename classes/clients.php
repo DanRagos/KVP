@@ -294,10 +294,10 @@ public function update_schedule($schedule_id, $status) {
 	return true;
 }
 public function delete_schedule($schedule_id) {
-	$sql = "DELETE FROM schedule WHERE `schedule`.`schedule_id` = :schedule_id";
+	$sql = "DELETE FROM schedule WHERE `schedule`.`schedule_id` = :schedule_id AND schedule.schedule_type = 2";
 	$stmt = $this->conn->prepare($sql);
-	$stmt -> execute(['schedule_id'=>$schedule_id]);
-	return true;
+	$result = $stmt -> execute(['schedule_id'=>$schedule_id]);
+	return $result;
 }
 public function delete_svcall($sv_call) {
 		$sql = "DELETE FROM service_call WHERE `service_call`.`sv_id` = :sv_call";
