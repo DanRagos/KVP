@@ -1924,6 +1924,8 @@ $output .= '
     echo $output;
 }
 if (isset($_POST['action'])&& $_POST['action']== 'reportProcess') {
+	
+	$parameter=array();
 	$query = '';
 	$query1='';
 	$response = array();
@@ -2014,7 +2016,12 @@ array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Repo
 
 	}
 	if ($_POST['reportType']== 2){
-		$header = ['Schedule Id', 'Contract Id'];
+		$parameter =  [
+				'reportType' => 'Contracts',
+				'reportName'=> $_POST['reportName'],
+				'dateFilter'=> $_POST['datefilter']
+		];
+		$header = ['Contract Id'];
 		$contractStatus = $_POST['contractStatus'];
 		$client_t = $_POST['client'];
 		$datefilter = $_POST['datefilter'];
@@ -2027,14 +2034,16 @@ array_push($header,'Client','Machine', 'Schedule Date', 'Schedule Status', 'Repo
 		if($contractStatus == 1){
 			$query1.= "where contract.isActive = 1 AND contract.count > 0 AND (contract.turn_over BETWEEN '$dateFrom' AND '$dateTo' OR contract.coverage BETWEEN '$dateFrom' AND '$dateTo') ";
 			($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+			$parameter['contractStatus'] = 'Active Contracts';
 		}
 		else {
 			$query1.= "where contract.isActive = 1 AND contract.count <= 0 AND (contract.turn_over BETWEEN '$dateFrom' AND '$dateTo' OR contract.coverage BETWEEN '$dateFrom' AND '$dateTo') ";
 			($client_t) ? $query1.=' AND clients.client_id in ('.$client_t.')' : '';
+			$parameter['contractStatus'] = 'Completed Contracts';
 		}
 		$query.= "SELECT clients.client_id as clientId, clients.client_name, clients.client_address, contract.*, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
 		left join machine_type on contract.machine_type = machine_type.machine_id $query1";
-	array_push($header,'Client','Machine', 'Contract Coverage', 'Contract Status');
+	array_push($header,'Client','Machine', 'Contract Coverage', 'Contract Completion',  'Frequency');
 		$result  = $client->reportQuery($query);
 	}
 	if ($_POST['reportType']== 3){
@@ -2079,7 +2088,8 @@ array_push($header,'Client','Machine', 'Contract Coverage', 'Contract Status');
 	}
 $return = array(
 	'data'=>$result,
-	'headers'=> $header
+	'headers'=> $header,
+	'parameters' => $parameter,
 );
 echo json_encode($return);
 

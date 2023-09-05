@@ -104,7 +104,7 @@
         </nav>
         <!-- End Navbar -->
         <div class="container-fluid py-4">
-           
+
             <div class="row">
                 <div class="col-12">
                     <div class="d-flex justify-content-center">
@@ -365,6 +365,7 @@
                 contentType: false,
                 processData: false,
                 success: function(e) {
+                   console.log( JSON.parse(e));
                     $.ajax({
                         url: '../php/export_service.php',
                         method: 'GET',
@@ -372,8 +373,63 @@
                             rData: e,
                             action: 'viewReport'
                         },
+                        xhrFields: {
+                            responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                        },
                         success: function(response) {
-                            console.log(response);
+                            var blob = new Blob([response], {
+                                type: 'application/pdf'
+                            });
+
+                            // Create a temporary URL for the blob
+                            var blobUrl = URL.createObjectURL(blob);
+
+                            // Open the PDF in a new tab or window
+                          
+                            swal.fire({
+                      title: "Save",
+                      text: "Do you want to save this report?",
+                      showCancelButton: true,
+                      denyButtonText: `Don't save`,
+                      icon: "warning",
+                      buttons: true,
+                      dangerMode: true,
+                  }).then((result)=> {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                              icon: 'success',
+                              title: 'Report Saved',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  $('#reportNewModal').modal('hide');
+                                  $('#report-form')[0].reset();
+                                 
+                              },
+                          });
+                        }
+                          else {
+                            Swal.fire({
+                              icon: 'success',
+                              title: 'Viewing Report',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  window.open(blobUrl, '_blank');
+                              },
+                          });
+                    }
+
+                  });
+
 
                         }
                     });

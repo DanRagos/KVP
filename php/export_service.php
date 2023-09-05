@@ -463,7 +463,118 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewReport')
  $data = json_decode($_GET['rData'], true);
  $headers = $data['headers'];
  $arrData = $data['data'];
- print_r($headers);
+ $parameter = $data['parameters'];
+
+
+ $string=$parameter['dateFilter'];
+		$last_space = strrpos($string, ' ');
+		$last_word = substr($string, $last_space);
+		$first_chunk = substr($string, 0, $last_space - 2);
+		$dateTo = date('Y-m-d', strtotime($last_word));
+		$dateFrom = date('Y-m-d', strtotime($first_chunk));
+ //print_r($arrData);
+
+ class MYPDF extends TCPDF {
+}
+ $obj_pdf = new MYPDF('P', 'mm', 'A4'); 
+        $obj_pdf->SetCreator(PDF_CREATOR);  
+        $obj_pdf->SetTitle("Test");  
+        $obj_pdf->SetHeaderData('', '', PDF_HEADER_TITLE, PDF_HEADER_STRING);
+        
+        // set header and footer fonts  
+        $obj_pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));  
+        $obj_pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA)); 
+        
+        // set default monospaced font
+        $obj_pdf->SetDefaultMonospacedFont('helvetica');
+
+        // set margins
+        $obj_pdf->SetFooterMargin(10);
+        $obj_pdf->SetMargins(PDF_MARGIN_LEFT, '11', PDF_MARGIN_RIGHT);  
+        $obj_pdf->setPrintHeader(false); 
+        $obj_pdf->SetAutoPageBreak(TRUE, 17);
+
+        $obj_pdf->SetFont('helvetica', '', 12); 
+
+$obj_pdf->AddPage(); 
+
+$content = '';
+$content .= '
+   <style>
+   table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  table td, #table th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  table tr:nth-child(even){background-color: #f2f2f2;}
+  
+  table tr:hover {background-color: #ddd;}
+  
+  table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
+  }
+           .table-container {
+margin-bottom: 20px;
+}
+
+   </style>
+   <div class="header">';
+      $obj_pdf -> Image('../img/icon.jpg', 58, 7, 25);
+       $obj_pdf -> SetFont('Helvetica', 'B', 12);
+       $obj_pdf -> Cell(180, 7, "KVP Healthcare Inc.", 0, 1, 'C');
+       $obj_pdf -> SetFont('Helvetica', '', 11);
+       $obj_pdf -> Cell(180, 5, "Preventive Maintenance", 0, 1, 'C');
+       $obj_pdf -> SetFont('Helvetica', 'B', 10);
+       $obj_pdf -> Ln(10);
+       
+       $content .= '</div>';  
+       $content .= '<div style= "text-align: center;"> 
+       <h3>'.$parameter['contractStatus'].'</h3> 
+       <h5> Coverage : '.date('M d, Y ', strtotime ($dateFrom)).' - '.date('M d, Y ', strtotime ($dateTo)).'</h5>
+       </div>';
+
+       $content .= '<table id="table">
+       <tr>';
+       foreach($headers as $header) {
+        $content .= '<th> '.$header.'</th>';
+       }
+       $content .='
+       </tr>';
+       foreach($arrData as $dData) {
+       $frequency = $dData['status'] == 1 ? 'Quarterly': ($dData['status'] == 2 ? 'Semi-Annual': 'Annually');
+
+       $content .= ' <tr> 
+       <td> '.$dData['contract_id'].'</td>
+       <td> '.$dData['client_name'].'</td>
+       <td> '.$dData['brand'].'- '.$dData['model'].'</td>
+       <td> '.date('M d, Y', strtotime($dData['turn_over'])).' - '.date('M d, Y', strtotime($dData['coverage'])).'</td>
+       <td> '. 100 - (($dData['count'] /$dData['total']) * 100).'%</td>
+       <td> '. $frequency.'</td>
+       </tr> ';
+       }
+       
+       $content.='</table>';
+
+       $obj_pdf->SetFont('helvetica', '', 11); 
+       $obj_pdf->writeHTML($content, true, false, true, false, '');
+        $pdfContent = $obj_pdf->Output('', 'S'); // Capture the PDF content as a string
+
+   // Set the appropriate headers for the response
+   header('Content-Type: application/pdf');
+   header('Content-Disposition: inline; filename="test.pdf"');
+   echo $pdfContent;
+
+
 }
 else {
     // Return an error response
