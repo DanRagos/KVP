@@ -458,14 +458,19 @@ $content .=" \n Generated at $date_today";
 	exit;
 
 }
-if (isset($_GET['action']) && $_GET['action'] == 'viewReport')
+
+
+if (isset($_POST['action']) && $_POST['action'] == 'viewReport')
 {
- $data = json_decode($_GET['rData'], true);
+    
+
+  
+ $data = json_decode($_POST['rData'], true);
  $headers = $data['headers'];
  $arrData = $data['data'];
  $parameter = $data['parameters'];
 
-
+ $reportType = $parameter['reportType'];
  $string=$parameter['dateFilter'];
 		$last_space = strrpos($string, ' ');
 		$last_word = substr($string, $last_space);
@@ -478,7 +483,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'viewReport')
 }
  $obj_pdf = new MYPDF('P', 'mm', 'A4'); 
         $obj_pdf->SetCreator(PDF_CREATOR);  
-        $obj_pdf->SetTitle("Test");  
+        $obj_pdf->SetTitle($parameter['reportName']);  
         $obj_pdf->SetHeaderData('', '', PDF_HEADER_TITLE, PDF_HEADER_STRING);
         
         // set header and footer fonts  
@@ -517,6 +522,8 @@ $content .= '
   table tr:hover {background-color: #ddd;}
   
   table th {
+    
+    font-weight: bold;
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: left;
@@ -539,21 +546,78 @@ margin-bottom: 20px;
        
        $content .= '</div>';  
        $content .= '<div style= "text-align: center;"> 
-       <h3>'.$parameter['contractStatus'].'</h3> 
+       <h3>'.$parameter['reportTitle'].'</h3> 
        <h5> Coverage : '.date('M d, Y ', strtotime ($dateFrom)).' - '.date('M d, Y ', strtotime ($dateTo)).'</h5>
        </div>';
 
        $content .= '<table id="table">
-       <tr>';
+       <tr style= "text-align: center;" >';
        foreach($headers as $header) {
         $content .= '<th> '.$header.'</th>';
        }
        $content .='
        </tr>';
-       foreach($arrData as $dData) {
-       $frequency = $dData['status'] == 1 ? 'Quarterly': ($dData['status'] == 2 ? 'Semi-Annual': 'Annually');
+       
+      
+    if ($reportType == 1) {
+        if($parameter['schedSt'] == 2) {
+            foreach ($arrData as $dData) {
+                $scheduleType = $dData['schedule_type'] == 1? 'PM' : 'SV';
+                $scheduleStatus = $dData['status'] == 1? 'PM' : 'SV';
+                $content .= ' <tr style="text-align: center;"> 
+                <td> '.$dData['schedule_id'].' </td>
+                <td> '.$scheduleType.' </td>
+                <td> '.$dData['client_name'].' </td>
+                <td> '.$dData['brand'].'- '.$dData['model'].'</td>
+                <td> '.date('M d, Y',strtotime($dData['schedule_date'])).'</td>
+                <td> '.$dData['rep_problem'].'</td>
+                <td> '.$dData['ServicedBy'].'</td>
+    
+                </tr>';
+            } 
+        }
+        elseif ($parameter['schedSt'] == 3) {
+            foreach ($arrData as $dData) {
+                $scheduleType = $dData['schedule_type'] == 1? 'PM' : 'SV';
+                $scheduleStatus = $dData['status'] == 1? 'PM' : 'SV';
+                $content .= ' <tr style="text-align: center;"> 
+                <td> '.$dData['schedule_id'].' </td>
+                <td> '.$scheduleType.' </td>
+                <td> '.$dData['client_name'].' </td>
+                <td> '.$dData['brand'].'- '.$dData['model'].'</td>
+                <td> '.date('M d, Y',strtotime($dData['schedule_date'])).'</td>
+                <td> '.$dData['rep_problem'].'</td>
+                <td> '.$dData['ServicedBy'].'</td>
+    
+                </tr>';
+            } 
 
-       $content .= ' <tr> 
+        }
+        elseif ($parameter['schedSt'] == 0) {
+            foreach ($arrData as $dData) {
+                $scheduleType = $dData['schedule_type'] == 1? 'PM' : 'SV';
+                $scheduleStatus = $dData['status'] == 1? 'PM' : 'SV';
+                $content .= ' <tr style="text-align: center;"> 
+                <td> '.$dData['schedule_id'].' </td>
+                <td> '.$scheduleType.' </td>
+                <td> '.$dData['client_name'].' </td>
+                <td> '.$dData['brand'].'- '.$dData['model'].'</td>
+                <td> '.date('M d, Y',strtotime($dData['schedule_date'])).'</td>
+                <td> '.$dData['assignedTo'].'</td>
+                <td> '.$dData['rep_problem'].'</td>
+               
+
+    
+                </tr>';
+            } 
+
+        }
+     
+    }
+    else if ($reportType == 2 ) {
+        foreach($arrData as $dData) {
+            $frequency = $dData['status'] == 1 ? 'Quarterly': ($dData['status'] == 2 ? 'Semi-Annual': 'Annually');
+       $content .= ' <tr style="text-align: center;"> 
        <td> '.$dData['contract_id'].'</td>
        <td> '.$dData['client_name'].'</td>
        <td> '.$dData['brand'].'- '.$dData['model'].'</td>
@@ -562,6 +626,23 @@ margin-bottom: 20px;
        <td> '. $frequency.'</td>
        </tr> ';
        }
+    }
+    else if ($reportType == 3) {
+        $serviceStatus = $dData['accomp_status'] == 2 ? "Done" : "Unresolved";
+        foreach($arrData as $dData) {
+       $content .= ' <tr style="text-align: center;"> 
+       <td> '.$dData['schedule_id'].'</td>
+       <td> '.$dData['client_name'].'</td>
+       <td> '.$dData['brand'].'- '.$dData['model'].'</td>
+       <td> '.$dData['accomp_id'].'</td>
+       <td> '.date('M d, Y', strtotime($dData['accomp_date'])).'</td>
+       <td> '. $dData['ServicedBy'].'</td>
+       <td> '. $serviceStatus.'</td>
+       <td> '. $dData['rep_problem'].'</td>
+       </tr> ';
+       }
+
+    }
        
        $content.='</table>';
 
@@ -576,6 +657,7 @@ margin-bottom: 20px;
 
 
 }
+
 else {
     // Return an error response
     $response = array('status' => 'error', 'message' => 'JSON data not received');

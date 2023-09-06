@@ -368,15 +368,14 @@
                    console.log( JSON.parse(e));
                     $.ajax({
                         url: '../php/export_service.php',
-                        method: 'GET',
-                        data: {
-                            rData: e,
-                            action: 'viewReport'
-                        },
-                        xhrFields: {
+            method: 'POST',  // Use POST request
+            data: { rData: e, action: 'viewReport' },
+            xhrFields: {
                             responseType: 'blob' // Set the response type to 'blob' to handle binary data
-                        },
-                        success: function(response) {
+                        },  // Send data in JSON format
+             // Set content type to JSON
+            success: function(response) {
+                console.log(response);
                             var blob = new Blob([response], {
                                 type: 'application/pdf'
                             });

@@ -603,12 +603,7 @@
                                     <div  class="form-control p-0 sample-select1" id="myDiv" name="client"></div>    
                                 </div>
                             </div>
-                            <div class="col" id="servicedBy" style="display:none;">
-                                <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus1" class="ms-0">Serviced By (Optional) </label>
-                                    <div  class="form-control p-0 sample-select" id="myDiv1" name="service_by"></div>    
-                                </div>
-                            </div>
+                          
                         </div>
                        
                     </div>
@@ -683,7 +678,7 @@
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
-                                    <label for="scheduleStatus1" class="ms-0">Serviced By (Optional) </label>
+                                    <label for="scheduleStatus1" class="ms-0">Serviced By (Required) </label>
                                     <div  class="form-control p-0 sample-select" id="myDiv1" name="service_by"></div>    
                                 </div>
                             </div>
