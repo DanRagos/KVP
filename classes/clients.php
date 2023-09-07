@@ -689,6 +689,13 @@ public function reportQuery($query){
 	return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+public function save_report($location, $filename, $user_id){
+	$sql = "INSERT INTO `report` (`report_id`, `location`, `report_name`, `report_date`, `generated_by`) VALUES (NULL, :location, :reportName, current_timestamp(), :user_id);";
+	$stmt = $this->conn->prepare($sql);
+	$execute = $stmt->execute(["location"=>$location, "reportName"=>$filename, "user_id"=>$user_id]);
+	return $execute;
+}
+
 }
 
 

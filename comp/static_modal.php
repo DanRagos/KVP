@@ -581,20 +581,21 @@
                             </div>
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
+                                    <label>Schedule Date</label>
+                                    <input name="datefilter" class="form-control" name="schedDate">
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row" id="pmsType">
+                        <div class="col">
+                                <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Schedule Status</label>
                                     <select class="form-control" id="scheduleStatus" name="schedStatus">
                                         <option value=0 selected>Not Done</option>
                                         <option value=2 >Done</option>
                                         <option class="unresolved" value=3 style="display:none;">Unresolved</option>
                                     </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" id="pmsType">
-                            <div class="col">
-                                <div class="input-group input-group-static mb-4">
-                                    <label>Schedule Date</label>
-                                    <input name="datefilter" class="form-control" name="schedDate">
                                 </div>
                             </div>
                             <div class="col">
@@ -616,6 +617,16 @@
                                     <input type="text" class="form-control" name="reportName" >
                                 </div>
                             </div>
+                            <div class="col-4">
+                                <div class="input-group input-group-static mb-4">
+                                    <label>Date Coverage</label>
+                                    <input name="datefilter" class="form-control" >
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                        
                             <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Contract Status</label>
@@ -623,14 +634,6 @@
                                         <option value=1 selected>Active Contract</option>
                                         <option value=2>Completed Contract</option>
                                     </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                        <div class="col-4">
-                                <div class="input-group input-group-static mb-4">
-                                    <label>Date Coverage</label>
-                                    <input name="datefilter" class="form-control" >
                                 </div>
                             </div>
                             <div class="col">
@@ -652,7 +655,16 @@
                                     <input type="text" class="form-control" name="reportName" >
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col-4">
+                                <div class="input-group input-group-static mb-4">
+                                    <label>Service Date</label>
+                                    <input name="datefilter" class="form-control" >
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                        <div class="col">
                                 <div class="input-group input-group-static mb-4">
                                     <label for="scheduleStatus" class="ms-0">Schedule Type</label>
                                     <select class="form-control" id="scheduleStatus" name="serviceType">
@@ -660,14 +672,6 @@
                                         <option value=1 >PMS</option>
                                         <option value=2>Service Call</option>
                                     </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                        <div class="col-4">
-                                <div class="input-group input-group-static mb-4">
-                                    <label>Service Date</label>
-                                    <input name="datefilter" class="form-control" >
                                 </div>
                             </div>
                             <div class="col">

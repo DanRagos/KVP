@@ -559,6 +559,27 @@ array('db' => 'sv_call', 'dt'=>'sv_call'),
 
 );
  }
+ else if(isset($_GET['db'])&& $_GET['db']==11){
+	$primaryKey = 'report_id';
+	$isActive = 1;
+
+
+	// DB table to use
+$table = <<<EOT
+(SELECT report.*, CONCAT(users.firstname, ' ', users.lastname) as generatedBy from report LEFT JOIN users on report.generated_by = users.mem_id) temp
+EOT;
+// indexes
+$columns = array(
+array( 'db' => 'report_id', 'dt' => 'report_id'),
+array('db' => 'location', 'dt'=>'location'),
+array('db' => 'report_name', 'dt'=>'report_name'),
+array('db' => 'report_date', 'dt'=>'report_date'),
+array( 'db' => 'generated_by', 'dt' => 'generated_by'),
+array( 'db' => 'generatedBy', 'dt' => 'generatedBy'),
+
+
+);
+ }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * If you just want to use the basic configuration for DataTables with PHP
  * server-side, there is no need to edit below this line.

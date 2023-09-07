@@ -466,6 +466,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'viewReport')
 
   
  $data = json_decode($_POST['rData'], true);
+ $isSave = $_POST['isSave'];
  $headers = $data['headers'];
  $arrData = $data['data'];
  $parameter = $data['parameters'];
@@ -652,8 +653,23 @@ margin-bottom: 20px;
 
    // Set the appropriate headers for the response
    header('Content-Type: application/pdf');
-   header('Content-Disposition: inline; filename="test.pdf"');
-   echo $pdfContent;
+   header('Content-Disposition: inline; filename="'.$parameter['reportName'].'.pdf"');
+    if ($_POST['isSave'] == 1){
+        $outputPath = $_SERVER['DOCUMENT_ROOT'] . '/kvp/pdfReport/' . $parameter['reportName'] . '.pdf';
+        $obj_pdf->Output($outputPath, 'F');
+        $test = $client->save_report('../pdfReport/'.$parameter['reportName'].'.pdf', $parameter['reportName'], $id);
+        // echo $test;
+
+     
+    }
+    else {
+        echo $pdfContent;
+       
+    }
+   
+        
+    
+   
 
 
 }
