@@ -554,7 +554,7 @@ margin-bottom: 20px;
        $content .= '<table id="table">
        <tr style= "text-align: center;" >';
        foreach($headers as $header) {
-        $content .= '<th> '.$header.'</th>';
+        $content .= '<th > '.$header.'</th>';
        }
        $content .='
        </tr>';
@@ -629,8 +629,9 @@ margin-bottom: 20px;
        }
     }
     else if ($reportType == 3) {
-        $serviceStatus = $dData['accomp_status'] == 2 ? "Done" : "Unresolved";
+       
         foreach($arrData as $dData) {
+            $serviceStatus = ($dData['accomp_status'] === "3") ? "Unresolved" : "Done";
        $content .= ' <tr style="text-align: center;"> 
        <td> '.$dData['schedule_id'].'</td>
        <td> '.$dData['client_name'].'</td>
@@ -657,7 +658,7 @@ margin-bottom: 20px;
     if ($_POST['isSave'] == 1){
         $outputPath = $_SERVER['DOCUMENT_ROOT'] . '/kvp/pdfReport/' . $parameter['reportName'] . '.pdf';
         $obj_pdf->Output($outputPath, 'F');
-        $test = $client->save_report('../pdfReport/'.$parameter['reportName'].'.pdf', $parameter['reportName'], $id);
+        $test = $client->save_report('../pdfReport/'.$parameter['reportName'].'.pdf', $parameter['reportName'], $id, 1);
         // echo $test;
 
      

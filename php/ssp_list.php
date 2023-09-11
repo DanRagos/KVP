@@ -576,6 +576,7 @@ array('db' => 'report_name', 'dt'=>'report_name'),
 array('db' => 'report_date', 'dt'=>'report_date'),
 array( 'db' => 'generated_by', 'dt' => 'generated_by'),
 array( 'db' => 'generatedBy', 'dt' => 'generatedBy'),
+array( 'db' => 'db_type', 'dt' => 'db_type'),
 
 
 );

@@ -689,10 +689,16 @@ public function reportQuery($query){
 	return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-public function save_report($location, $filename, $user_id){
-	$sql = "INSERT INTO `report` (`report_id`, `location`, `report_name`, `report_date`, `generated_by`) VALUES (NULL, :location, :reportName, current_timestamp(), :user_id);";
+public function save_report($location, $filename, $user_id, $dbType){
+	$sql = "INSERT INTO `report` (`report_id`, `location`, `report_name`, `report_date`, `generated_by`, `db_type`) VALUES (NULL, :location, :reportName, current_timestamp(), :user_id, :dbType)";
 	$stmt = $this->conn->prepare($sql);
-	$execute = $stmt->execute(["location"=>$location, "reportName"=>$filename, "user_id"=>$user_id]);
+	$execute = $stmt->execute(["location"=>$location, "reportName"=>$filename, "user_id"=>$user_id, "dbType"=>$dbType]);
+	return $execute;
+}
+public function delete_report($reportId){
+	$sql = "DELETE from report where report.report_id = :reportId";
+	$stmt = $this->conn->prepare($sql);
+	$execute = $stmt->execute(["reportId"=>$reportId]);
 	return $execute;
 }
 

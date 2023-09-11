@@ -106,52 +106,53 @@
                                   </button>
                               </div>
                               <div class="d-flex justify-content-center">
-                         
-                        <div id="spinner" class="spinner-border mt-4" style="width: 6rem; height: 6rem; display:none;"
-                            role="status">
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                    
+
+                                  <div id="spinner" class="spinner-border mt-4"
+                                      style="width: 6rem; height: 6rem; display:none;" role="status">
+                                      <span class="sr-only">Loading...</span>
+                                  </div>
+
                                   <div id="calendar" style="width: 50%; height:50%;"> </div>
-                                  <div class="table-responsive" id="schedTable"  style="display:none;">
-                              <table  id="tableCalendar" class="table align-items-center mb-0 table-striped" style="width:100%;">
-                                <thead>
-                                    <tr>
-                                        <th
-                                            class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">
-                                            Schedule Id</th>
-                                        <th
-                                            class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">
-                                            Schedule Type</th>
-                                        <th
-                                            class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">
-                                            Client</th>
-                                        <th
-                                            class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Machine</th>
-                                        <th
-                                            class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Schedule Date</th>
-                                        <th
-                                            class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Status</th>
-                                        <th
-                                            class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Reported Problem</th>
-                                        <th
-                                            class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                           Action</th>
+                                  <div class="table-responsive" id="schedTable" style="display:none;">
+                                      <table id="tableCalendar" class="table align-items-center mb-0 table-striped"
+                                          style="width:100%;">
+                                          <thead>
+                                              <tr>
+                                                  <th
+                                                      class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">
+                                                      Schedule Id</th>
+                                                  <th
+                                                      class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">
+                                                      Schedule Type</th>
+                                                  <th
+                                                      class="text-uppercase text-center text-secondary text-xxs font-weight-bolder opacity-7 ">
+                                                      Client</th>
+                                                  <th
+                                                      class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                      Machine</th>
+                                                  <th
+                                                      class="text-uppercase text-center  text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                      Schedule Date</th>
+                                                  <th
+                                                      class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                      Status</th>
+                                                  <th
+                                                      class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                      Reported Problem</th>
+                                                  <th
+                                                      class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                      Action</th>
 
 
 
-                                    </tr>
-                                </thead>
+                                              </tr>
+                                          </thead>
 
-                            </table>
-                                 
+                                      </table>
+
+                                  </div>
                               </div>
-                              </div>
-                              
+
                           </div>
                       </div>
                   </div>
@@ -163,32 +164,294 @@
       <?php include 'scripts.php'; ?>
       <script>
       $(document).ready(function() {
-        showSchedules();
-        $('#liCalendar').click(function() {
-            $('#spinner').show();
-            setTimeout(() => {
-                $('#spinner').hide();
-                $('#calendar').show();
-                $('#schedTable').hide();
-                showSchedules();
 
-            }, 300)
-        });
-        $('#liTable').click(function() {
-            $('#spinner').show();
-            setTimeout(() => {
-                $('#spinner').hide();
-                $('#calendar').hide();
-                $('#schedTable').show();
-                if ($.fn.DataTable.isDataTable('#tableCalendar')) {
-    // Destroy the DataTable instance
-    $('#tableCalendar').DataTable().destroy();
-        }
-        displaySchedule();
+          function isTableViewActive() {
+              return $("#schedTable").is(":visible");
+          }
 
-            }, 300)
-        });
-         
+
+          function isCalendarViewActive() {
+              return $("#calendar").is(":visible");
+          }
+
+          showSchedules();
+          $('#liCalendar').click(function() {
+              $('#spinner').show();
+              setTimeout(() => {
+                  $('#spinner').hide();
+                  $('#calendar').show();
+                  $('#schedTable').hide();
+                  showSchedules();
+              }, 300)
+          });
+          $('#liTable').click(function() {
+              $('#spinner').show();
+              setTimeout(() => {
+                  $('#spinner').hide();
+                  $('#calendar').hide();
+                  $('#schedTable').show();
+                  if ($.fn.DataTable.isDataTable('#tableCalendar')) {
+                      // Destroy the DataTable instance
+                      $('#tableCalendar').DataTable().destroy();
+                  }
+                  displaySchedule();
+              }, 300)
+          });
+
+          ///Table Schedule
+          function displaySchedule() {
+              if ($.fn.DataTable.isDataTable('#tableCalendar')) {
+                  // Destroy the DataTable instance
+                  $('#tableCalendar').DataTable().destroy();
+              }
+
+              let db = 10;
+
+              var table = $('#tableCalendar').DataTable({
+                  stateSave: true,
+                  processing: true,
+                  serverSide: true,
+                  scrollY: '45vh',
+                  scrollX: true,
+                  ajax: {
+                      url: '../php/ssp_list.php',
+                      type: 'GET',
+                      data: {
+                          db: db,
+                      },
+                  },
+                  columns: [{
+                          data: 'schedule_id',
+                          render: function(data, type, row) {
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<p class="text-sm font-weight-bold mb-0">' + row
+                                  .schedule_id +
+                                  '</p>' +
+                                  '</div>';
+                          }
+                      },
+                      {
+                          data: 'schedule_type',
+                          render: function(data, type, row) {
+                              var type = data == 2 ? "SV" : "PMS"; // Use 'data' instead of '$d'
+                              var color = data == 1 ? "primary" :
+                                  "success"; // Use 'data' instead of '$row['schedule_type']'
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<span class="badge badge-sm bg-gradient-' + color + '">' +
+                                  type + '</span>' +
+                                  '</div>';
+                          }
+                      },
+                      // Replace 'client_id' with the actual column name
+                      {
+                          data: 'client_name',
+                          render: function(data, type, row) {
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<h6 class="mb-0 text-sm">' + row.client_name +
+                                  '</h6>' +
+                                  '<p class="text-xs text-secondary mb-0">' + row.address +
+                                  '</p>' +
+                                  '</div>';
+                          }
+                      },
+                      {
+                          data: 'model',
+                          render: function(data, type, row) {
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<h6 class="mb-0 text-sm">' + row.brand + ' / ' + row.model +
+                                  '</h6>' +
+                                  '<p class="text-xs text-secondary mb-0">' + row.machine_name +
+                                  '</p>' +
+                                  '</div>';
+                          }
+                      },
+                      {
+                          data: 'schedule_date',
+                          render: function(data, type, row) {
+                              const schedule_date = new Date(row.schedule_date)
+                                  .toLocaleDateString(
+                                      'en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric'
+                                      });
+
+
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<p class="badge badge-sm bg-gradient-success">' +
+                                  schedule_date + '</p>' +
+                                  '</div>';
+                          }
+                      },
+                      {
+                          data: 'status',
+                          render: function(data, type, row) {
+                              const currentDate = new Date();
+                              const currentYear = currentDate.getFullYear();
+                              const currentMonth = currentDate.getMonth() + 1;
+                              let partStatus = (row.status == 3) ? "Unresolved" : "Not Done";
+                              let partColor = (row.status == 3) ? "warning" : "info";
+
+                              const targetDate = row.schedule_date;
+                              const [targetYear, targetMonth] = targetDate.split('-').map(
+                                  Number);
+
+                              // Compare the month and year
+                              if (targetYear < currentYear || (targetYear === currentYear &&
+                                      targetMonth < currentMonth)) {
+                                  partStatus = "Delayed";
+                                  partColor = "danger";
+                              } else {
+                                  console.log('Status: On track');
+                              }
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<p class="badge badge-sm bg-gradient-' + partColor + '">' +
+                                  partStatus + '</p>' +
+                                  '</div>';
+                          }
+                      },
+                      {
+                          data: 'rep_problem',
+                          render: function(data, type, row) {
+                              return '<div class="align-middle text-center text-sm">' +
+                                  '<p class="text-sm font-weight-bold mb-0">' + row
+                                  .rep_problem +
+                                  '</p>' +
+                                  '</div>';
+                          }
+                      },
+
+                      {
+                          orderable: false,
+                          data: 'schedule_id',
+                          defaultContent: '',
+                          render: function(data, type, row) {
+                              return `
+    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
+        <button type="button" data-id="${row.schedule_id}" class="btn btn-secondary no_margin confirmSchedule">
+            <i class="fa fa-check"></i>
+        </button>
+    </span>`;
+
+                          },
+                          width: "15px"
+                      }, // Replace 'client_name' with the actual column name
+                      // Define other data columns...
+                  ]
+              });
+
+              $(document).on('click', '.confirmSchedule', function(e) {
+                  let id = $(this).attr('data-id');
+                  $.ajax({
+                      url: "../php/process.php",
+                      method: "POST",
+                      data: {
+                          action: 'show_sched_details',
+                          id: id
+                      },
+                      success: function(data) {
+                          console.log(id);
+                          // Set the content of the modal with the AJAX request's response data
+                          $("#schedule_details_modal .contents")
+                              .html(data);
+                      }
+                  });
+                  $("#schedule_details_modal").modal("show");
+
+              });
+
+
+
+
+
+
+
+
+          }
+
+          // Calendar Schedule
+          function showSchedules(initialDate) {
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: {
+                      action: 'display_schedule'
+                  },
+                  success: function(response) {
+                      var scheds = $.parseJSON(response);
+                      var calendar;
+                      var Calendar = FullCalendar.Calendar;
+                      var events = [];
+                      $(function() {
+                          if (!!scheds) {
+                              Object.keys(scheds).map(k => {
+                                  var row = scheds[k]
+                                  events.push({
+                                      id: row.schedule_id,
+                                      title: row.title,
+                                      start: row.schedule_date,
+                                      color: row.color
+                                  });
+                              })
+                          }
+                          var date = new Date()
+                          var d = date.getDate(),
+                              m = date.getMonth(),
+                              y = date.getFullYear()
+
+                          calendar = new Calendar(document.getElementById('calendar'), {
+                              headerToolbar: {
+                                  left: 'prev,next today',
+                                  right: 'dayGridMonth,dayGridWeek,list',
+                                  center: 'title',
+                              },
+                              selectable: true,
+                              themeSystem: 'bootstrap',
+                              initialDate: initialDate,
+                              //Random default events
+                              events: events,
+                              eventClick: function(info) {
+                                  var id = info.event.id;
+                                  $.ajax({
+                                      url: "../php/process.php",
+                                      method: "POST",
+                                      data: {
+                                          action: 'show_sched_details',
+                                          id: id
+                                      },
+                                      success: function(data) {
+                                          console.log(id);
+                                          // Set the content of the modal with the AJAX request's response data
+                                          $("#schedule_details_modal .contents")
+                                              .html(data);
+                                      }
+                                  });
+                                  $("#schedule_details_modal").modal("show");
+                              },
+                              eventDidMount: function(info) {
+                                  // Do Something after events mounted
+                              },
+                              editable: false
+                          });
+                          calendar.render();
+                          // Form reset listener
+                          $('#schedule-form').on('reset', function() {
+                              $(this).find('input:hidden').val('')
+                              $(this).find('input:visible').first().focus()
+                          })
+
+
+                      })
+                  }
+              });
+
+
+
+
+          }
+
+          // Event Handlers
+
           $(document).on('click', '#addSchedule', function() {
               $.ajax({
                   url: '../php/process.php',
@@ -297,376 +560,9 @@
                   $('#city').html('<input placeholder="test">');
               }
           });
-          //Resched Schedule
 
-          $('#resched-btn1').click(function(e) {
-              e.preventDefault();
-              $.ajax({
-                  url: '../php/process.php',
-                  method: 'POST',
-                  data: $("#resched-form1").serialize() + '&action=resched',
-                  success: function(response) {
-                      swal("Rescheduled", "", "success");
-                      $("#resched-form1")[0].reset();
-                      $("#reschedModalTable").modal('hide');
-                      displaySchedule();
-                  }
-              });
-          });
-          //Display All Schedule Table View
-          function displaySchedule() {
-            let db = 10;
-        
-            var table = $('#tableCalendar').DataTable({
-                stateSave: true,
-                processing: true,
-                serverSide: true,
-                scrollY: '45vh',
-                scrollX: true,
-                ajax: {
-                    url: '../php/ssp_list.php',
-                    type: 'GET',
-                    data: {
-                        db: db,
-                    },
 
-                },
-                columns: [
-                    {
-                        data: 'schedule_id',
-                        render: function(data, type, row) {
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<p class="text-sm font-weight-bold mb-0">' + row.schedule_id +
-                                '</p>' +
-                                '</div>';
-                        }
-                    },
-                    {
-                        data: 'schedule_id',
-                        render: function(data, type, row) {
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<p class="text-sm font-weight-bold mb-0">' + row.schedule_id +
-                                '</p>' +
-                                '</div>';
-                        }
-                    },
-                    // Replace 'client_id' with the actual column name
-                    {
-                        data: 'client_name',
-                        render: function(data, type, row) {
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<h6 class="mb-0 text-sm">' + row.client_name +
-                                '</h6>' +
-                                '<p class="text-xs text-secondary mb-0">' + row.address +
-                                '</p>' +
-                                '</div>';
-                        }
-                    },
-                    {
-                        data: 'model',
-                        render: function(data, type, row) {
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<h6 class="mb-0 text-sm">' + row.brand + ' / ' + row.model +
-                                '</h6>' +
-                                '<p class="text-xs text-secondary mb-0">' + row.machine_name +
-                                '</p>' +
-                                '</div>';
-                        }
-                    },
-                    {
-                        data: 'schedule_date',
-                        render: function(data, type, row) {
-                            const schedule_date = new Date(row.schedule_date).toLocaleDateString(
-                                'en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                });
-                          
 
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<p class="badge badge-sm bg-gradient-success">' +
-                                schedule_date + '</p>' +
-                                '</div>';
-                        }
-                    },
-                    {
-                        data: 'status',
-                        render: function(data, type, row) {
-                            const currentDate = new Date();
-                            const currentYear = currentDate.getFullYear();
-                            const currentMonth = currentDate.getMonth() + 1; 
-                            let partStatus = (row.status == 3) ? "Unresolved": "Not Done";
-                            let partColor = (row.status == 3) ? "warning" : "info";
-
-            const targetDate = row.schedule_date;
-            const [targetYear, targetMonth] = targetDate.split('-').map(Number);
-
-            // Compare the month and year
-            if (targetYear < currentYear || (targetYear === currentYear && targetMonth < currentMonth)) {
-           partStatus = "Delayed";
-           partColor = "danger";
-            } else {
-            console.log('Status: On track');
-}
-                           
-
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<p class="badge badge-sm bg-gradient-'+ partColor + '">' +
-                                partStatus+ '</p>' +
-                                '</div>';
-
-                        }
-                    },
-
-                    {
-                        data: 'rep_problem',
-                        render: function(data, type, row) {
-                            return '<div class="align-middle text-center text-sm">' +
-                                '<p class="text-sm font-weight-bold mb-0">' + row.rep_problem +
-                                '</p>' +
-                                '</div>';
-                        }
-                    },
-
-                    {
-                        orderable: false,
-                        data: 'schedule_id',
-                        defaultContent: '',
-                        render: function(data, type, row) {
-                            return `
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
-        <button type="button" data-id="${row.schedule_id}" class="btn btn-secondary no_margin confirmSchedule">
-            <i class="fa fa-check"></i>
-        </button>
-    </span>`;
-
-                        },
-                        width: "15px"
-                    }, // Replace 'client_name' with the actual column name
-                    // Define other data columns...
-                ]
-            });
-
-            $(document).on('click', '.confirmSchedule', function(e){
-                let id = $(this).attr('data-id');
-                                  $.ajax({
-                                      url: "../php/process.php",
-                                      method: "POST",
-                                      data: {
-                                          action: 'show_sched_details',
-                                          id: id
-                                      },
-                                      success: function(data) {
-                                          console.log(id);
-                                          // Set the content of the modal with the AJAX request's response data
-                                          $("#schedule_details_modal .contents")
-                                              .html(data);
-                                      }
-                                  });
-                                  $("#schedule_details_modal").modal("show");
-
-            });
-
-                //Confirm Resched
-          $("body").on("click", "#reschedConfirm", function(e) {
-              let resched_cId = $(this).attr('data-id');
-              e.preventDefault();
-              $.ajax({
-                  url: '../php/process.php',
-                  method: 'post',
-                  data: $("#resched_form").serialize() + "&action=confirm_resched",
-                  success: function(response) {
-                      var formattedDate = new Date(response).toISOString().substring(0, 10);
-                      Swal.fire({
-                          icon: 'success',
-                          title: 'Rescheduled',
-                          text: '.', // Add a custom success message here if needed
-                          timer: 1500,
-                          timerProgressBar: true,
-                          didOpen: () => {
-                              Swal.showLoading();
-                          },
-                          willClose: () => {
-                              Swal.hideLoading();
-                              table.ajax.reload(null, false);
-                          },
-                      });
-                      $("#add-sched-form")[0].reset();
-                      $("#reschedModal").modal('hide');
-                      showSchedules(formattedDate);
-
-                  }
-              });
-          });
-          $("body").on("click", "#c_confirmBtn", function(e) {
-              let service_by = $('.sample-select').val();
-              if ($("#confirm_form")[0].checkValidity()) {
-                  e.preventDefault();
-                  var formData = new FormData($("#confirm_form")[0]);
-                  formData.append('action', 'update_sched');
-                  $.ajax({
-                      url: '../php/process.php',
-                      method: 'post',
-                      data: formData,
-                      contentType: false,
-                      processData: false,
-                      success: function(response) {
-                          console.log(response);
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Saved',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                               
-                              },
-                          });
-                          table.ajax.reload(null, false);
-                          $("#confirm-sched-modal").modal('hide');
-                          $("#confirm_form")[0].reset();
-                          
-                      }
-                  });
-              }
-          });            
-
-          $("#confirmG").click(function(e) {
-              if ($("#add-sched-g-form")[0].checkValidity()) {
-                  e.preventDefault();
-                  let service_by1 = $('.service_by_svg').val();
-                  $.ajax({
-                      url: '../php/process.php',
-                      method: 'post',
-                      data: {
-                          ...$("#add-sched-g-form").serializeArray(),
-                          action: "confirm_g_sched",
-                          service_by1: service_by1
-                      },
-                      success: function(response) {
-                          console.log(response);
-                          $("#addSvGModal").modal('hide');
-                          $("#add-sched-g-form")[0].reset();
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Saved',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                table.ajax.reload(null,false)
-                              },
-                          });
-                      }
-                  });
-              }
-          });
-
-          $("body").on("click", "#c_confirmBtn", function(e) {
-              let service_by = $('.sample-select').val();
-              if ($("#confirm_form")[0].checkValidity()) {
-                  e.preventDefault();
-                  var formData = new FormData($("#confirm_form")[0]);
-                  formData.append('action', 'update_sched');
-                  $.ajax({
-                      url: '../php/process.php',
-                      method: 'post',
-                      data: formData,
-                      contentType: false,
-                      processData: false,
-                      success: function(response) {
-                          console.log(response);
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Saved',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                table.ajax.reload(null,false);
-                              },
-                          });
-                          $("#confirm-sched-modal").modal('hide');
-                          $("#confirm_form")[0].reset();
-                          
-                      }
-                  });
-              }
-          });  
-
-                 //Cancel Service Call
-                 $("body").on("click", ".cancelSv", function(e) {
-              e.preventDefault();
-              del_id = $(this).attr('data-id');
-              swal.fire({
-                      title: "Are you sure?",
-                      text: "This will cancel this schedule",
-                      showCancelButton: true,
-                      denyButtonText: `Don't save`,
-                      icon: "warning",
-                      buttons: true,
-                      dangerMode: true,
-                  })
-                  .then((result) => {
-                      if (result.isConfirmed) {
-                          $.ajax({
-                              url: '../php/process.php',
-                              method: 'post',
-                              data: {
-                                  del_id: del_id,
-                                  action: 'deleteSchedule'
-                              },
-                              success: function(response) {
-                                Swal.fire({
-                              icon: 'success',
-                              title: 'Schedule Cancelled',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                  $("#schedule_details_modal").modal('hide');
-                                  table.ajax.reload(null,false);
-                              },
-                          });
-                              }
-                          });
-                      }
-                  });
-          });
-
-          
-          }
-          //Resched
-          $("body").on("click", ".reschedBtn", function(e) {
-              let resched_id = $(this).attr('data-id');
-              e.preventDefault();
-              $.ajax({
-                  url: '../php/process.php',
-                  method: 'post',
-                  data: {
-                      resched_id: resched_id
-                  },
-                  success: function(response) {
-                      $("#reschedModal .reschedContent").html(response);
-                      $("#reschedModal").modal("show");
-                  }
-              });
-          });
-      
-          // Confirm Schedule
           $("body").on("click", "#updateBtn", function(e) {
               let sched_id = $(this).attr('data-id');
 
@@ -717,6 +613,25 @@
                   }
               });
           });
+
+          //Resched
+          $("body").on("click", ".reschedBtn", function(e) {
+              let resched_id = $(this).attr('data-id');
+              e.preventDefault();
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: {
+                      resched_id: resched_id
+                  },
+                  success: function(response) {
+                      $("#reschedModal .reschedContent").html(response);
+                      $("#reschedModal").modal("show");
+                  }
+              });
+          });
+
+
           $("#confirmBtn").click(function(e) {
               if ($("#add-sched-form")[0].checkValidity()) {
                   e.preventDefault();
@@ -751,197 +666,18 @@
                               },
                               willClose: () => {
                                   Swal.hideLoading();
-                                  showSchedules();
-                              },
-                          });
-                      }
-                  });
-              }
-          });
-
-    
-
-
-   
-          //Calendar show Schedule function
-          function showSchedules(initialDate) {
-              $.ajax({
-                  url: '../php/process.php',
-                  method: 'post',
-                  data: {
-                      action: 'display_schedule'
-                  },
-                  success: function(response) {
-                      var scheds = $.parseJSON(response);
-                      var calendar;
-                      var Calendar = FullCalendar.Calendar;
-                      var events = [];
-                      $(function() {
-                          if (!!scheds) {
-                              Object.keys(scheds).map(k => {
-                                  var row = scheds[k]
-                                  events.push({
-                                      id: row.schedule_id,
-                                      title: row.title,
-                                      start: row.schedule_date,
-                                      color: row.color
-                                  });
-                              })
-                          }
-                          var date = new Date()
-                          var d = date.getDate(),
-                              m = date.getMonth(),
-                              y = date.getFullYear()
-
-                          calendar = new Calendar(document.getElementById('calendar'), {
-                              headerToolbar: {
-                                  left: 'prev,next today',
-                                  right: 'dayGridMonth,dayGridWeek,list',
-                                  center: 'title',
-                              },
-                              selectable: true,
-                              themeSystem: 'bootstrap',
-                              initialDate: initialDate,
-                              //Random default events
-                              events: events,
-                              eventClick: function(info) {
-                                  var id = info.event.id;
-                                  $.ajax({
-                                      url: "../php/process.php",
-                                      method: "POST",
-                                      data: {
-                                          action: 'show_sched_details',
-                                          id: id
-                                      },
-                                      success: function(data) {
-                                          console.log(id);
-                                          // Set the content of the modal with the AJAX request's response data
-                                          $("#schedule_details_modal .contents")
-                                              .html(data);
-                                      }
-                                  });
-                                  $("#schedule_details_modal").modal("show");
-                              },
-                              eventDidMount: function(info) {
-                                  // Do Something after events mounted
-                              },
-                              editable: false
-                          });
-                          calendar.render();
-                          // Form reset listener
-                          $('#schedule-form').on('reset', function() {
-                              $(this).find('input:hidden').val('')
-                              $(this).find('input:visible').first().focus()
-                          })
-
-                          // Edit Button
-                          $('#resched-12').click(function() {
-                              var id = $(this).attr('data-id')
-                              if (!!scheds[id]) {
-                                  var _form = $('#schedule-form')
-                                  console.log(String(scheds[id].start_datetime),
-                                      String(scheds[id].start_datetime).replace(
-                                          " ", "\\t"))
-                                  _form.find('[name="id"]').val(id)
-                                  _form.find('[name="start_date"]').val(scheds[id]
-                                      .start)
-                                  _form.find('[name="description"]').val(scheds[id]
-                                      .description)
-                                  _form.find('[name="start_datetime"]').val(String(
-                                      scheds[id].start_datetime).replace(
-                                      " ", "T"))
-                                  _form.find('[name="end_datetime"]').val(String(
-                                      scheds[id].end_datetime).replace(" ",
-                                      "T"))
-                                  $('#resched-modal').modal('hide')
-                                  _form.find('[name="title"]').focus()
-                              } else {
-                                  alert("Event is undefined");
-                              }
-                          })
-                          // Delete Button / Deleting an Event
-                          $('#delete').click(function() {
-                              var id = $(this).attr('data-id')
-                              if (!!scheds[id]) {
-                                  var _conf = confirm(
-                                      "Are you sure to delete this scheduled event?"
-                                      );
-                                  if (_conf === true) {
-                                      location.href = "./delete_schedule.php?id=" +
-                                          id;
+                                  if (isTableViewActive()) {
+                                      displaySchedule();
+                                  } else {
+                                      showSchedules();
                                   }
-                              } else {
-                                  alert("Event is undefined");
-                              }
-                          })
-                      })
-                  }
-              });
-
-              $("body").on("click", "#reschedConfirm", function(e) {
-              let resched_cId = $(this).attr('data-id');
-              e.preventDefault();
-              $.ajax({
-                  url: '../php/process.php',
-                  method: 'post',
-                  data: $("#resched_form").serialize() + "&action=confirm_resched",
-                  success: function(response) {
-                      var formattedDate = new Date(response).toISOString().substring(0, 10);
-                      Swal.fire({
-                          icon: 'success',
-                          title: 'Rescheduled',
-                          text: '.', // Add a custom success message here if needed
-                          timer: 1500,
-                          timerProgressBar: true,
-                          didOpen: () => {
-                              Swal.showLoading();
-                          },
-                          willClose: () => {
-                              Swal.hideLoading();
-                             
-                          },
-                      });
-                      $("#add-sched-form")[0].reset();
-                      $("#reschedModal").modal('hide');
-                      showSchedules(formattedDate);
-
-                  }
-              });
-          });
-          $("body").on("click", "#c_confirmBtn", function(e) {
-              let service_by = $('.sample-select').val();
-              if ($("#confirm_form")[0].checkValidity()) {
-                  e.preventDefault();
-                  var formData = new FormData($("#confirm_form")[0]);
-                  formData.append('action', 'update_sched');
-                  $.ajax({
-                      url: '../php/process.php',
-                      method: 'post',
-                      data: formData,
-                      contentType: false,
-                      processData: false,
-                      success: function(response) {
-                          console.log(response);
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Saved',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                  showSchedules();
                               },
                           });
-                          $("#confirm-sched-modal").modal('hide');
-                          $("#confirm_form")[0].reset();
-                          
                       }
                   });
               }
-          });  
+          });
+
           $("#confirmG").click(function(e) {
               if ($("#add-sched-g-form")[0].checkValidity()) {
                   e.preventDefault();
@@ -968,7 +704,11 @@
                               },
                               willClose: () => {
                                   Swal.hideLoading();
-                                  showSchedules();
+                                  if (isTableViewActive()) {
+                                      displaySchedule();
+                                  } else {
+                                      showSchedules();
+                                  }
                               },
                           });
                       }
@@ -976,32 +716,25 @@
               }
           });
 
-                 //Cancel Service Call
-                 $("body").on("click", ".cancelSv", function(e) {
-              e.preventDefault();
-              del_id = $(this).attr('data-id');
-              swal.fire({
-                      title: "Are you sure?",
-                      text: "This will cancel this schedule",
-                      showCancelButton: true,
-                      denyButtonText: `Don't save`,
-                      icon: "warning",
-                      buttons: true,
-                      dangerMode: true,
-                  })
-                  .then((result) => {
-                      if (result.isConfirmed) {
-                          $.ajax({
-                              url: '../php/process.php',
-                              method: 'post',
-                              data: {
-                                  del_id: del_id,
-                                  action: 'deleteSchedule'
-                              },
-                              success: function(response) {
-                                Swal.fire({
+
+          $(document).on("click", '#c_confirmBtn', function(e) {
+            
+              let service_by = $('.sample-select').val();
+              if ($("#confirm_form")[0].checkValidity()) {
+                  e.preventDefault();
+                  var formData = new FormData($("#confirm_form")[0]);
+                  formData.append('action', 'update_sched');
+                  $.ajax({
+                      url: '../php/process.php',
+                      method: 'post',
+                      data: formData,
+                      contentType: false,
+                      processData: false,
+                      success: function(response) {
+                          console.log(response);
+                          Swal.fire({
                               icon: 'success',
-                              title: 'Schedule Cancelled',
+                              title: 'Saved',
                               timer: 1500,
                               timerProgressBar: true,
                               didOpen: () => {
@@ -1009,58 +742,27 @@
                               },
                               willClose: () => {
                                   Swal.hideLoading();
-                                  $("#schedule_details_modal").modal('hide');
-                                  showSchedules();
+                                  if (isTableViewActive()) {
+                                      displaySchedule();
+                                  } else {
+                                      showSchedules();
+                                  }
                               },
                           });
-                              }
-                          });
+
+                          // Check which view is active and execute the appropriate function
+
+
+                          $("#confirm-sched-modal").modal('hide');
+                          $("#confirm_form")[0].reset();
                       }
                   });
+              }
           });
-                 //Cancel Service Call
-          $("body").on("click", ".cancelSv", function(e) {
-              e.preventDefault();
-              del_id = $(this).attr('data-id');
-              swal.fire({
-                      title: "Are you sure?",
-                      text: "This will cancel this schedule",
-                      showCancelButton: true,
-                      denyButtonText: `Don't save`,
-                      icon: "warning",
-                      buttons: true,
-                      dangerMode: true,
-                  })
-                  .then((result) => {
-                      if (result.isConfirmed) {
-                          $.ajax({
-                              url: '../php/process.php',
-                              method: 'post',
-                              data: {
-                                  del_id: del_id,
-                                  action: 'deleteSchedule'
-                              },
-                              success: function(response) {
-                                Swal.fire({
-                              icon: 'success',
-                              title: 'Schedule Cancelled',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                  $("#schedule_details_modal").modal('hide');
-                                  showSchedules();
-                              },
-                          });
-                              }
-                          });
-                      }
-                  });
-          });
-          }
+
+
+
+
       });
       </script>
   </body>

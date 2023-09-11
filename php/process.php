@@ -364,7 +364,7 @@ if ($result) {
 }
 //Update Schedule Details
 if (isset($_POST['action'])&& $_POST['action'] == 'update_sched'){
-
+print_r($_POST);
 $schedule_type = $_POST['schedule_type'];
 $contract_id = $_POST['contract_id'];
 $sv_id = $_POST['sv_id'];
@@ -398,7 +398,9 @@ else {
 	$check_sv_contract = $client->get_sv_details($sv_id);
 	if ($check_sv_contract['contract_id'] > 0 ) {
 	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
+	print_r($contract_det);
 	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
+	echo $count;
 	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
 	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;	
 	}
@@ -424,9 +426,9 @@ $check = $client->check_user_service($user, $schedule_id);
 
 }
 
-// echo 'Success';
-print_r($_POST);
-print_r($s_by);
+ echo 'Success';
+// print_r($_POST);
+// print_r($s_by);
 }
 
 
@@ -1350,6 +1352,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'reportServiceClient'){
 }
 
 
+
 if (isset($_GET['action'])&& $_GET['action'] == 'edit_pm_details'){
 	$accomp_id = $_GET['accomp_id'];
 	$result = $client->get_pms_report($accomp_id); 
@@ -2076,7 +2079,7 @@ $query.= 'GROUP BY accomplished_schedule.id';
 		$dateTo = date('Y-m-d', strtotime($last_word));
 		$dateFrom = date('Y-m-d', strtotime($first_chunk));
 
-		$query .= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
+		$query .= "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_date, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
         schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
         COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,
 		 GROUP_CONCAT(users.firstname, ' ', users.lastname) AS ServicedBy, 
@@ -2093,7 +2096,7 @@ $query.= 'GROUP BY accomplished_schedule.id';
 		if ($schedType == 0) {
 			$query.=" WHERE schedule.status =2 AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";	
 		} else {
-			$query.=" WHERE schedule.schedule_type = $schedType AND schedule.status =2 AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";	
+			$query.=" WHERE schedule.schedule_type = $schedType AND schedule.status =2 AND accomplished_schedule.accomp_date BETWEEN '$dateFrom' AND '$dateTo' ";	
 		}
 	
 ($client_t) ? $query.=' AND clients.client_id in ('.$client_t.')' : '';		
@@ -2118,6 +2121,7 @@ if ($serviceBy) {
 			$query.=" WHERE schedule.schedule_type = $schedType AND schedule.status =2 AND schedule.schedule_date BETWEEN '$dateFrom' AND '$dateTo' ";	
 		}
 
+		
 	$query .=' AND user_sched.uid in ('.$serviceBy.')';
 
 }
@@ -2133,6 +2137,28 @@ $return = array(
 echo json_encode($return);
 
 
+}
+
+if(isset($_POST['action']) && $_POST['action'] == 'deleteReport') {
+	$reportId = $_POST['reportId'];
+	$fileName = $_POST['reportName'];
+	$report = $client->delete_report($reportId);
+	if($report) {
+		if (file_exists($fileName)) {
+			if (unlink($fileName)) {
+				echo 'Success';
+			}
+			else {
+				echo 'Failed';
+			}
+		}
+		else {
+			echo 'File not existing';
+		}
+	}
+	else {
+		echo 'ERROR';
+	}
 }
 ?>
 

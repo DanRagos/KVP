@@ -82,7 +82,7 @@
 				</div>				
 				</div>
               <div class="table-responsive" >
-		 <table id="example" class="table align-items-center justify-content-center table-responsive" style="width:100%;" >
+		 <table id="example" class="table align-items-center justify-content-center table-responsive  table-striped" style="width:100%;" >
         <thead>
             <tr>
 					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule no.</th>
@@ -130,14 +130,14 @@
     });
  $('#month-filter').on('change', function() {
     var value = $(this).val();
-    table.column(7).search(value).draw();
+    table.column(8).search(value).draw();
   });	
 $('#tool_type').on('change', function() {
    var value = $(this).val();
    if (value === '3') {
-      table.columns(3).search('').draw();
+      table.columns(4).search('').draw();
    } else {
-      table.column(3).search(value).draw();
+      table.column(4).search(value).draw();
    }
 });
 	
