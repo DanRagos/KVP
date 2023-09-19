@@ -327,7 +327,7 @@
                           defaultContent: '',
                           render: function(data, type, row) {
                               return `
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
+         <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
         <button type="button" data-id="${row.schedule_id}" class="btn btn-secondary no_margin confirmSchedule">
             <i class="fa fa-check"></i>
         </button>
@@ -718,7 +718,7 @@
 
 
           $(document).on("click", '#c_confirmBtn', function(e) {
-            
+
               let service_by = $('.sample-select').val();
               if ($("#confirm_form")[0].checkValidity()) {
                   e.preventDefault();

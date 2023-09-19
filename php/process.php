@@ -187,7 +187,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
                          ';
 						
 						$output.='
-						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
+						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Update</button>
                         <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>					 ';
 						if ($result['schedule_type'] == 2) {
 							$output.=' <button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button> </div> ';
@@ -352,7 +352,7 @@ if ($result) {
   </div>
       </div>
       <div class="modal-footer">
-	  <button type="submit" id="c_confirmBtn" name="c_button" class="btn btn-primary">Confirm</button>
+	  <button type="submit" id="c_confirmBtn" name="c_button" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         
       </div>

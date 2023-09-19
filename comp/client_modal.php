@@ -244,7 +244,7 @@
 	</select>
 	</div>
 	<div class="input-group input-group-outline" style="display:none"  id="reason">
-									<label class="form-label">PMS Count:</label>
+									<label class="form-label">No. of SVC:</label>
 									<input type="number" min=1 name="pms_count"  id="inp_reason" class="form-control" >
 									</div>
 	</div>

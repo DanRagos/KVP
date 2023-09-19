@@ -431,10 +431,18 @@
                     {
                         data: 'sv_call',
                         render: function(data, type, row) {
+                        if (row.status == 2) {    
                             return '<div class="align-middle text-center text-sm">' +
                                 '<p class="text-sm font-weight-bold mb-0">' + row.sv_call +
                                 '</p>' +
                                 '</div>';
+                        }
+                        else {
+                            return '<div class="align-middle text-center text-sm">' +
+                                '<p class="text-sm font-weight-bold mb-0"> Unli' +
+                                '</p>' +
+                                '</div>';
+                        }
                         }
                     },
 
@@ -1033,10 +1041,18 @@
                     {
                         data: 'sv_call',
                         render: function(data, type, row) {
+                        if (row.status == 2) {    
                             return '<div class="align-middle text-center text-sm">' +
                                 '<p class="text-sm font-weight-bold mb-0">' + row.sv_call +
                                 '</p>' +
                                 '</div>';
+                        }
+                        else {
+                            return '<div class="align-middle text-center text-sm">' +
+                                '<p class="text-sm font-weight-bold mb-0"> Unli' +
+                                '</p>' +
+                                '</div>';
+                        }
                         }
                     },
 

@@ -297,7 +297,7 @@ require_once '../php/session.php';
 		  method: 'GET',
 		  data: {action:'dboardCards'},
 		  success: function (response) {
-        
+        console.log(response);
 			   let json = JSON.parse(response);
         console.log(json);
          $('#serviceSchedule').text(json.serviceSchedule);
