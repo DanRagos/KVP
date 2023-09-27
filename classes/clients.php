@@ -192,6 +192,14 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		return $result;
 	}
 
+	public function display_contract_expiraton () {
+		$sql = "SELECT contract.*, clients.* from contract LEFT JOIN clients on contract.client_id = clients.client_id where contract.count =1;";
+		$stmt = $this ->conn ->prepare($sql);
+		$stmt -> execute();
+		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
+
 	public function display_schedule_month (){
 		$sql = "SELECT schedule.*, COALESCE(clients.client_name, service_call.guest_name, 
 		COALESCE((SELECT clients.client_name FROM clients 
@@ -508,6 +516,15 @@ public function schedule() {
     $stmt->execute();
     return $stmt->fetchColumn();
 }
+
+public function contractExpire() {
+    $sql = "SELECT COUNT(contract_id) FROM contract where contract.count = 1 AND isActive = 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+
 
 
 public function countSchedule($client_id) {
