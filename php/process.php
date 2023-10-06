@@ -526,7 +526,7 @@ $pms_count = $_POST['pms_count'];
 $datefilter = $_POST['datefilter'];
 $partsWarranty = $_POST['partsWarranty'];
 $first_pms = $_POST['first_pms'];
-$pms = $first_pms;
+
 $type= 1;
 
 $last_space = strrpos($partsWarranty, ' ');
@@ -536,12 +536,15 @@ $pCoverage = date('Y-m-d', strtotime($last_word));
 $pTurn_over = date('Y-m-d', strtotime($first_chunk));
 
 
+
 $string=$datefilter;
 $last_space = strrpos($string, ' ');
 $last_word = substr($string, $last_space);
 $first_chunk = substr($string, 0, $last_space - 2);
 $coverage = date('Y-m-d', strtotime($last_word));
 $turn_over = date('Y-m-d', strtotime($first_chunk));
+
+$pms = $turn_over;
 
 if ($frequency =="1"  ){$num = 3;}
 elseif ($frequency =="2" ){$num = 6; }
@@ -555,11 +558,6 @@ do {
 $result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type );
 echo $result;
 
-
-
-	/*$id = $_POST['add_id'];
-	$row = $client ->add_contract($id);
-	echo json_encode($row);*/
 }
 
 if (isset($_GET['action'])&& $_GET['action'] == 'del_Contract'){
