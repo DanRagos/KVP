@@ -1,0 +1,25 @@
+ $("#pmsCheck").click(function(e){
+		   if ($(this).is(':checked')) {
+				$('#option2').show();
+				$('#option1').hide();
+				let user_id = $('#client_id').val();
+				console.log(user_id);
+				$.ajax({
+				url: '../php/process.php',
+				method : 'POST',
+				data: {user_id : user_id},
+				success: function (response){
+					console.log(response);
+					
+					/*swal("Rescheduled", "", "success");
+							$("#resched-form")[0].reset();
+							$("#resched-modal").modal('hide');
+							 showSchedules(response);		*/	 
+				}
+			});
+		   }
+		   else {
+				$('#option2').hide();
+				$('#option1').show();
+		   }
+        });
