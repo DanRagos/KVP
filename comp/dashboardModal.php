@@ -127,3 +127,36 @@
     </div>
   </div>
 </div>
+
+<!--Contract to expire for this Month -->
+<div class="modal fade" id="contractExpiration" tabindex="-1" aria-labelledby="contractExpirationLbl" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contractExpirationLbl">Contract of Expiration</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <div class="table-responsive">
+      <table id="contractExpirationTbl" class="table align-items-center justify-content-center" >
+        <thead>
+                    <tr>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Schedule No.</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Machine</th>
+					  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contract</th>
+            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody class="contractContent"> 
+</tbody>
+    </table>
+</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      
+      </div>
+    </div>
+  </div>
+</div>

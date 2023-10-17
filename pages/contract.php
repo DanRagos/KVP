@@ -123,7 +123,7 @@
                                     <span class="ms-1">Completed Contract</span>
                                 </a>
                             </li>
-                            
+
                         </ul>
                     </div>
                 </div>
@@ -155,7 +155,7 @@
                         </div>
                         <div class="card-body px-0 pb-2">
                             <div class="table-responsive p-0">
-                                <table id="example" class="table align-items-center mb-0 table-striped"
+                                <table id="activeContractTable" class="table align-items-center mb-0 table-striped"
                                     style="width:100%;">
                                     <thead>
                                         <tr>
@@ -208,7 +208,7 @@
                         </div>
                         <div class="card-body px-0 pb-2">
                             <div class="table-responsive">
-                                <table id="completedContract" class="table align-items-center mb-0 table-striped"
+                                <table id="completedContractTable" class="table align-items-center mb-0 table-striped"
                                     style="width:100%;">
                                     <thead>
                                         <tr>
@@ -262,7 +262,18 @@
     <?php include 'scripts.php' ?>
     <script>
     $(document).ready(function() {
-        activeContract();
+        var activeContract;
+        var completedContract;
+        
+        function isContractActive() {
+            return $("#activeContractTable").is(":visible");
+        }
+
+        function isCompletedActive() {
+            return $("#completedContractTable").is(":visible");
+        }
+      
+
         $('#liActive').click(function() {
             $('#spinner').show();
             setTimeout(() => {
@@ -270,13 +281,6 @@
                 $('#tabActive').show();
                 $('#tabComplete').hide();
                 $('#tabService').hide();
-
-                if ($.fn.DataTable.isDataTable('#example')) {
-                    // Destroy the DataTable instance
-                    $('#example').DataTable().destroy();
-                }
-                activeContract();
-
             }, 300)
         });
         $('#liComplete').click(function() {
@@ -286,18 +290,13 @@
                 $('#tabActive').hide();
                 $('#tabComplete').show();
                 $('#tabService').hide();
-                if ($.fn.DataTable.isDataTable('#completedContract')) {
-                    // Destroy the DataTable instance
-                    $('#completedContract').DataTable().destroy();
-                }
-                completedContract();
             }, 300)
 
         });
 
-        function activeContract() {
+    
             let db = 8;
-            var table = $('#example').DataTable({
+            activeContract = $('#activeContractTable').DataTable({
                 stateSave: true,
                 processing: true,
                 serverSide: true,
@@ -467,17 +466,17 @@
             <i class="fa fa-trash"></i>
         </button>
     </span>`;
-
                         },
                         width: "15px"
                     }, // Replace 'client_name' with the actual column name
                     // Define other data columns...
                 ]
             });
-            $('#example tbody').on('click', 'td.details-control', function() {
+            
+     $('#activeContractTable tbody').on('click', 'td.details-control', function() {
                 var tr = $(this).closest('tr');
                 var tdi = tr.find("i.fa");
-                var row = table.row(tr);
+                var row = activeContract.row(tr);
 
                 if (row.child.isShown()) {
                     // This row is already open - close it
@@ -501,7 +500,6 @@
                             var table2 = $('.test-table').DataTable();
 
                             $(document).on('click', '.updatePm', function(e) {
-
                                 if ($("#update_pm_form")[0].checkValidity()) {
                                     e.preventDefault();
                                     var formData = new FormData($(
@@ -515,7 +513,7 @@
                                         processData: false,
                                         success: function(response) {
                                             console.log(response);
-                                            table.ajax.reload();
+                                            activeContract.ajax.reload();
                                             $("#update_pm_form")[0]
                                                 .reset();
                                             $("#edit-pm-modal").modal(
@@ -552,45 +550,8 @@
 
                 }
             });
-            $(document).on('click', '#edit-contract-btn', function() {
 
-                $.ajax({
-                    url: '../php/process.php',
-                    method: 'POST',
-                    data: $('#edit-contract-form').serialize() + "&action=update_contract",
-                    success: function(response) {
-
-                        data = JSON.parse(response);
-                        console.log(data);
-                        if (data.status === 0) {
-                            Swal.fire(
-                                'Invalid',
-                                data.message,
-                                'error'
-                            );
-                        } else {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Contract Updated',
-                                text: 'Contract has been edited successfully.', // Add a custom success message here if needed
-                                timer: 1500,
-                                timerProgressBar: true,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                },
-                                willClose: () => {
-                                    Swal.hideLoading();
-                                    $('#editContractModal').modal('hide');
-                                    table.ajax.reload();
-                                },
-                            });
-                        }
-
-
-                    }
-                });
-
-            });
+            
             $(document).on('click', '.editContract', function() {
                 let contract_id = $(this).attr('data-id');
                 $.ajax({
@@ -606,180 +567,10 @@
 
                 });
             });
+  
 
 
-
-
-            $(document).on('click', '.addChanges', function() {
-
-                let contract_id = $('#pms_contract_id').val();
-                let frequency = $('#frequency').val()
-                var modalBody = $(this).closest('.modal-content').find('.modal-body');
-                var formDataArray = []; // Step 1: Initialize the formDataArray
-                modalBody.find('.row').each(function() {
-                    var formData = {};
-                    $(this).find('input, select').each(function() {
-                        var fieldName = $(this).attr('name');
-                        var fieldValue = $(this).val();
-                        formData[fieldName] = fieldValue;
-
-
-                    });
-                    formData['service_by'] = $(this).find('.sample-select').val();
-
-                    // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
-                    // If yes, add it to the formDataArray
-                    if (
-                        formData.hasOwnProperty('sched_date') &&
-                        formData.hasOwnProperty('serv_date') &&
-                        formData.hasOwnProperty('diagnosis') &&
-                        formData.hasOwnProperty('service_done') &&
-                        formData.hasOwnProperty('recomm') &&
-                        formData.hasOwnProperty('service_by')
-                    ) {
-                        formDataArray.push(formData);
-                    }
-                });
-
-                // Step 3: Send the form data via AJAX
-                swal.fire({
-                    title: 'Confirm changes',
-                    confirmButtonText: 'Save',
-                    showCancelButton: true,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '../php/process.php',
-                            type: 'POST',
-                            data: {
-                                formDataArray: JSON.stringify(formDataArray),
-                                contract_id: contract_id,
-                                frequency: frequency
-                            },
-                            success: function(response) {
-                                console.log(response);
-
-                                // Handle the AJAX response
-                                $('#pms-forms').empty();
-                                $('#exampleModal').modal('hide');
-
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Saved',
-                                    timer: 1500,
-                                    timerProgressBar: true,
-                                    didOpen: () => {
-                                        Swal.showLoading();
-
-                                    },
-                                    willClose: () => {
-                                        Swal.hideLoading();
-                                        table.ajax.reload(null, false);
-                                    },
-                                });
-                            },
-                            error: function(xhr, status, error) {
-                                console.log(error);
-                            },
-                        });
-                    }
-                });
-            });
-
-            $(document).on('click', '.editPm', function() {
-                let accomp_id = $(this).attr('data-id');
-                $.ajax({
-                    url: '../php/process.php',
-                    method: 'GET',
-                    data: {
-                        accomp_id: accomp_id,
-                        action: 'edit_pm_details'
-                    },
-                    success: function(response) {
-
-                        $('.update_pm_contents').html(response);
-                        const arrayValue = JSON.parse(document.getElementById('myDiv')
-                            .dataset
-                            .arrayValue);
-                        $.ajax({
-                            url: '../php/process.php',
-                            method: 'GET',
-                            data: {
-                                'action': 'getServiceBy'
-                            },
-                            dataType: 'json',
-                            success: function(data) {
-
-                                // Assuming the response data is an array of objects with label and value properties
-                                var optionsData = data.map(function(item) {
-                                    var fullName = item.firstname +
-                                        ' ' +
-                                        item.lastname;
-                                    return {
-                                        label: fullName,
-                                        value: item.mem_id
-                                    };
-                                });
-
-                                // Initialize Virtual Select with the fetched options
-                                VirtualSelect.init({
-                                    ele: '.sample-select',
-                                    options: optionsData,
-                                    multiple: true,
-
-                                });
-
-                                document.querySelector('.sample-select')
-                                    .setValue(
-                                        arrayValue);
-
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error fetching options:', error);
-                            }
-                        });
-                    }
-                });
-
-            });
-
-            //       $(document).on('click', '.updatePm', function(e) {
-            //           if ($("#update_pm_form")[0].checkValidity()) {
-            //   e.preventDefault();
-            //   var formData = new FormData($("#update_pm_form")[0]);
-            //   formData.append('action', 'updatePms');
-            //   $.ajax({
-            //     url: '../php/process.php',
-            //     method: 'post',
-            //     data: formData,
-            //     contentType: false,
-            //     processData: false,
-            //     success: function (response) {
-            //       console.log(response);
-            //         $("#update_pm_form")[0].reset();
-            //         $("#edit-pm-modal").modal('hide');
-            //         table2.ajax.reload( null, false );
-            //         Swal.fire({
-            //           icon: 'success',
-            //           title: 'PMS Update',
-            //           text: 'The Service details has been edited successfully.', // Add a custom success message here if needed
-            //           timer: 1500,
-            //           timerProgressBar: true,
-            //           didOpen: () => {
-            //             Swal.showLoading();
-            //           },
-            //           willClose: () => {
-            //             Swal.hideLoading();
-            //           },
-            //         });
-
-
-            //     }
-            //   });
-            // }
-            //       });
-
-            $("body").on("click", ".viewPms", function(e) {
+        $("body").on("click", ".viewPms", function(e) {
                 let accomp_id = $(this).attr('data-id');
                 e.preventDefault();
                 $.ajax({
@@ -807,10 +598,8 @@
                                 var blob = new Blob([pdfResponse], {
                                     type: 'application/pdf'
                                 });
-
                                 // Create a temporary URL for the blob
                                 var blobUrl = URL.createObjectURL(blob);
-
                                 // Open the PDF in a new tab or window
                                 window.open(blobUrl, '_blank');
                             },
@@ -818,13 +607,11 @@
                                 // Handle the error
                             }
                         });
-
-
                     }
-
                 });
             });
-            $(document).on('click', '.viewContractPmReport', function() {
+
+    $(document).on('click', '.viewContractPmReport', function() {
                 let accomp_id = $(this).attr('data-id');
                 $.ajax({
                     url: '../php/export_service.php',
@@ -840,10 +627,8 @@
                         var blob = new Blob([response], {
                             type: 'application/pdf'
                         });
-
                         // Create a temporary URL for the blob
                         var blobUrl = URL.createObjectURL(blob);
-
                         // Open the PDF in a new tab or window
                         window.open(blobUrl, '_blank');
 
@@ -851,59 +636,20 @@
                 });
             });
 
-            $(document).on('click', '.delContract', function() {
-                let contract_id = $(this).attr('data-id');
+         
 
-
-                Swal.fire({
-                    title: 'Do you want to delete the contract?',
-                    showDenyButton: true,
-
-                    confirmButtonText: 'Confirm',
-                    denyButtonText: 'Cancel',
-                }).then((result) => {
-                    /* Read more about isConfirmed, isDenied below */
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '../php/process.php',
-                            method: 'GET',
-                            data: {
-                                contract_id: contract_id,
-                                action: 'del_Contract'
-                            },
-                            success: function(e) {
-                                Swal.fire('Deleted!', '', 'success')
-                                displayContracts();
-                            }
-                        });
-
-                    } else if (result.isDenied) {
-                        Swal.fire('Changes are not saved', '', 'info')
-                    }
-                })
-
-
-
-            });
-
-        }
-
-        function completedContract() {
-            let db = 9;
-
-            var completeTable = $('#completedContract').DataTable({
+    let db2 = 9;
+        completedContract = $('#completedContractTable').DataTable({
                 stateSave: true,
                 processing: true,
                 serverSide: true,
                 scrollY: '45vh',
                 scrollX: true,
-
                 ajax: {
                     url: '../php/ssp_list.php',
                     type: 'GET',
                     data: {
-                        db: db,
-
+                        db: db2,
                     },
                 },
                 columns: [{
@@ -916,7 +662,6 @@
                         },
                         width: "15px"
                     },
-
                     {
                         data: 'contractId',
                         render: function(data, type, row) {
@@ -1072,8 +817,7 @@
                 ]
             });
 
-            $('#completedContract tbody').on('click', 'td.details-control', function() {
-
+            $('#completedContractTable tbody').on('click', 'td.details-control', function() {
                 var tr = $(this).closest('tr');
                 var tdi = tr.find("i.fa");
                 var row = completeTable.row(tr);
@@ -1103,7 +847,7 @@
                                     e.preventDefault();
                                     var formData = new FormData($(
                                         "#update_pm_form")[
-                                            0]);
+                                        0]);
                                     formData.append('action', 'updatePms');
                                     $.ajax({
                                         url: '../php/process.php',
@@ -1149,6 +893,7 @@
 
                 }
             });
+
             $(document).on('click', '.renewContract', function() {
                 let contract_id = $(this).attr('data-id');
                 $.ajax({
@@ -1166,7 +911,6 @@
             });
 
             $(document).on('click', '#renew-contract-btn', function() {
-
                 $.ajax({
                     url: '../php/process.php',
                     method: 'POST',
@@ -1206,7 +950,7 @@
 
             });
 
-        }
+        
         $(document).on('click', '.addPms', function() {
 
             $('#pms-forms').empty();
@@ -1232,24 +976,19 @@
 
         });
 
-        $(document).on('click', '.editTest', function() {
-
+    $(document).on('click', '.editTest', function() {
             // Generate a unique name for the input field
             let contract_no = $('#pms_contract_id').val();
             let pm_no = $('#pms_no').val();
             let frequency = $('#frequency').val()
-
-
             var fieldName = 'inputField_' + Date.now(); // Example: inputField_1623286595761
             let last_sched = $('#last_pms').val();
-
             // Create the input field dynamically with the unique name
             var inputField = $('<input>').attr({
                 type: 'text',
                 name: fieldName
             });
             if (pm_no > 0) {
-
                 var html = '<div class="row ">' +
                     '<div class="col">' +
                     '<div class="input-group input-group-outline my-3 is-filled">' +
@@ -1289,18 +1028,17 @@
                     ' <div  class="form-control p-0 sample-select" name="service_by"> </div>' +
                     '</div>' +
                     '</div>' +
-
                     '</div>' +
                     '</div>' +
                     '<hr style="background-color:rgb(131 110 110 / 92%);">';
-                let nextDate = new Date(last_sched);
-                nextDate.setMonth(nextDate.getMonth() + 3);
-                last_sched = nextDate.toISOString().slice(0, 10);
+            let nextDate = new Date(last_sched);
+            nextDate.setMonth(nextDate.getMonth() + 3);
+            last_sched = nextDate.toISOString().slice(0, 10);
                 // Append the input field to the container element
-                $('#pms-forms').append(html);
-                pm_no -= 1;
-                $('#pms_no').val(pm_no);
-                $('#last_pms').val(last_sched);
+            $('#pms-forms').append(html);
+            pm_no -= 1;
+            $('#pms_no').val(pm_no);
+            $('#last_pms').val(last_sched);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -1324,7 +1062,6 @@
                             value: item.mem_id
                         };
                     });
-
                     // Initialize Virtual Select with the fetched options
                     VirtualSelect.init({
                         ele: '.sample-select',
@@ -1337,25 +1074,8 @@
                 }
             });
         });
-        // var db = 3;
-        // var user_id = 1;
-        // var table= $('#contracts').DataTable({
-
-        // 			 processing: true,
-        // 			 serverSide: true,
-        //        scrollY: '45vh',
-        //        scrollX: true,
-        // 			ajax: {
-        // 			url: '../php/ssp_list.php',
-        // 			data: {db : db,
-        // 			user_id:user_id},
-        // 			method:'GET',
-        // 			},
-        // 			"order":[0,'asc'],					
-
-
-        // });
-
+     
+//View Contract Report
         $(document).on('click', '.viewContractReport', function() {
             let contract_id = $(this).attr('data-id');
             $.ajax({
@@ -1382,7 +1102,213 @@
                 }
             });
         });
+
+// Delete Contract
+        $(document).on('click', '.delContract', function() {
+                let contract_id = $(this).attr('data-id');
+                Swal.fire({
+                    title: 'Do you want to delete the contract?',
+                    showDenyButton: true,
+
+                    confirmButtonText: 'Confirm',
+                    denyButtonText: 'Cancel',
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '../php/process.php',
+                            method: 'GET',
+                            data: {
+                                contract_id: contract_id,
+                                action: 'del_Contract'
+                            },
+                            success: function(e) {
+                                Swal.fire('Deleted!', '', 'success')
+                                if (isContractActive()) {
+                                    activeContract.ajax.reload();
+                                }
+                                else {
+                                    completedContract.ajax.reload();
+                                }
+                                
+                            }
+                        });
+
+                    } else if (result.isDenied) {
+                        Swal.fire('Changes are not saved', '', 'info')
+                    }
+                })
+            });
+
+//Edit Contract
+    $(document).on('click', '#edit-contract-btn', function() {
+        $.ajax({
+            url: '../php/process.php',
+            method: 'POST',
+            data: $('#edit-contract-form').serialize() + "&action=update_contract",
+            success: function(response) {
+
+                data = JSON.parse(response);
+                console.log(data);
+                if (data.status === 0) {
+                    Swal.fire(
+                        'Invalid',
+                        data.message,
+                        'error'
+                    );
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Contract Updated',
+                        text: 'Contract has been edited successfully.', // Add a custom success message here if needed
+                        timer: 1500,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        willClose: () => {
+                            Swal.hideLoading();
+                            $('#editContractModal').modal('hide');
+                            activeContract.ajax.reload();
+                        },
+                    });
+                }
+            }
+        });
+
+});   
+
+ //Add Pms
+ $(document).on('click', '.addChanges', function() {
+    let contract_id = $('#pms_contract_id').val();
+    let frequency = $('#frequency').val()
+    var modalBody = $(this).closest('.modal-content').find('.modal-body');
+    var formDataArray = []; // Step 1: Initialize the formDataArray
+    modalBody.find('.row').each(function() {
+        var formData = {};
+        $(this).find('input, select').each(function() {
+            var fieldName = $(this).attr('name');
+            var fieldValue = $(this).val();
+            formData[fieldName] = fieldValue;
+        });
+        formData['service_by'] = $(this).find('.sample-select').val();
+        // Step 2: Check if the row contains the required data (sched_date, serv_date, problem, diagnosis, service_done, recomm, service_by)
+        // If yes, add it to the formDataArray
+        if (
+            formData.hasOwnProperty('sched_date') &&
+            formData.hasOwnProperty('serv_date') &&
+            formData.hasOwnProperty('diagnosis') &&
+            formData.hasOwnProperty('service_done') &&
+            formData.hasOwnProperty('recomm') &&
+            formData.hasOwnProperty('service_by')
+        ) {
+            formDataArray.push(formData);
+        }
     });
+    // Step 3: Send the form data via AJAX
+    swal.fire({
+        title: 'Confirm changes',
+        confirmButtonText: 'Save',
+        showCancelButton: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '../php/process.php',
+                type: 'POST',
+                data: {
+                    formDataArray: JSON.stringify(formDataArray),
+                    contract_id: contract_id,
+                    frequency: frequency
+                },
+                success: function(response) {
+                    console.log(response);
+
+                    // Handle the AJAX response
+                    $('#pms-forms').empty();
+                    $('#exampleModal').modal('hide');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Saved',
+                        timer: 1500,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+
+                        },
+                        willClose: () => {
+                            Swal.hideLoading();
+                            activeContract.ajax.reload(null, false);
+                        },
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                },
+            });
+        }
+    });
+});
+    // Edit PM
+    $(document).on('click', '.editPm', function() {
+        let accomp_id = $(this).attr('data-id');
+        $.ajax({
+            url: '../php/process.php',
+            method: 'GET',
+            data: {
+                accomp_id: accomp_id,
+                action: 'edit_pm_details'
+            },
+            success: function(response) {
+
+                $('.update_pm_contents').html(response);
+                const arrayValue = JSON.parse(document.getElementById('myDiv')
+                    .dataset
+                    .arrayValue);
+                $.ajax({
+                    url: '../php/process.php',
+                    method: 'GET',
+                    data: {
+                        'action': 'getServiceBy'
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+
+                        // Assuming the response data is an array of objects with label and value properties
+                        var optionsData = data.map(function(item) {
+                            var fullName = item.firstname +
+                                ' ' +
+                                item.lastname;
+                            return {
+                                label: fullName,
+                                value: item.mem_id
+                            };
+                        });
+
+                        // Initialize Virtual Select with the fetched options
+                        VirtualSelect.init({
+                            ele: '.sample-select',
+                            options: optionsData,
+                            multiple: true,
+
+                        });
+
+                        document.querySelector('.sample-select')
+                            .setValue(
+                                arrayValue);
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching options:', error);
+                    }
+                });
+            }
+        });
+    });
+
+
+
+});
     </script>
 
     <script>

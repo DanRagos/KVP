@@ -187,7 +187,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
                          ';
 						
 						$output.='
-						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Confirm</button>
+						<button type="button" class="btn btn-primary btn-sm rounded-0" data-id='.$id.' id="updateBtn" data-bs-target="#confirm-sched-modal" data-bs-toggle="modal" > Update</button>
                         <button type="button" class="btn btn-info btn-sm rounded-0 reschedBtn" data-id='.$id.' data-bs-target="#reschedModal" data-bs-toggle="modal">Re-Schedule</button>					 ';
 						if ($result['schedule_type'] == 2) {
 							$output.=' <button type="button" class="btn btn-danger btn-sm rounded-0 cancelSv" data-id="'.$id.'">Cancel</button> </div> ';
@@ -352,7 +352,7 @@ if ($result) {
   </div>
       </div>
       <div class="modal-footer">
-	  <button type="submit" id="c_confirmBtn" name="c_button" class="btn btn-primary">Confirm</button>
+	  <button type="submit" id="c_confirmBtn" name="c_button" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         
       </div>
@@ -526,7 +526,7 @@ $pms_count = $_POST['pms_count'];
 $datefilter = $_POST['datefilter'];
 $partsWarranty = $_POST['partsWarranty'];
 $first_pms = $_POST['first_pms'];
-$pms = $first_pms;
+
 $type= 1;
 
 $last_space = strrpos($partsWarranty, ' ');
@@ -536,12 +536,15 @@ $pCoverage = date('Y-m-d', strtotime($last_word));
 $pTurn_over = date('Y-m-d', strtotime($first_chunk));
 
 
+
 $string=$datefilter;
 $last_space = strrpos($string, ' ');
 $last_word = substr($string, $last_space);
 $first_chunk = substr($string, 0, $last_space - 2);
 $coverage = date('Y-m-d', strtotime($last_word));
 $turn_over = date('Y-m-d', strtotime($first_chunk));
+
+$pms = $turn_over;
 
 if ($frequency =="1"  ){$num = 3;}
 elseif ($frequency =="2" ){$num = 6; }
@@ -555,11 +558,6 @@ do {
 $result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type );
 echo $result;
 
-
-
-	/*$id = $_POST['add_id'];
-	$row = $client ->add_contract($id);
-	echo json_encode($row);*/
 }
 
 if (isset($_GET['action'])&& $_GET['action'] == 'del_Contract'){
@@ -2161,4 +2159,3 @@ if(isset($_POST['action']) && $_POST['action'] == 'deleteReport') {
 	}
 }
 ?>
-

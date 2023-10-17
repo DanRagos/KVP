@@ -185,6 +185,25 @@ require_once '../php/session.php';
         </a>
       </div>
     </div>
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <a type="button" id="contractBtn"data-bs-toggle="modal" data-bs-target="#contractExpiration">
+          <div class="card-header p-3 pt-5">
+            <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+              <i class="fa-solid fa-calendar opacity-10"></i>
+            </div>
+            <div class="text-end pt-1">
+              <h1 class="text-sm mb-0 text-capitalize">Contract FOr Expiration</h1>
+              <h1 class="mb-2" id="contractExpire">...</h1>
+            </div>
+          </div>
+          <hr class="dark horizontal my-0">
+          <div class="card-footer p-3">
+            <p class="mb-0"><span class="text-success text-sm font-weight-bolder">View</span></p>
+          </div>
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -288,6 +307,17 @@ require_once '../php/session.php';
         }
       });
     });
+    $(document).on('click', '#contractBtn', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=contractModal', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+          console.log(response);
+              $('.contractContent').html(response);
+              $('#contractExpirationTbl').DataTable()     
+        }
+      });
+    });
 	  setInterval(loadDashboard, 3000);
 	  
 	  function loadDashboard () {
@@ -297,7 +327,7 @@ require_once '../php/session.php';
 		  method: 'GET',
 		  data: {action:'dboardCards'},
 		  success: function (response) {
-        
+        console.log(response);
 			   let json = JSON.parse(response);
         console.log(json);
          $('#serviceSchedule').text(json.serviceSchedule);
@@ -307,6 +337,7 @@ require_once '../php/session.php';
 			   $('#pSvCall').text(json.pendSv);
 			   $('#resolvedH1').text(json.resolved);
          $('#scheduleMonth').text(json.schedule);
+         $('#contractExpire').text(json.contract);
 			 
 		  }
 	  });

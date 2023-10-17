@@ -1,4 +1,4 @@
-  <?php 
+<?php 
 	require_once '../php/session.php';
 	include 'head.php';
 	require_once '../classes/auth.php';	
@@ -93,7 +93,6 @@
    </div>
 </div> -->
                               <div class="d-flex flex-row ms-1 row-2 gap-1">
-
                                   <button type="button" class="btn btn-block bg-gradient-primary ms-3"
                                       data-bs-toggle="modal" data-bs-target="#addSchedule">
                                       <span><i class="fa fa-info-circle"></i></span>
@@ -111,7 +110,6 @@
                                       style="width: 6rem; height: 6rem; display:none;" role="status">
                                       <span class="sr-only">Loading...</span>
                                   </div>
-
                                   <div id="calendar" style="width: 50%; height:50%;"> </div>
                                   <div class="table-responsive" id="schedTable" style="display:none;">
                                       <table id="tableCalendar" class="table align-items-center mb-0 table-striped"
@@ -142,34 +140,24 @@
                                                   <th
                                                       class="text-uppercase text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                                       Action</th>
-
-
-
                                               </tr>
                                           </thead>
-
                                       </table>
-
                                   </div>
                               </div>
-
                           </div>
                       </div>
                   </div>
               </div>
-
           </div>
       </main>
       <!--   Core JS Files   -->
       <?php include 'scripts.php'; ?>
       <script>
       $(document).ready(function() {
-
           function isTableViewActive() {
               return $("#schedTable").is(":visible");
           }
-
-
           function isCalendarViewActive() {
               return $("#calendar").is(":visible");
           }
@@ -206,7 +194,6 @@
               }
 
               let db = 10;
-
               var table = $('#tableCalendar').DataTable({
                   stateSave: true,
                   processing: true,
@@ -359,14 +346,6 @@
                   $("#schedule_details_modal").modal("show");
 
               });
-
-
-
-
-
-
-
-
           }
 
           // Calendar Schedule
