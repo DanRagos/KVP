@@ -212,9 +212,6 @@
                                 $("#editClient").modal('hide');
                             },
                         });
-
-
-
                     }
                 });
             }
@@ -233,8 +230,6 @@
                     data = JSON.parse(response);
                     $("#contract_id").val(sched_id);
                     $("#title1").text('Add contract for ' + data.client_name);
-
-
                 }
             });
         });
