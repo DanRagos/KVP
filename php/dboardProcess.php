@@ -183,11 +183,11 @@ if (isset($_GET['action']) && $_GET['action']=='getScheduleDoneChart') {
 	while ($month <=12){
 
 		$stmt = "SELECT COUNT(schedule_id) as schedId FROM schedule LEFT JOIN contract on schedule.contract_id = contract.contract_id 
-		where schedule.status = 2 AND schedule.schedule_type = 1 AND MONTH(schedule.schedule_date) = $month AND YEAR(schedule.schedule_date) = $year";
+		where schedule.status = 2 AND schedule.schedule_type = 1 AND MONTH(schedule.schedule_date) = $month AND YEAR(schedule.schedule_date) = $year AND contract.isActive != 0";
 		
 		array_push($pm, $client->countSchedClient($stmt));
 		$stmt = "SELECT COUNT(schedule_id) as schedId FROM schedule LEFT JOIN contract on schedule.contract_id = contract.contract_id 
-		where schedule.status in (2,3) AND schedule.schedule_type = 2 AND MONTH(schedule.schedule_date) = $month AND YEAR(schedule.schedule_date) = $year";
+		where schedule.status in (2,3) AND schedule.schedule_type = 2 AND MONTH(schedule.schedule_date) = $month AND YEAR(schedule.schedule_date) = $year AND contract.isActive != 0";
 		array_push($sv, $client->countSchedClient($stmt));
 		$month++;
 	}

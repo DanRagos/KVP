@@ -239,6 +239,7 @@ require_once '../php/session.php';
 
     scheduleDoneChart();
     userScheduleDoneChart();
+    
     $(document).on('click', '#pendingSvBtn', function(){
       $.ajax({
         url: '../php/dboardProcess.php?action=pendingSvModal', // Pass the action as a query parameter

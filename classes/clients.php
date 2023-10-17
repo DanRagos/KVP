@@ -174,7 +174,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
 		LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id)
-		WHERE schedule.status != 2";
+		WHERE schedule.status != 2 AND contract.isActive !=0 ";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute();
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -185,7 +185,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
-		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.status != 2 AND user_sched.uid = :user_id";
+		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.status != 2 AND user_sched.uid = :user_id AND contract.isActive != 0";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['user_id'=>$user_id]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -204,7 +204,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
           LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
           LEFT JOIN clients ON contract.client_id = clients.client_id 
 		  WHERE schedule.schedule_date 
-		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0;;";
+		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0 AND contract.isActive !=0 ";
 $stmt = $this ->conn ->prepare($sql);
 $stmt -> execute([]);
 $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -212,7 +212,7 @@ return $result;
 	}
 	public function display_pend_sv (){
 		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract on service_call.contract_id = contract.contract_id LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
-		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01');";
+		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND contract.isActive != 0";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -220,7 +220,7 @@ return $result;
 	}
 	public function display_pend_pm (){
 		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
-		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2";
+		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2 AND contract.isActive != 0";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -235,7 +235,7 @@ return $result;
 		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
 		WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
-				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
+				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) AND contract.isActive != 0 ORDER BY schedule.schedule_id DESC";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);

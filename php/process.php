@@ -550,7 +550,7 @@ else {}
 do {
 		$pms = date('Y-m-d', strtotime("+$num months", strtotime($pms)));
 		$count++;
-} while($pms < $coverage);
+} while($pms <= $coverage);
 
 $result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type );
 echo $result;
