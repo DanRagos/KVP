@@ -257,6 +257,10 @@
                                     <label class="form-label">Sv Count:</label>
                                     <input type="number" min=1 name="pms_count" id="inp_reason" class="form-control">
                                 </div>
+                                <div class="m-0 form-check" style="display:none" id="unliSv">
+                                    <label class="form-label">Unli Sv :</label>
+                                    <input class="form-check-input" type="checkbox" name="unliSv"  value=1 id="unliSvC">
+                                </div>
                             </div>
 
 

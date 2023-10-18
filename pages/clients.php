@@ -111,6 +111,7 @@
         });
         $(".freq").click(function() {
             if ($(this).val() == '2') {
+                $('#unliSv').show();
                 $('#inp_reason').attr('required', true);
                 document.getElementById('reason').style.display = '';
             } else {
@@ -119,6 +120,17 @@
                 document.getElementById('reason').style.display = 'none';
             }
         });
+        $("#unliSvC").on('change', function(e) {
+              if ($(this).is(':checked')) {
+                $('#inp_reason').val('');
+                $('#inp_reason').attr('required', false);
+                $('#reason').hide();
+              }
+              else {
+                $('#reason').show();
+                $('#inp_reason').attr('required', true);
+              }
+            });
         //Date Range Picker
         $(function() {
 
@@ -257,6 +269,8 @@
                     });
                     $("#add-contract-form")[0].reset();
                     $("#confirmModal").modal('hide');
+                    $('#reason').hide();
+                    $('#unliSv').hide();
                     // data = JSON.parse(response);
                     // $("#client_id").val(add_id);
                     // $("#client_name").val(data.client_name);
@@ -283,8 +297,13 @@
             $('#confirmFirst').text(formObject.first_pms);
             $('#confirmFrequency').text(freq[formObject.frequency - 1]);
             $('#confirmContract').text(contractT[formObject.contract_type - 1]);
-           
-            $('#confirmSv').text(formObject.pms_count);
+            if (formObject.unliSv) {
+                $('#confirmSv').text('Unli');
+            }
+            else {
+                $('#confirmSv').text(formObject.pms_count);
+            }
+            
 
             let dateParts = formObject.datefilter.split(" - ");
             let firstChunk = dateParts[0];

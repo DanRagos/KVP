@@ -15,13 +15,13 @@ $sql_details = array(
 	 // DB table to use
 $table = <<<EOT
  (SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
- schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+ schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, contract.svUnli, COALESCE(contract.brand, service_call.brand) as brand, 
  COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, 
  COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date 
  FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
   LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
  LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
- WHERE schedule.status IN (2, 3) AND contract.isActive !=0 ORDER BY schedule.schedule_id DESC ) temp
+ WHERE schedule.status IN (2, 3) ORDER BY schedule.schedule_id DESC ) temp
 EOT;
 // indexes
 $columns = array(
@@ -85,11 +85,12 @@ return ($d!==null) ? '<td class ="align-middle text-center text-sm"  "'.strtotim
 <span class="badge badge-sm bg-gradient-info">'.date( 'M d, Y', strtotime($d)).'</span>
 </td>':' ' ;}),
 array('db'=> 'withC', 'dt'=> ''), 
+array('db'=> 'svUnli', 'dt'=> ''), 
 array(
 	'db'        => 'accomp_status',
 	'dt'        => 9,
 	'formatter' => function( $d, $row) {
-		$aStats = ($row['withC'] >0 )? "W/Collection": " ";
+		$aStats = ($row['withC'] >0 && $row['svUnli'] !=1 )? "W/Collection": " ";
 	$status =  ($row['accomp_status'] == 2) ? '<span class="badge badge-sm bg-gradient-success">DONE '. $aStats.'</span>' 
 	: '<span class="badge badge-sm bg-gradient-warning">Unresolved '. $aStats.'</span>' ;
 	return '<td class ="justify-content-center align-middle text-center text-sm"> '.$status.'</td>';
@@ -117,7 +118,7 @@ return
 $table = <<<EOT
 (SELECT accomplished_schedule.id as accomp_id, schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name,COALESCE(clients.client_address, service_call.guest_address) AS address, service_call.rep_problem, accomplished_schedule.accomp_date FROM schedule LEFT JOIN contract ON (schedule.schedule_type = 1 AND schedule.contract_id = contract.contract_id) LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id
-WHERE schedule.status IN (2, 3) AND user_sched.uid = $user_id AND contract.isActive!=0 ORDER BY schedule.schedule_id DESC ) temp
+WHERE schedule.status IN (2, 3) AND user_sched.uid = $user_id ORDER BY schedule.schedule_id DESC ) temp
 EOT;
 // indexes
 $columns = array(
@@ -478,6 +479,7 @@ array('db' => 'count', 'dt'=>'count'),
 array('db' => 'total', 'dt'=>'total'),
 array('db' => 'sv_call', 'dt'=>'sv_call'),
 array('db' => 'contract_id', 'dt'=>'contract_id'),
+array('db' => 'svUnli', 'dt'=>'svUnli'),
 
 
 );
@@ -511,6 +513,7 @@ array('db' => 'count', 'dt'=>'count'),
 array('db' => 'total', 'dt'=>'total'),
 array('db' => 'sv_call', 'dt'=>'sv_call'),
 array('db' => 'contract_id', 'dt'=>'contract_id'),
+array('db' => 'svUnli', 'dt'=>'svUnli'),
 
 
 );
@@ -534,7 +537,7 @@ IS NOT NULL THEN COALESCE(contract.model, service_call.model) ELSE COALESCE(serv
   LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
 LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
 LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id)
-WHERE schedule.status != 2 AND contract.isActive != 0) temp
+WHERE schedule.status != 2) temp
 EOT;
 // indexes
 $columns = array(

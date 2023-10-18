@@ -155,6 +155,7 @@
       <?php include 'scripts.php'; ?>
       <script>
       $(document).ready(function() {
+        var table;
           function isTableViewActive() {
               return $("#schedTable").is(":visible");
           }
@@ -194,7 +195,7 @@
               }
 
               let db = 10;
-              var table = $('#tableCalendar').DataTable({
+               table = $('#tableCalendar').DataTable({
                   stateSave: true,
                   processing: true,
                   serverSide: true,
@@ -738,6 +739,41 @@
                   });
               }
           });
+
+          $("body").on("click", "#reschedConfirm", function(e) {
+              let resched_cId = $(this).attr('data-id');
+              e.preventDefault();
+              $.ajax({
+                  url: '../php/process.php',
+                  method: 'post',
+                  data: $("#resched_form").serialize() + "&action=confirm_resched",
+                  success: function(response) {
+                      var formattedDate = new Date(response).toISOString().substring(0, 10);
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Rescheduled',
+                          text: '.', // Add a custom success message here if needed
+                          timer: 1500,
+                          timerProgressBar: true,
+                          didOpen: () => {
+                              Swal.showLoading();
+                          },
+                          willClose: () => {
+                              Swal.hideLoading();
+                              $("#add-sched-form")[0].reset();
+                              $("#reschedModal").modal('hide');
+                              showSchedules(formattedDate);
+                              if (isTableViewActive()) {
+                              table.ajax.reload(null,false);
+                            }
+                          },
+                      });
+
+
+                  }
+              });
+          });
+          
 
 
 

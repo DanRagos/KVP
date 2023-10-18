@@ -430,8 +430,9 @@
                     {
                         data: 'sv_call',
                         render: function(data, type, row) {
+                            let svCall = (row.svUnli != 1 && row.status != 1) ? row.sv_call : 'Unli'; 
                             return '<div class="align-middle text-center text-sm">' +
-                                '<p class="text-sm font-weight-bold mb-0">' + row.sv_call +
+                                '<p class="text-sm font-weight-bold mb-0">' + svCall +
                                 '</p>' +
                                 '</div>';
                         }
@@ -778,8 +779,9 @@
                     {
                         data: 'sv_call',
                         render: function(data, type, row) {
+                            let svCall = (row.svUnli != 1 && row.status != 1) ? row.sv_call : 'Unli'; 
                             return '<div class="align-middle text-center text-sm">' +
-                                '<p class="text-sm font-weight-bold mb-0">' + row.sv_call +
+                                '<p class="text-sm font-weight-bold mb-0">' + svCall +
                                 '</p>' +
                                 '</div>';
                         }

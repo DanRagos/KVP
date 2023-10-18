@@ -96,12 +96,12 @@ class Clients extends Db {
 		
 	}
 		//Add Contract to Clients 
-	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type ) {
-		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `pTurn_over`, `pCoverage`, `status`, `count`, `total`, `sv_call`)
-		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :pTurn_over, :pCoverage, :status, :count, :total, :sv_call);";
+	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type, $svUnli ) {
+		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `pTurn_over`, `pCoverage`, `status`, `count`, `total`, `sv_call`, `svUnli`)
+		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :pTurn_over, :pCoverage, :status, :count, :total, :sv_call, :svUnli);";
 		$stmt = $this -> conn -> prepare($sql);
 		$stmt ->execute(['client_id'=>$client_id,'machine_type' =>$machine_type,'brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency,
-		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'pTurn_over'=>$pTurn_over, 'pCoverage' =>$pCoverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count]);
+		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'pTurn_over'=>$pTurn_over, 'pCoverage' =>$pCoverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count, 'svUnli'=>$svUnli]);
 		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
 		$last_id = $this->conn->lastInsertId();
 		$add_sched = $this->add_schedule_contract($last_id, $first_pms, $type);
@@ -174,7 +174,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		  LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) 
 		LEFT JOIN machine_type on (contract.machine_type = machine_type.machine_id ) OR (service_call.machine_type = machine_type.machine_id)
-		WHERE schedule.status != 2 AND contract.isActive !=0 ";
+		WHERE schedule.status != 2 ";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute();
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -185,7 +185,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		as brand, COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) 
 		AS client_name FROM schedule LEFT JOIN contract ON schedule.contract_id = contract.contract_id LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id)
-		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.status != 2 AND user_sched.uid = :user_id AND contract.isActive != 0";
+		 LEFT JOIN user_sched ON schedule.schedule_id = user_sched.sched_id WHERE schedule.status != 2 AND user_sched.uid = :user_id ";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['user_id'=>$user_id]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -204,7 +204,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
           LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
           LEFT JOIN clients ON contract.client_id = clients.client_id 
 		  WHERE schedule.schedule_date 
-		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0 AND contract.isActive !=0 ";
+		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0";
 $stmt = $this ->conn ->prepare($sql);
 $stmt -> execute([]);
 $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -212,7 +212,7 @@ return $result;
 	}
 	public function display_pend_sv (){
 		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract on service_call.contract_id = contract.contract_id LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
-		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND contract.isActive != 0";
+		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -220,7 +220,7 @@ return $result;
 	}
 	public function display_pend_pm (){
 		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
-		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2 AND contract.isActive != 0";
+		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -235,7 +235,7 @@ return $result;
 		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
 		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
 		WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
-				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) AND contract.isActive != 0 ORDER BY schedule.schedule_id DESC";
+				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -322,7 +322,7 @@ public function add_pms_bulk ($contract_id, $s_date, $status){
 	return $this->conn->lastInsertId();
 }
 public function get_contract($id) {
-		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2";
+		$sql = "SELECT * FROM `contract` WHERE client_id = :id and status = 2 AND isActive != 0";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute(['id'=>$id]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -356,6 +356,9 @@ public function delete_contract($contract_id){
 	$sql = "Update contract SET isActive = 0 where contract_id = :contract_id";
 	$stmt = $this ->conn ->prepare($sql);
 	$stmt -> execute(['contract_id'=>$contract_id]);
+	$sql2= "DELETE FROM schedule WHERE `schedule`.`contract_id` = :contract_id";
+	$stmt2 = $this ->conn ->prepare($sql2);
+	$stmt2 -> execute(['contract_id'=>$contract_id]);
 	return $stmt;
 }
 public function add_pms_count($contract_id, $count){
