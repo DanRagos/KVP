@@ -15,7 +15,7 @@ $sql_details = array(
 	 // DB table to use
 $table = <<<EOT
  (SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
- schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
+ schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, contract.svUnli, COALESCE(contract.brand, service_call.brand) as brand, 
  COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, 
  COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date 
  FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
@@ -85,11 +85,12 @@ return ($d!==null) ? '<td class ="align-middle text-center text-sm"  "'.strtotim
 <span class="badge badge-sm bg-gradient-info">'.date( 'M d, Y', strtotime($d)).'</span>
 </td>':' ' ;}),
 array('db'=> 'withC', 'dt'=> ''), 
+array('db'=> 'svUnli', 'dt'=> ''), 
 array(
 	'db'        => 'accomp_status',
 	'dt'        => 9,
 	'formatter' => function( $d, $row) {
-		$aStats = ($row['withC'] >0 )? "W/Collection": " ";
+		$aStats = ($row['withC'] >0 && $row['svUnli'] !=1 )? "W/Collection": " ";
 	$status =  ($row['accomp_status'] == 2) ? '<span class="badge badge-sm bg-gradient-success">DONE '. $aStats.'</span>' 
 	: '<span class="badge badge-sm bg-gradient-warning">Unresolved '. $aStats.'</span>' ;
 	return '<td class ="justify-content-center align-middle text-center text-sm"> '.$status.'</td>';
@@ -478,6 +479,7 @@ array('db' => 'count', 'dt'=>'count'),
 array('db' => 'total', 'dt'=>'total'),
 array('db' => 'sv_call', 'dt'=>'sv_call'),
 array('db' => 'contract_id', 'dt'=>'contract_id'),
+array('db' => 'svUnli', 'dt'=>'svUnli'),
 
 
 );
@@ -511,6 +513,7 @@ array('db' => 'count', 'dt'=>'count'),
 array('db' => 'total', 'dt'=>'total'),
 array('db' => 'sv_call', 'dt'=>'sv_call'),
 array('db' => 'contract_id', 'dt'=>'contract_id'),
+array('db' => 'svUnli', 'dt'=>'svUnli'),
 
 
 );

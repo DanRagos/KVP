@@ -124,15 +124,7 @@
 					data: {db : db},
 					method:'GET',
 					},
-					"order":[0,'asc'],
-          stateSaveParams: function (settings, data) {
-         data.monthFilter = $("#month-filter").val();
-         data.toolType = $("#tool_type").val();
-      },	
-      stateLoadParams: function (settings, data) {
-         $("#month-filter").val(data.monthFilter);
-         $("#tool_type").val(data.toolType);
-      }				
+					"order":[0,'asc'],					
 				
 					
     });

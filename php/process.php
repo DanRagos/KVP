@@ -160,7 +160,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'show_sched_details'){
                     <div class="container-fluid">
                         <dl> ';
 						
-						if ($check_collection && $check_collection['status'] == 2 && $check_collection['sv_call'] == 0){
+						if ($check_collection && $check_collection['status'] == 2 && $check_collection['sv_call'] == 0 && $check_collection['svUnli'] ==0){
 							$output .= '  <dt class="text-danger">With Collection!</dt>';
 						}
 						else {
@@ -317,7 +317,7 @@ if ($result) {
 
   </div>
   <div class="row"> ';
-  if ($result['sv_id'] != '0') {
+  if ($result['sv_id'] > 0) {
 	  $output .= '
 	<div class="col">
       <div class="input-group input-group-static my-0">
@@ -398,10 +398,11 @@ else {
 	$check_sv_contract = $client->get_sv_details($sv_id);
 	if ($check_sv_contract['contract_id'] > 0 ) {
 	$contract_det = $client->get_contract_details($check_sv_contract['contract_id']);
-	print_r($contract_det);
 	$count = $contract_det['sv_call'] > 0 ? $contract_det['sv_call'] - 1 : 0 ;
-	echo $count;
-	$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
+	if ($status != 3 ){
+		$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
+	}
+	
 	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;	
 	}
 	
@@ -519,10 +520,19 @@ $client_id = $_POST['id'];
 $machine_type = $_POST['machine_type'];
 $brand = $_POST['brand'];
 $model = $_POST['model'];
+$unliSv = 0;
 
 $frequency = $_POST['frequency'];
 $contract_type = $_POST['contract_type'];
-$pms_count = $_POST['pms_count'];
+if (isset($_POST['unliSv']) && $_POST['unliSv'] == 1) {
+	$pms_count = 0;
+	$unliSv = 1;
+}
+else {
+	$pms_count = $_POST['pms_count'];
+	$unliSv = 0;
+}
+
 $datefilter = $_POST['datefilter'];
 $partsWarranty = $_POST['partsWarranty'];
 $first_pms = $_POST['first_pms'];
@@ -555,7 +565,7 @@ do {
 		$count++;
 } while($pms < $coverage);
 
-$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type );
+$result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type, $unliSv );
 echo $result;
 
 }
@@ -681,7 +691,12 @@ if (isset($_POST['contract_id_1'])){
 if (isset($_POST['ctr'])){
 	$id = $_POST['ctr'];
 	$result = $client ->get_sv($id);
-	echo ($result)? $result['sv_call']:'';
+	if ($result['svUnli'] == 1 || $result['status'] == 1){
+		echo 'Unli';
+	} else {
+		echo $result['sv_call'];
+	}
+	
 	
 }
 
@@ -1107,7 +1122,7 @@ $output .= '</select>
 </div>
 </div>
 ';
-if ($result['status'] != '1') {
+if ($result['status'] != '1' && $result['svUnli'] == '0') {
 $output .='  <div class="row">
 <div class="col">
 <div class="input-group input-group-outline is-filled" >
@@ -2159,4 +2174,3 @@ if(isset($_POST['action']) && $_POST['action'] == 'deleteReport') {
 	}
 }
 ?>
-
