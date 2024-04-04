@@ -611,6 +611,56 @@
               });
           });
 
+            // Cancel sv
+
+            $("body").on("click",".cancelSv", function(e){
+		e.preventDefault();
+		del_id = $(this).attr('data-id');
+		swal.fire({
+			title: "Are you sure?",
+			text: "This will cancel this schedule",
+			icon: "warning",
+            showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Confirm',
+			buttons: true,
+			dangerMode: true,
+			})
+			.then((result) => {
+			if (result.isConfirmed) {
+			$.ajax({
+				url: '../php/process.php',
+				method: 'post',
+				data: {del_id : del_id,
+                action: 'deleteSchedule'},
+				success: function(response){
+                    Swal.fire({
+                              icon: 'success',
+                              title: 'SV Deleted',
+                              timer: 1500,
+                              timerProgressBar: true,
+                              didOpen: () => {
+                                  Swal.showLoading();
+                              },
+                              willClose: () => {
+                                  Swal.hideLoading();
+                                  if (isTableViewActive()) {
+                                    table.ajax.reload(null,false);
+                                  } else {
+                                      showSchedules();
+                                  }
+
+                                  $("#schedule_details_modal").modal('hide');
+                              },
+                          });
+				}
+			});	
+			}
+			});
+	});
+
 
           $("#confirmBtn").click(function(e) {
               if ($("#add-sched-form")[0].checkValidity()) {
@@ -647,7 +697,7 @@
                               willClose: () => {
                                   Swal.hideLoading();
                                   if (isTableViewActive()) {
-                                      displaySchedule();
+                                    table.ajax.reload(null,false);
                                   } else {
                                       showSchedules();
                                   }
@@ -685,7 +735,7 @@
                               willClose: () => {
                                   Swal.hideLoading();
                                   if (isTableViewActive()) {
-                                      displaySchedule();
+                                    table.ajax.reload(null,false);
                                   } else {
                                       showSchedules();
                                   }
@@ -723,7 +773,7 @@
                               willClose: () => {
                                   Swal.hideLoading();
                                   if (isTableViewActive()) {
-                                      displaySchedule();
+                                    table.ajax.reload(null,false);
                                   } else {
                                       showSchedules();
                                   }

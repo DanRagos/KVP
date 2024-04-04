@@ -10,6 +10,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'dboardCards'){
 	$resolved = $client->resolved();
 	$schedule = $client->schedule();
 	$contract = $client->contractExpire();
+	$exParts = $client->expiredPartsCount();
 	
 	$response = array (
 	'serviceSchedule'=>$serviceSched,
@@ -19,7 +20,8 @@ if (isset($_GET['action'])&& $_GET['action'] == 'dboardCards'){
 	'pendPms' =>$pendPms,
 	'resolved'=> $resolved,
 	'schedule' =>$schedule,
-	'contract' => $contract
+	'contract' => $contract,
+	'exParts' => $exParts
 	);
 	echo json_encode($response);
 }
@@ -210,6 +212,42 @@ if(isset($_GET['action'])&& $_GET['action']=='contractModal'){
 	<td class="align-middle text-center text-sm">
 	<p class="badge badge-sm bg-gradient-info">'.$count.'%</p>
   </td>
+	</tr>';
+
+	}
+	echo $output;
+}
+
+
+if(isset($_GET['action'])&& $_GET['action']=='expiredParts'){
+	$output ='';
+	$contract = $client->expiredParts();
+	foreach($contract as $row){
+		$count = 100 - (($row['count'] / $row['total']) * 100);
+		$imglink = ($row['imglink']) ? $row['imglink'] : '../image/uploads/mv santiago.webp';
+		$output .= '
+		<tr>
+		<td class="text-center">'.$row['contract_id'].'</td>
+		<td>
+		 <div class="d-flex px-2 py-1">
+		  <div>
+			<img src="'.$imglink.'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
+		  </div>
+		  <div class="d-flex flex-column justify-content-center">
+			<h6 class="text-center mb-0 text-sm clientName">'.$row['client_name'].'</h6>
+			<p class="text-center text-xs text-secondary mb-0">'.$row['client_address'].'</p>
+		  </div>
+		</div>
+		</div>
+	  </td>
+	  <td class="align-middle text-center text-sm">
+		<h6 class="mb-0 text-sm text-center">'.$row['brand'].'</h6>
+		<p class="text-center text-xs font-weight-bold mb-0">'.$row['model'].'</p>
+
+	  </td>
+   <td class="align-middle text-center text-sm">
+	  <p class="badge badge-sm bg-gradient-danger">'.date('M-d-Y',strtotime($row['pTurn_over'])).' - '.date('M-d-Y',strtotime($row['pCoverage'])).'</p>
+	</td>
 	</tr>';
 
 	}

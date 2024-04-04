@@ -48,7 +48,6 @@ require_once '../php/session.php';
     <!-- End Navbar -->
     <div class="container-fluid py-4">
       <div class="row">
-     
         <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
 		<input type="hidden" id="user_id" value="<?php echo $user_id ?>">
           <div class="card">
@@ -126,7 +125,11 @@ require_once '../php/session.php';
             </div>
           </div>
         </div>
-	<div class="container">
+
+
+	
+      </div>
+	  	<div class="container-fluid py-4">
   <div class="row mt-2 justify-content-center">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
       <div class="card">
@@ -193,7 +196,7 @@ require_once '../php/session.php';
               <i class="fa-solid fa-calendar opacity-10"></i>
             </div>
             <div class="text-end pt-1">
-              <h1 class="text-sm mb-0 text-capitalize">Contract FOr Expiration</h1>
+              <h1 class="text-sm mb-0 text-capitalize">Contract For Expiration</h1>
               <h1 class="mb-2" id="contractExpire">...</h1>
             </div>
           </div>
@@ -207,8 +210,31 @@ require_once '../php/session.php';
   </div>
 </div>
 
-	
+	  	<div class="container-fluid py-4">
+  <div class="row mt-2 justify-content-left">
+    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+      <div class="card">
+        <a type="button" id="expiredParts" data-bs-toggle="modal" data-bs-target="#expiredParts">
+          <div class="card-header p-3 pt-5">
+            <div class="icon icon-lg icon-shape bg-gradient-danger shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+            <i class="fa-solid fa-x opacity-10"></i>
+            </div>
+            <div class="text-end pt-1">
+              <h1 class="text-sm mb-0 text-capitalize">Expired Parts Warranty</h1>
+              <h1 class="mb-2" id="exParts">...</h1>
+            </div>
+          </div>
+          <hr class="dark horizontal my-0">
+          <div class="card-footer p-3">
+            <p class="mb-0"><span class="text-success text-sm font-weight-bolder">View</span></p>
+          </div>
+        </a>
       </div>
+    </div>
+  </div>
+</div>
+
+
 	  <div class="row mt-4">
         <div class="col-lg-4 col-lg-6 mt-4 mb-4">
           <div class="card z-index-2  ">
@@ -318,6 +344,17 @@ require_once '../php/session.php';
         }
       });
     });
+	    $(document).on('click', '#expiredParts', function(){
+      $.ajax({
+        url: '../php/dboardProcess.php?action=expiredParts', // Pass the action as a query parameter
+        method: 'GET',
+        success: function (response){ 
+          console.log(response);
+              $('.expiredPartsContent').html(response);
+              $('#partsExpirationTbl').DataTable()     
+        }
+      });
+    });
 	  setInterval(loadDashboard, 3000);
 	  
 	  function loadDashboard () {
@@ -336,8 +373,9 @@ require_once '../php/session.php';
 			   $('#pPms').text(json.pendPms);
 			   $('#pSvCall').text(json.pendSv);
 			   $('#resolvedH1').text(json.resolved);
-         $('#scheduleMonth').text(json.schedule);
-         $('#contractExpire').text(json.contract);
+			   $('#exParts').text(json.exParts);
+				 $('#scheduleMonth').text(json.schedule);
+				 $('#contractExpire').text(json.contract);
 			 
 		  }
 	  });

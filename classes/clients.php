@@ -212,7 +212,7 @@ return $result;
 	}
 	public function display_pend_sv (){
 		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract on service_call.contract_id = contract.contract_id LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
-		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
+		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-31')";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -470,19 +470,19 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 		
 	}	
 public function countAllSchedule() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) ";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function countAllSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function countAllPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -494,13 +494,13 @@ public function pendPms() {
     return $stmt->fetchColumn();
 }
 public function pendSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id  = 0 and schedule.status != 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date <= DATE_FORMAT(CURRENT_DATE, '%Y-%m-31') and schedule.contract_id  = 0 and schedule.status != 2";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function resolved() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.status = 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.status = 2 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -686,7 +686,8 @@ public function getUserServ($client_id){
 }
 
 public function display_contract_expiraton () {
-	$sql = "SELECT contract.*, clients.* from contract LEFT JOIN clients on contract.client_id = clients.client_id where contract.count =1 AND contract.isActive != 0";
+	$sql = "SELECT contract.*, clients.* from contract LEFT JOIN clients on contract.client_id = clients.client_id 
+	where contract.count =1 AND contract.isActive != 0";
 	$stmt = $this ->conn ->prepare($sql);
 	$stmt -> execute();
 	$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -697,7 +698,22 @@ public function contractExpire() {
     $sql = "SELECT COUNT(contract_id) FROM contract where contract.count = 1 AND isActive = 1";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
+    $stmt->execute();
     return $stmt->fetchColumn();
+}
+public function expiredPartsCount() {
+    $sql = "SELECT COUNT(contract_id) FROM contract  WHERE  pCoverage <= CURDATE() AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00'";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+public function expiredParts() {
+    $sql = "SELECT contract.*, clients.client_name, clients.client_address, clients.imglink FROM contract LEFT JOIN clients on contract.client_id = clients.client_id 
+	WHERE pCoverage <= CURDATE() AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00';";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute();
+    $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+	return $result;
 }
 
 public function reportQuery($query){
