@@ -220,7 +220,8 @@ return $result;
 	}
 	public function display_pend_pm (){
 		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
-		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND schedule.status != 2";
+		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') 
+		AND schedule.status != 2 and contract.isActive = 1";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -488,7 +489,7 @@ public function countAllPms() {
     return $stmt->fetchColumn();
 }
 public function pendPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id  > 0 and schedule.status != 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule left join contract on schedule.contract_id = contract.contract_id where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id > 0 and schedule.status != 2 and contract.isActive = 1";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
