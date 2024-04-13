@@ -211,7 +211,12 @@ $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 return $result;
 	}
 	public function display_pend_sv (){
-		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id LEFT JOIN contract on service_call.contract_id = contract.contract_id LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
+		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) 
+		AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, 
+		COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model
+		 from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
+		 LEFT JOIN contract on service_call.contract_id = contract.contract_id 
+		 LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
 		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-31')";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
@@ -703,14 +708,19 @@ public function contractExpire() {
     return $stmt->fetchColumn();
 }
 public function expiredPartsCount() {
-    $sql = "SELECT COUNT(contract_id) FROM contract  WHERE  pCoverage <= CURDATE() AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00'";
+    $sql = "SELECT COUNT(contract_id) 
+	FROM contract  
+	WHERE (pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND pCoverage <= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)) 
+	AND status = 1 
+	AND isActive = 1 
+	AND pCoverage != '0000-00-00'";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function expiredParts() {
     $sql = "SELECT contract.*, clients.client_name, clients.client_address, clients.imglink FROM contract LEFT JOIN clients on contract.client_id = clients.client_id 
-	WHERE pCoverage <= CURDATE() AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00';";
+	WHERE (pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND pCoverage <= DATE_SUB(CURDATE(), INTERVAL 3 MONTH))  AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00';";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
