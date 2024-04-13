@@ -1,9 +1,9 @@
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark" id="sidenav-main">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark" id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xlkl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="../pages/dashboard.php" target="_blank">
       <img src="../img/calibration.png" class="navbar-brand-img h-100" alt="main_logo">
-        <span class="ms-1 font-weight-bold text-white">Calibration Monitoring</span>
+        <span class="ms-1 font-weight-bold text-white">KVP Monitoring System</span>
       </a>
     </div>
     <hr class="horizontal light mt-0 mb-2">
@@ -48,8 +48,8 @@
 </li>
 <li class="nav-item ">
 <a class="nav-link text-white <?php  echo (basename($_SERVER['PHP_SELF'] )== "contract.php")?  "bg-gradient-primary active" : "";?>"  href="../pages/contract.php">
-<span class="sidenav-mini-icon"> P </span>
-<span class="sidenav-normal  ms-2  ps-1"> PMS Masterlist </span>
+<span class="sidenav-mini-icon"> A </span>
+<span class="sidenav-normal  ms-2  ps-1"> Active Client Masterlist </span>
 </a>
 </li>
 </ul>

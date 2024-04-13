@@ -224,9 +224,11 @@ return $result;
 		return $result;
 	}
 	public function display_pend_pm (){
-		$sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
-		LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') 
-		AND schedule.status != 2 and contract.isActive = 1";
+		// $sql = "SELECT schedule.*, contract.brand, contract.model, clients.client_name, clients.client_address, clients.imglink FROM schedule INNER JOIN contract ON schedule.contract_id = contract.contract_id 
+		// LEFT JOIN clients ON contract.client_id = clients.client_id WHERE schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') 
+		// AND schedule.status != 2 and contract.isActive = 1";
+		$sql = "SELECT contract.*, schedule.schedule_id, schedule.schedule_date, clients.imglink, clients.client_name, clients.client_address from contract RIGHT JOIN schedule on contract.contract_id = schedule.contract_id INNER JOIN clients on contract.client_id = clients.client_id where schedule.status != 2 and contract.isActive = 1 
+		and schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -482,19 +484,19 @@ public function countAllSchedule() {
     return $stmt->fetchColumn();
 }
 public function countAllSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function countAllPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function pendPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule left join contract on schedule.contract_id = contract.contract_id where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') and schedule.contract_id > 0 and schedule.status != 2 and contract.isActive = 1";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule RIGHT join contract on schedule.contract_id = contract.contract_id where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')  and schedule.contract_id > 0 and schedule.status != 2 and contract.isActive = 1;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
