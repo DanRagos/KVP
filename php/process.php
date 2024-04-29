@@ -581,6 +581,12 @@ if (isset($_GET['action'])&& $_GET['action'] == 'restoreContract'){
 	return $restoreContract;
 }
 
+if (isset($_GET['action'])&& $_GET['action'] == 'viewSvcContract'){
+	$contract_id = $_GET['contract_id'];
+	$svcContract = $client->viewSvContract($contract_id, 1);
+	echo json_encode( $svcContract);
+}
+
 //Add Schedules 
 if (isset($_POST['action'])&& $_POST['action'] == 'add_schedule'){
 $title = $_POST['title'];

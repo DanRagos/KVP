@@ -65,6 +65,29 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="serviceCallModal" tabindex="-1" aria-labelledby="serviceCallModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="serviceCallModal">Service Calls for this Contract</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 ms-auto">
+                    <div id="serviceCallList">
+
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="editContractModal" tabindex="-1" aria-labelledby="editContractLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content editContractContent">
@@ -736,10 +759,10 @@
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </span>
-                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="Add PMS">
-                                    <button type="button" data-id="${row.contract_id}" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                                        data-sv="${row.count}" data-frequency="${row.frequency}" class="btn btn-primary no_margin viewSvc">
-                                        <i class="fa fa-plus"></i>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="View SVC">
+                                    <button type="button" data-id="${row.contract_id}" data-bs-toggle="modal" data-bs-target="#serviceCallModal"
+                                     class="btn btn-success no_margin viewSvc">
+                                        <i class="fa fa-eye"></i>
                                     </button>
                                 </span>
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Contract">
@@ -1264,6 +1287,85 @@
 
         });
 
+$(document).on('click', '.viewSvc', function() {
+    let contract_id = $(this).attr('data-id');
+    $.ajax({
+        url: '../php/process.php', // Replace 'process.php' with your actual PHP script filename
+        method: 'get',
+        data: {
+            contract_id: contract_id,
+            action: 'viewSvcContract'
+        },
+        success: function(response) {
+            let svc = JSON.parse(response);
+            let listBody = $('#serviceCallList');
+            let html = '';
+
+            html += "<div class='list-group'>";
+            svc.forEach((sv) => {
+                let date = new Date(sv.accomp_date);
+                // Format the date as "Month Day, Year"
+                let formattedDate = date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                html += `
+                <form method="GET">
+                <span class="list-group-item list-group-item-action" aria-current="true">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${sv.rep_problem}</h6>
+                        <small class="badge bg-secondary">${formattedDate}</small>
+                    </div>
+                    <button class="btn btn-sm btn-primary viewSvcDetails"data-id=${sv.id}>View Details</button> 
+                    
+                </span>
+                `;
+            });
+            html += '</div>';
+            console.log(html);
+            listBody.html(html);
+        }
+    });
+});
+
+$(document).on("click",".viewSvcDetails", function(e) {
+		let accomp_id = $(this).attr('data-id');
+		e.preventDefault();
+		$.ajax({
+			url: '../php/process.php',
+			method: 'get',
+			data: {
+				accomp_id: accomp_id,
+				action: 'view_report'
+			},
+			success: function (response) {
+				console.log(response);
+	$.ajax({
+    url: '../php/export_service.php',
+    type: 'POST',
+    data: { jsonData: response },
+    xhrFields: {
+        responseType: 'blob' // Set the response type to 'blob' to handle binary data
+    },
+    success: function(pdfResponse) {
+        console.log(pdfResponse);
+
+        // Create a blob object from the binary data
+        var blob = new Blob([pdfResponse], { type: 'application/pdf' });
+
+        // Create a temporary URL for the blob
+        var blobUrl = URL.createObjectURL(blob);
+
+        // Open the PDF in a new tab or window
+        window.open(blobUrl, '_blank');
+    },
+    error: function(error) {
+        // Handle the error
+    }
+});
+	
+
+			}
+			
+		});
+	});
     $(document).on('click', '.editTest', function() {
             // Generate a unique name for the input field
             let contract_no = $('#pms_contract_id').val();

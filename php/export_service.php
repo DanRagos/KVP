@@ -6,6 +6,7 @@ require_once('../pdf/examples/tcpdf_include.php');
 
 // creatp
 if (isset($_POST['jsonData'])) {
+
     // Get the JSON data
     $jsonData = $_POST['jsonData'];
 	$name = $jsonData['brand'];
@@ -15,6 +16,7 @@ if (isset($_POST['jsonData'])) {
 	$machine = $jsonData['brand'].' '.$jsonData['model'];
 	$rep_problem = $jsonData['rep_problem'];
 	$diagnosis = $jsonData['diagnosis'];
+    $reported_problem = (isset($jsonData['rep_problem'])) ? $jsonData['rep_problem'] : "";
 	$service_done = $jsonData['service_don'];
 	$remarks = $jsonData['recomm'];
     $schedule_id=$jsonData['schedule_id'];
@@ -97,7 +99,7 @@ $obj_pdf->AddPage();
     </tr>
 	<tr>
          <td ><b>Machine:</b> <br />$machine</td>
-		 <td colspan="2"><b>Diagnosis :</b> <br />$diagnosis</td>
+		 <td colspan="2"><b>Reported Problem (if any) :</b> <br />$rep_problem</td>
 		 
 		  
        
