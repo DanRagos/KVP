@@ -1,0 +1,8 @@
+Contract Status
+
+ 0 - Deleted Contract
+ 1 - Installation Warranty
+ 2 - PMS Contract
+ 3 - Expired Contract
+ 4 - Renewed Contract
+ 
