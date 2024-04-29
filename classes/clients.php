@@ -712,7 +712,7 @@ public function contractExpire() {
 public function expiredPartsCount() {
     $sql = "SELECT COUNT(contract_id) 
 	FROM contract  
-	WHERE (pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND pCoverage <= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)) 
+	WHERE pCoverage >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH) AND pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH)
 	AND status = 1 
 	AND isActive = 1 
 	AND pCoverage != '0000-00-00'";
@@ -722,7 +722,7 @@ public function expiredPartsCount() {
 }
 public function expiredParts() {
     $sql = "SELECT contract.*, clients.client_name, clients.client_address, clients.imglink FROM contract LEFT JOIN clients on contract.client_id = clients.client_id 
-	WHERE (pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH) AND pCoverage <= DATE_SUB(CURDATE(), INTERVAL 3 MONTH))  AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00';";
+	WHERE  pCoverage >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH) AND pCoverage <= DATE_ADD(CURDATE(), INTERVAL 2 MONTH)  AND status = 1 AND isActive = 1 AND pCoverage != '0000-00-00';";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
