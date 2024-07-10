@@ -481,7 +481,7 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 		
 	}	
 public function countAllSchedule() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) ";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2 ";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -511,7 +511,11 @@ public function pendSv() {
     return $stmt->fetchColumn();
 }
 public function resolved() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.status = 2 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE())";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule 
+	FROM schedule 
+	WHERE schedule.status = 2 
+	AND YEAR(schedule_date) = YEAR(CURRENT_DATE())
+	AND MONTH(schedule_date) = MONTH(CURRENT_DATE())";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
