@@ -61,6 +61,9 @@ else {
 
 $sched_res = [];
 foreach($result as $row){
+	if (isset($row['isActive']) && $row['isActive'] == 0) {
+		continue; // Skip this row if isActive is not 0
+	}
     $row['sdate'] = date("F d, Y",strtotime($row['schedule_date']));
     $row['edate'] =  date("F d, Y",strtotime($row['schedule_date']));
 	switch($row['status']) 
