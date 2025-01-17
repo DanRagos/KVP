@@ -355,7 +355,7 @@
                   url: '../php/process.php',
                   method: 'post',
                   data: {
-                      action: 'display_schedule'
+                      action: 'display_schedule_1'
                   },
                   success: function(response) {
                       var scheds = $.parseJSON(response);

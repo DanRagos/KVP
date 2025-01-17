@@ -49,6 +49,44 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 	echo $output;
 	}
 }
+//Version 2
+if (isset($_POST['action'])&& $_POST['action'] == 'display_schedule_1'){
+	$contract_sched = $client -> display_schedule_contract();
+	$sv_sched = $client -> display_schedule_sv();
+	$mergedResults = array_merge($contract_sched, $sv_sched);
+
+	$sched_res = [];
+foreach($mergedResults as $row){
+	if (isset($row['isActive']) && $row['isActive'] == 0) {
+		continue; // Skip this row if isActive is not 0
+	}
+    $row['sdate'] = date("F d, Y",strtotime($row['schedule_date']));
+    $row['edate'] =  date("F d, Y",strtotime($row['schedule_date']));
+	switch($row['status']) 
+	{case 0:
+	$row['color'] = "#033268";
+	$row['status'] = "Not done";
+	break;
+	case 1: 
+	$row['color'] = "Red";
+	$row['status'] = "Delayed";
+	break;
+	case 2:
+	$row['color'] = "Green";
+	$row['status'] = "Done";
+	break;	
+	case 3:
+	$row['color'] = "Orange";
+	$row['status'] = "Unresolved";
+	break;
+	}
+	
+	$row['title'] = $row['schedule_type'] == 1 ? 'PMS '.$row['client_name'] : 'SVC '.$row['client_name'];
+    $sched_res[$row['schedule_id']] = $row;
+}
+echo json_encode($sched_res);
+
+}
 //Display All Schedules 
 if (isset($_POST['action'])&& $_POST['action'] == 'display_schedule'){
 

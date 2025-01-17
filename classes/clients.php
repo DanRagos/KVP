@@ -160,6 +160,21 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 		return $row;
 		
 	}
+
+	public function display_schedule_contract() {
+		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, cl.client_name from schedule as s LEFT JOIN contract as c on s.contract_id = c.contract_id LEFT JOIN clients as cl on c.client_id = cl.client_id WHERE s.status != 2 AND c.isActive = 1";
+		$stmt = $this -> conn ->prepare ($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
+	public function display_schedule_sv() {
+		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, CASE WHEN sc.guest = 0 THEN sc.guest_name WHEN sc.guest = 1 THEN c1.client_name WHEN sc.guest = 2 THEN c2.client_name ELSE NULL END AS client_name FROM schedule AS s LEFT JOIN service_call AS sc ON s.sv_id = sc.sv_id LEFT JOIN clients AS c1 ON sc.client_id = c1.client_id LEFT JOIN contract AS ct ON sc.contract_id = ct.contract_id LEFT JOIN clients AS c2 ON ct.client_id = c2.client_id WHERE s.schedule_type = 2 and s.status !=2";
+		$stmt = $this -> conn ->prepare ($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
 	// Display Schedule
 	public function display_schedule () {
 		$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
