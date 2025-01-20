@@ -80,7 +80,7 @@ foreach($mergedResults as $row){
 	$row['status'] = "Unresolved";
 	break;
 	}
-	
+
 	$row['title'] = $row['schedule_type'] == 1 ? 'PMS '.$row['client_name'] : 'SVC '.$row['client_name'];
     $sched_res[$row['schedule_id']] = $row;
 }
@@ -126,6 +126,15 @@ foreach($result as $row){
     $sched_res[$row['schedule_id']] = $row;
 }
 echo json_encode($sched_res);
+}
+
+if (isset($_GET["action"]) && $_GET["action"]== 'display_schedule_tableView') {
+	$contract_sched = $client -> display_schedule_contract();
+	$sv_sched = $client -> display_schedule_sv();
+	$mergedResults = array_merge($contract_sched, $sv_sched);
+	echo json_encode(["data" => $mergedResults]);
+
+
 }
 
 if (isset($_GET['action'])&& $_GET['action'] == 'display_schedule_table'){

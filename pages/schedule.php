@@ -196,17 +196,17 @@
 
               let db = 10;
                table = $('#tableCalendar').DataTable({
-                  stateSave: true,
-                  processing: true,
-                  serverSide: true,
-                  scrollY: '45vh',
-                  scrollX: true,
+
+                stateSave: true,
+                processing: true,
+
                   ajax: {
-                      url: '../php/ssp_list.php',
+                      url: '../php/process.php',
                       type: 'GET',
                       data: {
-                          db: db,
+                        action: "display_schedule_tableView"
                       },
+                      dataSrc: "data"
                   },
                   columns: [{
                           data: 'schedule_id',
@@ -237,7 +237,7 @@
                               return '<div class="align-middle text-center text-sm">' +
                                   '<h6 class="mb-0 text-sm">' + row.client_name +
                                   '</h6>' +
-                                  '<p class="text-xs text-secondary mb-0">' + row.address +
+                                  '<p class="text-xs text-secondary mb-0">' + row.client_address +
                                   '</p>' +
                                   '</div>';
                           }
@@ -299,13 +299,13 @@
                           }
                       },
                       {
-                          data: 'rep_problem',
+                          data: 'problem',
                           render: function(data, type, row) {
-                              return '<div class="align-middle text-center text-sm">' +
-                                  '<p class="text-sm font-weight-bold mb-0">' + row
-                                  .rep_problem +
-                                  '</p>' +
-                                  '</div>';
+                            let problem = row.problem ? row.problem : " ";
+                              return `<div class="align-middle text-center text-sm"> 
+                                  <p class="text-sm font-weight-bold mb-0"> ${problem} 
+                                  </p>
+                                  </div>`;
                           }
                       },
 
@@ -315,11 +315,11 @@
                           defaultContent: '',
                           render: function(data, type, row) {
                               return `
-    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
-        <button type="button" data-id="${row.schedule_id}" class="btn btn-secondary no_margin confirmSchedule">
-            <i class="fa fa-check"></i>
-        </button>
-    </span>`;
+                            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Confirm Schedule">
+                                <button type="button" data-id="${row.schedule_id}" class="btn btn-secondary no_margin confirmSchedule">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </span>`;
 
                           },
                           width: "15px"

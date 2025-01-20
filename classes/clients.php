@@ -153,7 +153,7 @@ class Clients extends Db {
 	//Display Contract
 		public function displayContract(){
 		$sql = "SELECT *, machine_type.machine_name from clients inner join contract on clients.client_id = contract.client_id
-left join machine_type on contract.machine_type = machine_type.machine_id";
+		left join machine_type on contract.machine_type = machine_type.machine_id";
 		$stmt = $this -> conn -> prepare($sql);
 		$row = $stmt ->execute([]);
 		$row = $stmt -> fetchAll(PDO::FETCH_ASSOC);
@@ -162,14 +162,64 @@ left join machine_type on contract.machine_type = machine_type.machine_id";
 	}
 
 	public function display_schedule_contract() {
-		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, cl.client_name from schedule as s LEFT JOIN contract as c on s.contract_id = c.contract_id LEFT JOIN clients as cl on c.client_id = cl.client_id WHERE s.status != 2 AND c.isActive = 1";
+		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, cl.client_name, m.machine_name, c.brand, c.model, cl.client_address, NULL AS problem FROM schedule AS s LEFT JOIN contract AS c ON s.contract_id = c.contract_id LEFT JOIN clients AS cl ON c.client_id = cl.client_id LEFT JOIN machine_type as m ON c.machine_type = m.machine_id WHERE s.status != 2 AND c.isActive = 1";
 		$stmt = $this -> conn ->prepare ($sql);
 		$stmt->execute();
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
 	}
 	public function display_schedule_sv() {
-		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, CASE WHEN sc.guest = 0 THEN sc.guest_name WHEN sc.guest = 1 THEN c1.client_name WHEN sc.guest = 2 THEN c2.client_name ELSE NULL END AS client_name FROM schedule AS s LEFT JOIN service_call AS sc ON s.sv_id = sc.sv_id LEFT JOIN clients AS c1 ON sc.client_id = c1.client_id LEFT JOIN contract AS ct ON sc.contract_id = ct.contract_id LEFT JOIN clients AS c2 ON ct.client_id = c2.client_id WHERE s.schedule_type = 2 and s.status !=2";
+		$sql = "SELECT 
+				s.schedule_id, 
+				s.schedule_date, 
+				s.status, 
+				s.schedule_type, 
+				sc.rep_problem AS problem,
+				CASE 
+					WHEN sc.guest = 0 THEN sc.guest_name 
+					WHEN sc.guest = 1 THEN c1.client_name 
+					WHEN sc.guest = 2 THEN c2.client_name 
+					ELSE NULL 
+				END AS client_name,
+				CASE 
+					WHEN sc.guest = 0 THEN sc.guest_address 
+					WHEN sc.guest = 1 THEN c1.client_address 
+					WHEN sc.guest = 2 THEN c2.client_address 
+					ELSE NULL 
+				END AS client_address,
+				CASE 
+					WHEN sc.guest IN (0, 1) THEN m1.machine_name 
+					WHEN sc.guest = 2 THEN m2.machine_name 
+					ELSE NULL 
+				END AS machine_name,
+				CASE 
+					WHEN sc.guest IN (0, 1) THEN sc.brand 
+					WHEN sc.guest = 2 THEN ct.brand 
+					ELSE NULL 
+				END AS brand,
+				CASE 
+					WHEN sc.guest IN (0, 1) THEN sc.model 
+					WHEN sc.guest = 2 THEN ct.model 
+					ELSE NULL 
+				END AS model
+			FROM 
+				schedule AS s
+			LEFT JOIN 
+				service_call AS sc ON s.sv_id = sc.sv_id
+			LEFT JOIN 
+				clients AS c1 ON sc.client_id = c1.client_id
+			LEFT JOIN 
+				contract AS ct ON sc.contract_id = ct.contract_id
+			LEFT JOIN 
+				clients AS c2 ON ct.client_id = c2.client_id
+			LEFT JOIN 
+				machine_type AS m1 ON sc.machine_type = m1.machine_id
+			LEFT JOIN 
+				machine_type AS m2 ON ct.machine_type = m2.machine_id
+			WHERE 
+				s.schedule_type = 2 
+				AND s.status != 2 AND
+				 (ct.isActive = 1 OR ct.contract_id IS NULL) ";
 		$stmt = $this -> conn ->prepare ($sql);
 		$stmt->execute();
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -226,13 +276,58 @@ $result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 return $result;
 	}
 	public function display_pend_sv (){
-		$sql = "SELECT schedule.*, clients.imglink, COALESCE(service_call.guest_name, clients.client_name) 
-		AS clientName, COALESCE (service_call.guest_address, clients.client_address)AS clientAddress, 
-		COALESCE(contract.brand, service_call.brand) as brand , COALESCE(contract.model, service_call.model) as model
-		 from schedule INNER JOIN service_call ON schedule.sv_id = service_call.sv_id 
-		 LEFT JOIN contract on service_call.contract_id = contract.contract_id 
-		 LEFT JOIN clients ON service_call.client_id = clients.client_id where schedule.status != 2 
-		AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-31')";
+		$sql = "SELECT 
+					s.schedule_id, 
+					s.schedule_date, 
+					s.status, 
+					s.schedule_type, 
+					sc.rep_problem AS problem,
+					COALESCE (c1.imglink, c2.imglink) as imglink,
+					CASE 
+						WHEN sc.guest = 0 THEN sc.guest_name 
+						WHEN sc.guest = 1 THEN c1.client_name 
+						WHEN sc.guest = 2 THEN c2.client_name 
+						ELSE NULL 
+					END AS client_name,
+					CASE 
+						WHEN sc.guest = 0 THEN sc.guest_address 
+						WHEN sc.guest = 1 THEN c1.client_address 
+						WHEN sc.guest = 2 THEN c2.client_address 
+						ELSE NULL 
+					END AS client_address,
+					CASE 
+						WHEN sc.guest IN (0, 1) THEN m1.machine_name 
+						WHEN sc.guest = 2 THEN m2.machine_name 
+						ELSE NULL 
+					END AS machine_name,
+					CASE 
+						WHEN sc.guest IN (0, 1) THEN sc.brand 
+						WHEN sc.guest = 2 THEN ct.brand 
+						ELSE NULL 
+					END AS brand,
+					CASE 
+						WHEN sc.guest IN (0, 1) THEN sc.model 
+						WHEN sc.guest = 2 THEN ct.model 
+						ELSE NULL 
+					END AS model
+				FROM 
+					schedule AS s
+				LEFT JOIN 
+					service_call AS sc ON s.sv_id = sc.sv_id
+				LEFT JOIN 
+					clients AS c1 ON sc.client_id = c1.client_id
+				LEFT JOIN 
+					contract AS ct ON sc.contract_id = ct.contract_id
+				LEFT JOIN 
+					clients AS c2 ON ct.client_id = c2.client_id
+				LEFT JOIN 
+					machine_type AS m1 ON sc.machine_type = m1.machine_id
+				LEFT JOIN 
+					machine_type AS m2 ON ct.machine_type = m2.machine_id
+				WHERE 
+					s.schedule_type = 2 
+					AND s.status != 2
+	AND s.schedule_date <  DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
@@ -520,7 +615,16 @@ public function pendPms() {
     return $stmt->fetchColumn();
 }
 public function pendSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date <= DATE_FORMAT(CURRENT_DATE, '%Y-%m-31') and schedule.contract_id  = 0 and schedule.status != 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule
+			LEFT JOIN 
+				service_call ON schedule.sv_id = service_call.sv_id
+			LEFT JOIN 
+				contract ON service_call.contract_id = contract.contract_id
+			WHERE 
+				(contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract at all
+				AND schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') -- Match up to the last day of the current month
+				AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
+				AND schedule.status != 2;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -534,6 +638,46 @@ public function resolved() {
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
+}
+
+public function resolved_all() {
+	$sql = "SELECT 
+    SUM(allSchedule) AS totalSchedules
+FROM (
+    -- Count schedules with status = 2, linked to an active contract, within the current month
+    SELECT 
+        COUNT(schedule.schedule_id) AS allSchedule 
+    FROM 
+        schedule 
+    LEFT JOIN 
+        contract ON schedule.contract_id = contract.contract_id 
+    WHERE 
+        schedule.status = 2 
+        AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+        AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE()) 
+        AND contract.isActive = 1
+
+    UNION ALL
+
+    -- Count schedules linked to service calls, active contracts, or no contract, excluding status 2
+    SELECT 
+        COUNT(schedule.schedule_id) AS allSchedule 
+    FROM 
+        schedule 
+    LEFT JOIN 
+        service_call ON schedule.sv_id = service_call.sv_id 
+    LEFT JOIN 
+        contract ON service_call.contract_id = contract.contract_id 
+    WHERE 
+        (contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract
+        AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
+        AND schedule.status = 2 
+        AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+        AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE())
+) AS combinedCounts;";
+	    $stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		return $stmt->fetchColumn();
 }
 public function schedule() {
     $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0";

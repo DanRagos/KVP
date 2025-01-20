@@ -7,7 +7,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'dboardCards'){
 	$pms = $client->countAllPms();
 	$pendSv = $client->pendSv();
 	$pendPms = $client->pendPms();
-	$resolved = $client->resolved();
+	$resolved = $client->resolved_all();
 	$schedule = $client->schedule();
 	$contract = $client->contractExpire();
 	$exParts = $client->expiredPartsCount();
@@ -39,8 +39,8 @@ if(isset($_GET['action'])&& $_GET['action']=='pendingSvModal'){
 			<img src="'.$row['imglink'].'" class="avatar avatar-sm me-3 border-radius-lg" alt="user2">
 		  </div>
 		  <div class="d-flex flex-column justify-content-center">
-			<h6 class="text-center mb-0 text-sm clientName">'.$row['clientName'].'</h6>
-			<p class="text-center text-xs text-secondary mb-0">'.$row['clientAddress'].'</p>
+			<h6 class="text-center mb-0 text-sm clientName">'.$row['client_name'].'</h6>
+			<p class="text-center text-xs text-secondary mb-0">'.$row['client_address'].'</p>
 		  </div>
 		</div>
 		</div>
