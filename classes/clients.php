@@ -162,7 +162,10 @@ class Clients extends Db {
 	}
 
 	public function display_schedule_contract() {
-		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, cl.client_name, m.machine_name, c.brand, c.model, cl.client_address, NULL AS problem FROM schedule AS s LEFT JOIN contract AS c ON s.contract_id = c.contract_id LEFT JOIN clients AS cl ON c.client_id = cl.client_id LEFT JOIN machine_type as m ON c.machine_type = m.machine_id WHERE s.status != 2 AND c.isActive = 1";
+		$sql = "SELECT s.schedule_id, s.schedule_date, s.status, s.schedule_type, cl.client_name, m.machine_name, c.brand, c.model, cl.client_address, 
+		NULL AS problem FROM schedule AS s LEFT JOIN contract AS c ON s.contract_id = c.contract_id
+		 LEFT JOIN clients AS cl ON c.client_id = cl.client_id 
+		 LEFT JOIN machine_type as m ON c.machine_type = m.machine_id WHERE s.status != 2 AND c.isActive = 1 AND s.schedule_type = 1";
 		$stmt = $this -> conn ->prepare ($sql);
 		$stmt->execute();
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -258,23 +261,110 @@ class Clients extends Db {
 	}
 
 	public function display_schedule_month (){
-		$sql = "SELECT schedule.*, COALESCE(clients.client_name, service_call.guest_name, 
-		COALESCE((SELECT clients.client_name FROM clients 
-		WHERE clients.client_id = service_call.client_id), 'Fallback Client Name')) AS client_name, 
-		COALESCE(clients.client_address, service_call.guest_address,
-		 COALESCE((SELECT clients.client_address FROM clients where clients.client_id = service_call.client_id), 'Null'))as client_address,
-		  COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') AS imglink, COALESCE(contract.brand, service_call.brand) AS brand, 
-		  COALESCE(contract.model, service_call.model) AS model FROM schedule 
-		  LEFT JOIN service_call ON schedule.sv_id = service_call.sv_id
-          LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
-          LEFT JOIN clients ON contract.client_id = clients.client_id 
-		  WHERE schedule.schedule_date 
-		BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0";
-$stmt = $this ->conn ->prepare($sql);
-$stmt -> execute([]);
-$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
-return $result;
-	}
+		$sql = "SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			sc.rep_problem AS problem,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_name 
+				WHEN sc.guest = 1 THEN c1.client_name 
+				WHEN sc.guest = 2 THEN c2.client_name 
+				ELSE NULL 
+			END AS client_name,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_address 
+				WHEN sc.guest = 1 THEN c1.client_address 
+				WHEN sc.guest = 2 THEN c2.client_address 
+				ELSE NULL 
+			END AS client_address,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN m1.machine_name 
+				WHEN sc.guest = 2 THEN m2.machine_name 
+				ELSE NULL 
+			END AS machine_name,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.brand 
+				WHEN sc.guest = 2 THEN ct.brand 
+				ELSE NULL 
+			END AS brand,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.model 
+				WHEN sc.guest = 2 THEN ct.model 
+				ELSE NULL 
+			END AS model,
+			CASE 
+				WHEN sc.guest = 0 THEN NULL 
+				WHEN sc.guest = 1 THEN c1.imglink
+				WHEN sc.guest = 2 THEN c2.imglink
+				ELSE NULL 
+			END AS imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			service_call AS sc ON s.sv_id = sc.sv_id
+		LEFT JOIN 
+			clients AS c1 ON sc.client_id = c1.client_id
+		LEFT JOIN 
+			contract AS ct ON sc.contract_id = ct.contract_id
+		LEFT JOIN 
+			clients AS c2 ON ct.client_id = c2.client_id
+		LEFT JOIN 
+			machine_type AS m1 ON sc.machine_type = m1.machine_id
+		LEFT JOIN 
+			machine_type AS m2 ON ct.machine_type = m2.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+			s.schedule_type = 2 
+			AND s.status != 2 
+			AND (ct.isActive = 1 OR ct.contract_id IS NULL)
+			AND YEAR(s.schedule_date) = YEAR(CURRENT_DATE())
+			AND MONTH(s.schedule_date) = MONTH(CURRENT_DATE())
+
+		UNION ALL
+
+		SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			NULL AS problem,
+			cl.client_name, 
+			cl.client_address, 
+			m.machine_name, 
+			c.brand, 
+			c.model,
+			cl.imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			contract AS c ON s.contract_id = c.contract_id
+		LEFT JOIN 
+			clients AS cl ON c.client_id = cl.client_id
+		LEFT JOIN 
+			machine_type AS m ON c.machine_type = m.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+			s.status != 2 
+			AND c.isActive = 1
+			AND YEAR(s.schedule_date) = YEAR(CURRENT_DATE())
+			AND MONTH(s.schedule_date) = MONTH(CURRENT_DATE());";
+
+	$stmt = $this ->conn ->prepare($sql);
+	$stmt -> execute([]);
+	$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
+	return $result;
+		
+}
 	public function display_pend_sv (){
 		$sql = "SELECT 
 					s.schedule_id, 
@@ -345,19 +435,212 @@ return $result;
 		return $result;
 	}
 	public function display_resolved_month (){
-		$sql = "SELECT accomplished_schedule.id as accomp_id, accomplished_schedule.accomp_status, accomplished_schedule.withC, 
-		schedule.*, COALESCE(contract.contract_id, service_call.sv_id) AS id, COALESCE(contract.brand, service_call.brand) as brand, 
-		COALESCE(contract.model, service_call.model) as model, COALESCE(clients.client_name, CASE WHEN service_call.guest = 0 THEN service_call.guest_name END) AS client_name, 
-		COALESCE(clients.imglink, '../image/uploads/mv santiago.webp') as imglink, COALESCE(clients.client_address, service_call.guest_address) AS client_address, service_call.rep_problem, accomplished_schedule.accomp_date 
-		FROM schedule LEFT JOIN service_call ON (schedule.schedule_type = 2 AND schedule.sv_id = service_call.sv_id) 
-		 LEFT JOIN contract ON schedule.contract_id = contract.contract_id OR service_call.contract_id = contract.contract_id 
-		LEFT JOIN clients ON (contract.client_id = clients.client_id) OR (service_call.client_id = clients.client_id) LEFT JOIN accomplished_schedule ON (schedule.schedule_id = accomplished_schedule.schedule_id) 
-		WHERE schedule.status IN (2, 3) AND MONTH(accomplished_schedule.accomp_date) = MONTH(CURRENT_DATE) 
-				AND YEAR(accomplished_schedule.accomp_date) = YEAR(CURRENT_DATE) ORDER BY schedule.schedule_id DESC";
+		$sql = "SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			sc.rep_problem AS problem,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_name 
+				WHEN sc.guest = 1 THEN c1.client_name 
+				WHEN sc.guest = 2 THEN c2.client_name 
+				ELSE NULL 
+			END AS client_name,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_address 
+				WHEN sc.guest = 1 THEN c1.client_address 
+				WHEN sc.guest = 2 THEN c2.client_address 
+				ELSE NULL 
+			END AS client_address,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN m1.machine_name 
+				WHEN sc.guest = 2 THEN m2.machine_name 
+				ELSE NULL 
+			END AS machine_name,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.brand 
+				WHEN sc.guest = 2 THEN ct.brand 
+				ELSE NULL 
+			END AS brand,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.model 
+				WHEN sc.guest = 2 THEN ct.model 
+				ELSE NULL 
+			END AS model,
+			CASE 
+				WHEN sc.guest = 0 THEN NULL 
+				WHEN sc.guest = 1 THEN c1.imglink
+				WHEN sc.guest = 2 THEN c2.imglink
+				ELSE NULL 
+			END AS imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			service_call AS sc ON s.sv_id = sc.sv_id
+		LEFT JOIN 
+			clients AS c1 ON sc.client_id = c1.client_id
+		LEFT JOIN 
+			contract AS ct ON sc.contract_id = ct.contract_id
+		LEFT JOIN 
+			clients AS c2 ON ct.client_id = c2.client_id
+		LEFT JOIN 
+			machine_type AS m1 ON sc.machine_type = m1.machine_id
+		LEFT JOIN 
+			machine_type AS m2 ON ct.machine_type = m2.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+			s.schedule_type = 2 
+			AND s.status IN(2,3) 
+			AND (ct.isActive = 1 OR ct.contract_id IS NULL)
+			AND YEAR(s.schedule_date) = YEAR(CURRENT_DATE())
+			AND MONTH(s.schedule_date) = MONTH(CURRENT_DATE())
+
+		UNION ALL
+
+		SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			NULL AS problem,
+			cl.client_name, 
+			cl.client_address, 
+			m.machine_name, 
+			c.brand, 
+			c.model,
+			cl.imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			contract AS c ON s.contract_id = c.contract_id
+		LEFT JOIN 
+			clients AS cl ON c.client_id = cl.client_id
+		LEFT JOIN 
+			machine_type AS m ON c.machine_type = m.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+			s.status IN(2,3)
+			AND c.isActive = 1
+			AND YEAR(s.schedule_date) = YEAR(CURRENT_DATE())
+			AND MONTH(s.schedule_date) = MONTH(CURRENT_DATE());";
 		$stmt = $this ->conn ->prepare($sql);
 		$stmt -> execute([]);
 		$result = $stmt ->fetchAll(PDO::FETCH_ASSOC);
 		return $result;
+	}
+
+	public function service_done_all () {
+		$sql = "SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			sc.rep_problem AS problem,
+			ct.svUnli,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_name 
+				WHEN sc.guest = 1 THEN c1.client_name 
+				WHEN sc.guest = 2 THEN c2.client_name 
+				ELSE NULL 
+			END AS client_name,
+			CASE 
+				WHEN sc.guest = 0 THEN sc.guest_address 
+				WHEN sc.guest = 1 THEN c1.client_address 
+				WHEN sc.guest = 2 THEN c2.client_address 
+				ELSE NULL 
+			END AS client_address,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN m1.machine_name 
+				WHEN sc.guest = 2 THEN m2.machine_name 
+				ELSE NULL 
+			END AS machine_name,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.brand 
+				WHEN sc.guest = 2 THEN ct.brand 
+				ELSE NULL 
+			END AS brand,
+			CASE 
+				WHEN sc.guest IN (0, 1) THEN sc.model 
+				WHEN sc.guest = 2 THEN ct.model 
+				ELSE NULL 
+			END AS model,
+			CASE 
+				WHEN sc.guest = 0 THEN NULL 
+				WHEN sc.guest = 1 THEN c1.imglink
+				WHEN sc.guest = 2 THEN c2.imglink
+				ELSE NULL 
+			END AS imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC,
+			ac.id as accomp_id
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			service_call AS sc ON s.sv_id = sc.sv_id
+		LEFT JOIN 
+			clients AS c1 ON sc.client_id = c1.client_id
+		LEFT JOIN 
+			contract AS ct ON sc.contract_id = ct.contract_id
+		LEFT JOIN 
+			clients AS c2 ON ct.client_id = c2.client_id
+		LEFT JOIN 
+			machine_type AS m1 ON sc.machine_type = m1.machine_id
+		LEFT JOIN 
+			machine_type AS m2 ON ct.machine_type = m2.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+			s.schedule_type = 2 
+			AND s.status IN(2,3) 
+			AND (ct.isActive = 1 OR ct.contract_id IS NULL)
+
+		UNION ALL
+
+		SELECT 
+			s.schedule_id, 
+			s.schedule_date, 
+			s.status, 
+			s.schedule_type, 
+			NULL AS problem,
+			c.svUnli,
+			cl.client_name, 
+			cl.client_address, 
+			m.machine_name, 
+			c.brand, 
+			c.model,
+			cl.imglink,
+			ac.accomp_date,
+			ac.accomp_status,
+			ac.withC,
+			ac.id as accomp_id
+		FROM 
+			schedule AS s
+		LEFT JOIN 
+			contract AS c ON s.contract_id = c.contract_id
+		LEFT JOIN 
+			clients AS cl ON c.client_id = cl.client_id
+		LEFT JOIN 
+			machine_type AS m ON c.machine_type = m.machine_id
+		LEFT JOIN 
+			accomplished_schedule as ac on s.schedule_id = ac.schedule_id
+		WHERE 
+		 s.status IN(2,3) 
+			AND c.isActive = 1";
+		$stmt = $this->conn->prepare($sql);
+		$stmt ->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+
 	}
 		public function get_schedule ($id) {
 			$sql = "SELECT schedule.schedule_id, schedule.schedule_date, schedule.status, schedule.schedule_type, 
@@ -377,12 +660,12 @@ return $result;
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
 		}
-		public function with_collection ($contract_id) {
-	$sql = "SELECT * from contract where contract_id = :contract_id";
-	$stmt = $this->conn->prepare($sql);
-	$stmt ->execute(['contract_id'=>$contract_id]);
-	$result = $stmt->fetch(PDO::FETCH_ASSOC);
-	return $result;
+	public function with_collection ($contract_id) {
+		$sql = "SELECT * from contract where contract_id = :contract_id";
+		$stmt = $this->conn->prepare($sql);
+		$stmt ->execute(['contract_id'=>$contract_id]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		return $result;
 }
 public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC) {
 	
@@ -591,19 +874,59 @@ left join machine_type on contract.machine_type = machine_type.machine_id where 
 		
 	}	
 public function countAllSchedule() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2 ";
+    $sql = "SELECT 
+		SUM(allSchedule) AS totalSchedules
+			FROM (
+				-- Count schedules with status = 2, linked to an active contract, within the current month
+				SELECT 
+					COUNT(schedule.schedule_id) AS allSchedule 
+				FROM 
+					schedule 
+				LEFT JOIN 
+					contract ON schedule.contract_id = contract.contract_id 
+				WHERE 
+					schedule.status = 2 
+					AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+					AND contract.isActive = 1
+
+				UNION ALL
+
+				-- Count schedules linked to service calls, active contracts, or no contract, excluding status 2
+				SELECT 
+					COUNT(schedule.schedule_id) AS allSchedule 
+				FROM 
+					schedule 
+				LEFT JOIN 
+					service_call ON schedule.sv_id = service_call.sv_id 
+				LEFT JOIN 
+					contract ON service_call.contract_id = contract.contract_id 
+				WHERE 
+					(contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract
+					AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
+					AND schedule.status = 2 
+					AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+			) AS combinedCounts;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function countAllSv() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  = 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule
+			LEFT JOIN 
+				service_call ON schedule.sv_id = service_call.sv_id
+			LEFT JOIN 
+				contract ON service_call.contract_id = contract.contract_id
+			WHERE 
+				(contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract at all
+				AND YEAR(`schedule_date`) = YEAR(CURRENT_DATE())
+			 AND schedule_type = 2 -- Schedule not directly linked to a contract
+				AND schedule.status = 2;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
 }
 public function countAllPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.contract_id  > 0 and YEAR(`schedule_date`) = YEAR(CURRENT_DATE()) and schedule.status = 2";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule RIGHT join contract on schedule.contract_id = contract.contract_id where YEAR(`schedule_date`) = YEAR(CURRENT_DATE())  and schedule.contract_id > 0 and schedule.status = 2 and contract.isActive = 1;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();
@@ -643,44 +966,77 @@ public function resolved() {
 public function resolved_all() {
 	$sql = "SELECT 
     SUM(allSchedule) AS totalSchedules
-FROM (
-    -- Count schedules with status = 2, linked to an active contract, within the current month
-    SELECT 
-        COUNT(schedule.schedule_id) AS allSchedule 
-    FROM 
-        schedule 
-    LEFT JOIN 
-        contract ON schedule.contract_id = contract.contract_id 
-    WHERE 
-        schedule.status = 2 
-        AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
-        AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE()) 
-        AND contract.isActive = 1
+		FROM (
+			-- Count schedules with status = 2, linked to an active contract, within the current month
+			SELECT 
+				COUNT(schedule.schedule_id) AS allSchedule 
+			FROM 
+				schedule 
+			LEFT JOIN 
+				contract ON schedule.contract_id = contract.contract_id 
+			WHERE 
+				schedule.status IN(2,3)
+				AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+				AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE()) 
+				AND contract.isActive = 1
 
-    UNION ALL
+			UNION ALL
 
-    -- Count schedules linked to service calls, active contracts, or no contract, excluding status 2
-    SELECT 
-        COUNT(schedule.schedule_id) AS allSchedule 
-    FROM 
-        schedule 
-    LEFT JOIN 
-        service_call ON schedule.sv_id = service_call.sv_id 
-    LEFT JOIN 
-        contract ON service_call.contract_id = contract.contract_id 
-    WHERE 
-        (contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract
-        AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
-        AND schedule.status = 2 
-        AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
-        AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE())
-) AS combinedCounts;";
-	    $stmt = $this->conn->prepare($sql);
-		$stmt->execute();
-		return $stmt->fetchColumn();
-}
-public function schedule() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule where schedule.schedule_date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') AND LAST_DAY(CURRENT_DATE) AND schedule.status = 0";
+			-- Count schedules linked to service calls, active contracts, or no contract, excluding status 2
+			SELECT 
+				COUNT(schedule.schedule_id) AS allSchedule 
+			FROM 
+				schedule 
+			LEFT JOIN 
+				service_call ON schedule.sv_id = service_call.sv_id 
+			LEFT JOIN 
+				contract ON service_call.contract_id = contract.contract_id 
+			WHERE 
+				(contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract
+				AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
+				AND schedule.status IN(2,3) 
+				AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+				AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE())
+		) AS combinedCounts;";
+				$stmt = $this->conn->prepare($sql);
+				$stmt->execute();
+				return $stmt->fetchColumn();
+		}
+		public function schedule() {
+			$sql = "SELECT 
+			SUM(allSchedule) AS totalSchedules
+		FROM (
+
+			SELECT 
+				COUNT(schedule.schedule_id) AS allSchedule 
+			FROM 
+				schedule 
+			LEFT JOIN 
+				contract ON schedule.contract_id = contract.contract_id 
+			WHERE 
+				schedule.status != 2 
+				AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+				AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE()) 
+				AND contract.isActive = 1
+
+			UNION ALL
+
+			-- Count schedules linked to service calls, active contracts, or no contract, excluding status 2
+			SELECT 
+				COUNT(schedule.schedule_id) AS allSchedule 
+			FROM 
+				schedule 
+			LEFT JOIN 
+				service_call ON schedule.sv_id = service_call.sv_id 
+			LEFT JOIN 
+				contract ON service_call.contract_id = contract.contract_id 
+			WHERE 
+				(contract.isActive = 1 OR contract.contract_id IS NULL) -- Include active contracts or no contract
+				AND schedule.contract_id = 0 -- Schedule not directly linked to a contract
+				AND schedule.status != 2 
+				AND YEAR(schedule.schedule_date) = YEAR(CURRENT_DATE()) 
+				AND MONTH(schedule.schedule_date) = MONTH(CURRENT_DATE())
+		) AS combinedCounts";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();

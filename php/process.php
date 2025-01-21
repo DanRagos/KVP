@@ -49,6 +49,11 @@ if (isset($_POST['action'])&& $_POST['action'] == 'display_users'){
 	echo $output;
 	}
 }
+//Service done version 2
+if (isset($_GET["action"]) && $_GET["action"] == "service_done_all") {
+	$all = $client -> service_done_all();
+	echo json_encode(["data" => $all]);
+}
 //Version 2
 if (isset($_POST['action'])&& $_POST['action'] == 'display_schedule_1'){
 	$contract_sched = $client -> display_schedule_contract();
@@ -1440,7 +1445,7 @@ if (isset($_GET['action'])&& $_GET['action'] == 'edit_pm_details'){
 	$output .= '
 	<div class="modal-header">
 	<img src="../img/line_jpg.jpg" class="img-fluid" style="width:25%;height:15%;padding-right:14px;" alt="...">
-	  <h5 class="modal-title " id="title"></h5>
+	  <h5 class="modal-title " id="title"> '.$result['client_name'].'</h5>
 	  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	</div>
 	<div class="modal-body">

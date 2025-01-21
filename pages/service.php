@@ -74,8 +74,8 @@
 				<label>Schedule Type:</label>
 				<select class="form-control" name="tool_type" id="tool_type"> 
 				<option selected> Select </option>
-				<option value="1"> PMS </option>
-				<option value="2"> SV Call </option>
+				<option value="PMS"> PMS </option>
+				<option value="SV"> SV Call </option>
 				<option value="3"> All </option>
 				</select>
 				</div>	
@@ -112,28 +112,137 @@
   <!--   Core JS Files   -->
    <?php include 'scripts.php'; ?>
 <script>
+  $(document).ready(function () {
+
+    function formattedDate(date) {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
+
+
+
     var db = 1;
 		var table= $('#example').DataTable({
 					 stateSave: true,
-					 processing: true,
-					 serverSide: true,
            scrollY: '45vh',
            scrollX: true,
-					ajax: {
-					url: '../php/ssp_list.php',
-					data: {db : db},
-					method:'GET',
-					},
-					"order":[0,'asc'],					
-				
+           sortable: true,
+              ajax: {
+                url: '../php/process.php',
+                dataSrc: "data",
+                method:'GET',
+                data: {
+                  action: "service_done_all"
+                }
+              },    		
+				columns: [
+          {
+            data: "schedule_id",
+            render: function (data, type, row) {
+              return `<h6 class="text-center mb-0 text-sm">${data}</h6> `;
+            }
+          },
+          {
+            data: "accomp_id",
+            render: function (data, type, row) {
+              return `<h6 class="text-center mb-0 text-sm">${data}</h6> `;
+            }
+          },
+          {
+            data: "client_name",
+            render: function (data, type, row) {
+              return `<h5 class="text-center text-xs text-secondary mb-0">${data}</h5> `;
+            }
+          },
+          {
+            data: "client_address",
+            render: function (data) {
+              return `<h5 class="text-center text-xs text-secondary mb-0">${data}</h5> `;
+            }
+          },
+          {
+            data: "schedule_type",
+            render: function (data){
+              let type = data == 2 ? "SV" : "PMS";
+              let color = data == 1 ? "primary" :  "success";
+              return ` <span class="badge badge-sm bg-gradient-${color}">${type}</span>`;
+            },
+            filter: function (data) {
+                return data; // Return the raw data for filtering
+              }
+          },
+          {
+            data: "brand",
+            render: function (data) {
+              return `<h5 class="text-center text-xs text-secondary mb-0">${data}</h5> `;
+            }
+          },
+          {
+            data: "model",
+            render: function (data) {
+              return `<h5 class="text-center text-xs text-secondary mb-0">${data}</h5> `;
+            }
+          },
+          {
+            data : "problem",
+            render: function (data) {
+              return `<h5 class="text-center text-xs text-secondary mb-0">${data ? data: ""}</h5> `;
+            }
+          },
+          {
+            data: "accomp_date",
+            type: "date",
+            render: {
+              display: function (data) {
+                if (data !== null) {
+                  let date = new Date(data);
+                  let formatted = formattedDate(date);
+                  return `<span class="badge badge-sm bg-gradient-info">${formatted}</span>`;
+                } else {
+                  return null; // Or an empty string if you prefer
+                }
+              },
+              filter: function (data) {
+                return data; // Return the raw data for filtering
+              },
+            },
+          },
+
+          {
+            data: "accomp_status",
+            render: function (data, type, row) {
+              let aStats = (row.withC > 0 && row.svUnli !=1 ) ? "W/Collection": " ";
+              let status =  (row.accomp_status == 2) ? `<span class="badge badge-sm bg-gradient-success">DONE ${aStats} </span>`
+              :  `<span class="badge badge-sm bg-gradient-warning">Unresolved ${aStats} </span>` ;
+              return `<span class ="justify-content-center align-middle text-center text-sm"> ${status} </span>`;
+            }
+          },
+          {
+            data: "accomp_id",
+            render: function (data, type, row ) {
+              return `<div class ="align-middle text-center text-sm">
+                      <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="View Report"> <button type="button" data-id="${row.accomp_id}" class="btn btn-secondary no_margin viewPms"><i class="fa-solid fa-eye"></i></span></button>
+                      <span class="data-bs-toggle="tooltip" data-bs-placement="top" title="Edit tool details"> <button type="button" data-id="${row.accomp_id} "data-bs-target = "#edit-pm-modal" data-bs-toggle="modal" class="btn btn-warning no_margin editPm"><i class="fa-solid fa-edit"></i></span></button>
+                      </div>`;
+            }
+          }
+
+         
+        ] 
 					
     });
- $('#month-filter').on('change', function() {
-    var value = $(this).val();
-    table.column(8).search(value).draw();
-  });	
+
+  $('#month-filter').on('change', function () {
+    var value = $(this).val(); // e.g., "2024-03" for March 2024
+    table.column(8).search(value).draw(); // Ensure column index matches `accomp_date`
+  });
+
 $('#tool_type').on('change', function() {
    var value = $(this).val();
+   console.log(value);
    if (value === '3') {
       table.columns(4).search('').draw();
    } else {
@@ -273,6 +382,10 @@ $('#tool_type').on('change', function() {
     });
   }
         });
+
+
+  });
+  
 	
 </script>
 </body>
