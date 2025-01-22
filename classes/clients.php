@@ -668,12 +668,11 @@ class Clients extends Db {
 		return $result;
 }
 public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC) {
-	
 	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `accomp_status`, `withC`)
 	VALUES ('', :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'aStatus'=>$status, 'withC'=>$withC]);
-	return true;
+	return $this->conn->lastInsertId();
 }
 public function update_accomp($serv_date, $diagnosis, $service_done, $recomm, $id) {
 	

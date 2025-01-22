@@ -130,6 +130,10 @@
            scrollY: '45vh',
            scrollX: true,
            sortable: true,
+           order: {
+              name: 'accomp_date',
+              dir: 'desc'
+          },
               ajax: {
                 url: '../php/process.php',
                 dataSrc: "data",

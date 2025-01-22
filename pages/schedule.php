@@ -163,6 +163,84 @@
               return $("#calendar").is(":visible");
           }
 
+          function sendEmail (accomp_id, schedID) {
+            console.log(`${accomp_id} ${schedID}`);
+            Swal.fire({
+                    title: 'Do you want email the service report?',
+                    showDenyButton: true,
+                    confirmButtonText: 'Confirm',
+                    denyButtonText: 'Cancel',
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '../php/process.php',
+                            method: 'get',
+                            data: {
+                                accomp_id: accomp_id,
+                                action: 'view_report'
+                            },
+                            success: function(response) {
+                                response["savePDF"] = true;
+                                $.ajax({
+                                    url: '../php/export_service.php',
+                                    type: 'POST',
+                                    data: { jsonData: response },
+                                    xhrFields: {
+                                        responseType: 'blob' // Set the response type to 'blob' to handle binary data
+                                    },
+                                    success: function(pdfResponse) {
+                                        if (pdfResponse) {
+                                            $.ajax({
+                                                url: "../php/email.php",
+                                                method: "POST",
+                                                data: {
+                                                    schedID: schedID
+                                                },
+                                                success: function (response1){
+                                                    let re = JSON.parse(response1);
+                                                    if (re.response == "success") {
+                                                           Swal.fire({
+                                                              icon: 'success',
+                                                              title: 'Email Sent',
+                                                              timer: 1500,
+                                                              timerProgressBar: true,
+                                                              didOpen: () => {
+                                                                  Swal.showLoading();
+                                                              },
+                                                              willClose: () => {
+                                                                  Swal.hideLoading();
+                                                                  if (isTableViewActive()) {
+                                                                    table.ajax.reload(null,false);
+                                                                  } else {
+                                                                      showSchedules();
+                                                                  }
+                                                              },
+                                                          });
+                                                    } else {
+                                                        Swal.fire({
+                                                            icon: "error",
+                                                            title: "Failed"
+                                                        });
+                                                    }
+                                                }
+                                            })
+                                        }
+                                    },
+                                    error: function(error) {
+                                        // Handle the error
+                                    }
+                                });
+                                
+                            }
+                        });
+
+                    } else if (result.isDenied) {
+                        Swal.fire('Changes are not saved', '', 'info')
+                    }
+                });
+          }
+
           showSchedules();
           $('#liCalendar').click(function() {
               $('#spinner').show();
@@ -761,24 +839,9 @@
                       contentType: false,
                       processData: false,
                       success: function(response) {
-                          console.log(response);
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Saved',
-                              timer: 1500,
-                              timerProgressBar: true,
-                              didOpen: () => {
-                                  Swal.showLoading();
-                              },
-                              willClose: () => {
-                                  Swal.hideLoading();
-                                  if (isTableViewActive()) {
-                                    table.ajax.reload(null,false);
-                                  } else {
-                                      showSchedules();
-                                  }
-                              },
-                          });
+                        let res = JSON.parse(response);
+                          sendEmail(res.accomp_id, formData.get('schedule_id'));
+                       
 
                           // Check which view is active and execute the appropriate function
 

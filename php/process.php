@@ -419,7 +419,6 @@ if ($result) {
 }
 //Update Schedule Details
 if (isset($_POST['action'])&& $_POST['action'] == 'update_sched'){
-print_r($_POST);
 $schedule_type = $_POST['schedule_type'];
 $contract_id = $_POST['contract_id'];
 $sv_id = $_POST['sv_id'];
@@ -436,7 +435,6 @@ $withC = 0;
 if ($schedule_type == '1') {
 	$frequency = $_POST['frequency'];
 	$contract_det = $client->get_contract_details($contract_id);
-	print_r($contract_det);
 	$add_count= $client->add_pms_count_1($contract_id);
 	if ($contract_det['count'] - 1 > 0) {
 	$add_pms_sched = $client->add_pms_sched ($contract_id, $frequency, $s_date);
@@ -445,7 +443,6 @@ if ($schedule_type == '1') {
 	}
 }
 else {
-	
 }
 	}
 
@@ -457,11 +454,9 @@ else {
 	if ($status != 3 ){
 		$add_sv_count =  $client->add_sv_count($check_sv_contract['contract_id'], $count);
 	}
-	
 	$withC =  $contract_det['sv_call'] > 0 ? 0 : 1;	
 	}
 	
-
 }
 
 $accomp = $client->accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC);
@@ -473,7 +468,6 @@ foreach ($s_by as $user) {
 $check = $client->check_user_service($user, $schedule_id);
 	if (!$check) {
 		$client->add_user_service($user, $schedule_id, 1);
-		echo 'check';
 
 	}
 	$client->user_notification($user, $notif_id);	
@@ -482,7 +476,9 @@ $check = $client->check_user_service($user, $schedule_id);
 
 }
 
- echo 'Success';
+ echo json_encode(["response" => "success", 
+						"accomp_id" => $accomp
+ ] );
 // print_r($_POST);
 // print_r($s_by);
 }

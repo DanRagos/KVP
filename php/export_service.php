@@ -129,8 +129,11 @@ $content .=" \n Generated at $date_today";
 // print a block of text using Write()
 		   $obj_pdf->SetFont('helvetica', '', 10); 
 		$obj_pdf->writeHTML($content, true, false, true, false, '');
-		 $pdfContent = $obj_pdf->Output('', 'S'); // Capture the PDF content as a string
-
+        $pdfContent = $obj_pdf->Output('', 'S'); // Capture the PDF content as a string
+        if (isset($jsonData["savePDF"])) {
+            $obj_pdf->Output(dirname(__FILE__).'\email_pdf\Service report.pdf', 'F');
+        }
+        
     // Set the appropriate headers for the response
     header('Content-Type: application/pdf');
     header('Content-Disposition: inline; filename="test.pdf"');
