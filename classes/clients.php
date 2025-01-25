@@ -931,7 +931,9 @@ public function countAllPms() {
     return $stmt->fetchColumn();
 }
 public function pendPms() {
-    $sql = "SELECT COUNT(schedule_id) as allSchedule FROM schedule RIGHT join contract on schedule.contract_id = contract.contract_id where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')  and schedule.contract_id > 0 and schedule.status != 2 and contract.isActive = 1;";
+    $sql = "SELECT COUNT(schedule_id) as allSchedule 
+	FROM schedule RIGHT join contract on schedule.contract_id = contract.contract_id 
+	where schedule.schedule_date < DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')  and schedule.contract_id > 0 and schedule.status != 2 and contract.isActive = 1;";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute();
     return $stmt->fetchColumn();

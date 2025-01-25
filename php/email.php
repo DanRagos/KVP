@@ -74,7 +74,7 @@ try {
           <tr>
             <td style="padding: 20px;">
               <h1 style="font-size: 24px; color: #333333; margin-bottom: 20px;">Notification</h1>
-              <p style="font-size: 16px; color: #718096; margin-bottom: 17px;">Greetins,</p>
+              <p style="font-size: 16px; color: #718096; margin-bottom: 17px;">Greetings,</p>
               
               <p style="font-size: 16px; color: #718096; margin-bottom: 17px;">  
               Please find the details in the attached report for your review :</p>
