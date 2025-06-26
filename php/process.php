@@ -420,7 +420,7 @@ if ($result) {
 //Update Schedule Details
 if (isset($_POST['action'])&& $_POST['action'] == 'update_sched'){
 $schedule_type = $_POST['schedule_type'];
-$contract_id = $_POST['contract_id'];
+$contract_id = isset($_POST['contract_id']) && $_POST['contract_id'] !== '' ? (int)$_POST['contract_id'] : 0;
 $sv_id = $_POST['sv_id'];
 $schedule_id = $_POST['schedule_id'];
 $s_date = $_POST['s_date'];
@@ -580,7 +580,8 @@ if (isset($_POST['unliSv']) && $_POST['unliSv'] == 1) {
 	$unliSv = 1;
 }
 else {
-	$pms_count = $_POST['pms_count'];
+	$pms_count = isset($_POST['pms_count']) && is_numeric($_POST['pms_count']) ? (int)$_POST['pms_count'] : 0;
+
 	$unliSv = 0;
 }
 
@@ -617,7 +618,7 @@ do {
 } while($pms < $coverage);
 
 $result = $client -> add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type, $unliSv );
-echo $result;
+echo json_encode($result);
 
 }
 
@@ -767,7 +768,9 @@ if (isset($_POST['ctr'])){
 if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	print_r($_POST);
 	$client_id = $_POST['client_id'];
-	$contract_id = $_POST['contract_id'];
+	$contract_id = isset($_POST['contract_id']) && $_POST['contract_id'] !== '' ? (int)$_POST['contract_id'] : 0;
+
+
 	
 	$sv_type = 2;
 	if ($_POST['pmsCheck'] == 0) {
@@ -791,6 +794,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_sched'){
 	$rep_problem = $_POST['rep_problem'];
 	$sv_date = $_POST['sv_date'];
 	$last_id = $client->add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date);
+	echo json_encode($last_id);
 	$sched_Date = date('M d, Y', strtotime($sv_date));
 	$service_by = explode("," , $_POST['service_by']); 
 	$notif_title = "Service Assigned";
@@ -817,7 +821,7 @@ if (isset($_POST['action'])&& $_POST['action'] == 'confirm_g_sched'){
 	$rep_problem = $_POST[5]['value'];
     $sv_date = $_POST[6]['value'];
 	$last_id = $client->add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date);
-
+	echo json_encode($last_id);
 	$sched_Date = date('M d, Y', strtotime($sv_date));
 	$service_by = $_POST['service_by1'];
 	$notif_title = "Service Assigned";

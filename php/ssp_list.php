@@ -4,9 +4,9 @@
 // SQL server connection information
 $sql_details = array(
     'user' => 'root',
-    'pass' => '',
+    'pass' => 'Dandan2x!',
     'db'   => 'kvp',
-    'host' => 'localhost'
+    'host' => 'localhost:3310',
 );
 
 /*-----------------------------------------------------------------------------------Server Side for  Active List Datatable-------------------------------------------------------------------*/

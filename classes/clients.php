@@ -53,8 +53,8 @@ class Clients extends Db {
 	
 	//Register Client
 		public function register_client($client_name,$client_address, $contact_person, $contact_email, $img_link){
-		$sql = "INSERT INTO `clients` (`client_id`, `client_name`, `client_address`, `contact_person`, `contact_email`, `imglink`)
-		VALUES ('', :client_name, :client_address, :contact_person, :contact_email, :img_link)";
+		$sql = "INSERT INTO `clients` ( `client_name`, `client_address`, `contact_person`, `contact_email`, `imglink`)
+		VALUES (:client_name, :client_address, :contact_person, :contact_email, :img_link)";
 		$stmt = $this ->conn->prepare($sql);
 		$result = $stmt->execute(['client_name' => $client_name,'client_address' => $client_address, 'contact_person' => $contact_person,
 		'contact_email' =>$contact_email, 'img_link' => $img_link]);
@@ -96,59 +96,187 @@ class Clients extends Db {
 		
 	}
 		//Add Contract to Clients 
-	public function add_contract($client_id, $machine_type, $brand, $model,$frequency, $contract_type, $pms_count, $first_pms ,$turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type, $svUnli ) {
-		$sql = "INSERT INTO `contract` (`contract_id`, `client_id`, `machine_type`,`brand`, `model`, `frequency`, `turn_over`, `coverage`, `pTurn_over`, `pCoverage`, `status`, `count`, `total`, `sv_call`, `svUnli`)
-		VALUES ('', :client_id, :machine_type, :brand,:model, :frequency, :turn_over, :coverage, :pTurn_over, :pCoverage, :status, :count, :total, :sv_call, :svUnli);";
-		$stmt = $this -> conn -> prepare($sql);
-		$stmt ->execute(['client_id'=>$client_id,'machine_type' =>$machine_type,'brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency,
-		'turn_over'=>$turn_over, 'coverage'=>$coverage, 'pTurn_over'=>$pTurn_over, 'pCoverage' =>$pCoverage, 'status' =>$contract_type,'count'=>$count, 'total'=>$count, 'sv_call'=>$pms_count, 'svUnli'=>$svUnli]);
-		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
-		$last_id = $this->conn->lastInsertId();
-		$add_sched = $this->add_schedule_contract($last_id, $first_pms, $type);
-		return $row;
-		
-	}
+public function add_contract($client_id, $machine_type, $brand, $model, $frequency, $contract_type, $pms_count, $first_pms, $turn_over, $coverage, $pTurn_over, $pCoverage, $count, $type, $svUnli) {
+    try {
+        $sql = "INSERT INTO `contract` 
+                (`client_id`, `machine_type`, `brand`, `model`, `frequency`, `turn_over`, `coverage`, `pTurn_over`, `pCoverage`, `status`, `count`, `total`, `sv_call`, `svUnli`)
+                VALUES 
+                (:client_id, :machine_type, :brand, :model, :frequency, :turn_over, :coverage, :pTurn_over, :pCoverage, :status, :count, :total, :sv_call, :svUnli)";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            'client_id' => $client_id,
+            'machine_type' => $machine_type,
+            'brand' => $brand,
+            'model' => $model,
+            'frequency' => $frequency,
+            'turn_over' => $turn_over,
+            'coverage' => $coverage,
+            'pTurn_over' => $pTurn_over,
+            'pCoverage' => $pCoverage,
+            'status' => $contract_type,
+            'count' => $count,
+            'total' => $count,
+            'sv_call' => $pms_count,
+            'svUnli' => $svUnli
+        ]);
+
+        $last_id = $this->conn->lastInsertId();
+
+       if (!$last_id) {
+    return json_encode([
+        'status' => 'error',
+        'message' => 'Failed to insert contract.',
+        'error_info' => $stmt->errorInfo() // 🔍 Add this
+    ]);
+}
+
+
+        $sched_result = $this->add_schedule_contract($last_id, $first_pms, $type);
+
+        return json_encode([
+            'status' => 'success',
+            'contract_id' => $last_id,
+            'schedule_result' => $sched_result
+        ]);
+
+    } catch (PDOException $e) {
+        return json_encode([
+            'status' => 'error',
+            'message' => 'Insert Contract Failed: ' . $e->getMessage()
+        ]);
+    }
+}
+
 	// Add schedule 
 	
-	public function add_schedule_contract($last_id, $schedule_date, $type){
-		$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
-		VALUES ('', :type, :last_id, '',  :schedule_date, '')";
-		$stmt = $this -> conn -> prepare($sql);
-		$stmt ->execute(['type'=>$type, 'last_id'=>$last_id, 'schedule_date'=>$schedule_date]);
-		return true;
-		
+public function add_schedule_contract($last_id, $schedule_date, $type) {
+    try {
+        $sql = "INSERT INTO `schedule` 
+                (`schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
+                VALUES (:type, :last_id, NULL, :schedule_date, 0)";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            'type' => $type,
+            'last_id' => $last_id,
+            'schedule_date' => $schedule_date
+        ]);
+
+        return [
+            'status' => 'success',
+            'schedule_id' => $this->conn->lastInsertId()
+        ];
+
+    } catch (PDOException $e) {
+        return [
+            'status' => 'error',
+            'message' => 'Insert Schedule Failed: ' . $e->getMessage()
+        ];
+    }
+}
+
+
+	public function add_schedule_sv($last_id, $schedule_date, $type) {
+		try {
+			$sql = "INSERT INTO `schedule` 
+					(`schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
+					VALUES (:type, NULL, :last_id, :schedule_date, 0)";
+
+			$stmt = $this->conn->prepare($sql);
+			$stmt->execute([
+				':type' => $type,
+				':last_id' => $last_id,
+				':schedule_date' => $schedule_date
+			]);
+
+			return $this->conn->lastInsertId();
+		} catch (PDOException $e) {
+			return json_encode([
+				'status' => 'error',
+				'message' => 'Schedule Insert Error: ' . $e->getMessage()
+			]);
+		}
 	}
-		public function add_schedule_sv($last_id, $schedule_date, $type){
-		$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
-		VALUES ('', :type,'', :last_id,  :schedule_date, '')";
-		$stmt = $this -> conn -> prepare($sql);
-		$stmt ->execute(['type'=>$type, 'last_id'=>$last_id, 'schedule_date'=>$schedule_date]);
-		$last_id = $this->conn->lastInsertId();
-		return $last_id;
-		
-	}
+
 	//Add SV Call Client
-	public function add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date){
-		$type = 2;
-	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES ('', :sv_type , :client_id,  :contract_id ,NULL , NULL, :machine_type, :brand, :model, :rep_problem)";
-		$stmt = $this->conn-> prepare($sql);
-		$stmt ->execute(['sv_type'=>$sv_type, 'client_id'=>$client_id, 'contract_id'=>$contract_id, 'brand'=> $brand, 'model'=>$model, 'machine_type'=>$machine_type, 'rep_problem'=>$rep_problem]);
-		$last_id = $this->conn->lastInsertId();
-		$last_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
-		return $last_sched;
-	}
+// Add SV Call Client
+public function add_sv_client($client_id, $sv_type, $contract_id, $machine_type, $brand, $model, $rep_problem, $sv_date) {
+    $type = 2;
+
+    try {
+        $sql = "INSERT INTO `service_call` 
+                (`guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
+                VALUES (:sv_type, :client_id, :contract_id, NULL, NULL, :machine_type, :brand, :model, :rep_problem)";
+        
+        $stmt = $this->conn->prepare($sql);
+        $executed = $stmt->execute([
+            'sv_type' => $sv_type,
+            'client_id' => $client_id,
+            'contract_id' => $contract_id,
+            'machine_type' => $machine_type,
+            'brand' => $brand,
+            'model' => $model,
+            'rep_problem' => $rep_problem
+        ]);
+
+        if (!$executed) {
+            return json_encode([
+                'status' => 'error',
+                'message' => 'Failed to insert into service_call',
+                'errorInfo' => $stmt->errorInfo()
+            ]);
+        }
+
+        $last_id = $this->conn->lastInsertId();
+
+        if (!$last_id || $last_id == 0) {
+            return json_encode([
+                'status' => 'error',
+                'message' => 'No service_call ID returned. Insert may have failed.'
+            ]);
+        }
+
+        $last_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
+
+        return json_encode([
+            'service_call_id' => $last_id,
+            'schedule_id' => $last_sched
+        ]);
+    } catch (PDOException $e) {
+        return json_encode([
+            'status' => 'error',
+            'message' => 'Service Call Insert Error: ' . $e->getMessage()
+        ]);
+    }
+}
+
+
 	//Add SV Call Guest
-		public function add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date){
+	public function add_sv_guest($gName, $gAddress, $machine_type, $brand, $model, $rep_problem, $sv_date) {
 		$type = 2;
-	    $sql = "INSERT INTO `service_call` (`sv_id`, `guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
-		VALUES ('', 0 , 0,  0 , :gName , :gAddress, :machine_type, :brand, :model, :rep_problem)";
-		$stmt = $this->conn-> prepare($sql);
-		$stmt ->execute(['gName'=>$gName, 'gAddress'=>$gAddress, 'machine_type'=>$machine_type, 'brand'=>$brand, 'model'=>$model, 'rep_problem'=>$rep_problem]);
+		$sql = "INSERT INTO `service_call` 
+			(`guest`, `client_id`, `contract_id`, `guest_name`, `guest_address`, `machine_type`, `brand`, `model`, `rep_problem`)
+			VALUES (0, 0, 0, :gName, :gAddress, :machine_type, :brand, :model, :rep_problem)";
+
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute([
+			':gName' => $gName,
+			':gAddress' => $gAddress,
+			':machine_type' => $machine_type,
+			':brand' => $brand,
+			':model' => $model,
+			':rep_problem' => $rep_problem
+		]);
+
 		$last_id = $this->conn->lastInsertId();
-		$add_sched = $this->add_schedule_sv($last_id, $sv_date, $type);
-		return $add_sched;
+
+		// Still add schedule, but do not return its result
+		$this->add_schedule_sv($last_id, $sv_date, $type);
+
+		return $last_id; // ✅ Return the service_call ID instead
 	}
+
 	
 	//Display Contract
 		public function displayContract(){
@@ -668,8 +796,8 @@ class Clients extends Db {
 		return $result;
 }
 public function accomplished_schedule($schedule_id, $s_date, $c_rep, $c_loc, $diagnosis, $c_done, $status, $c_recom, $withC) {
-	$sql = "INSERT INTO `accomplished_schedule` (`id`, `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `accomp_status`, `withC`)
-	VALUES ('', :schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
+	$sql = "INSERT INTO `accomplished_schedule` ( `schedule_id`, `accomp_date`, `diagnosis`, `service_don`, `recomm`, `accomp_status`, `withC`)
+	VALUES (:schedule_id, :s_date,  :diagnosis,  :c_done, :c_recom,  :aStatus, :withC)";
 	$stmt = $this->conn->prepare($sql);
 	$stmt -> execute(['schedule_id'=>$schedule_id, 's_date'=>$s_date, 'diagnosis'=>$diagnosis,'c_done'=>$c_done, 'c_recom'=>$c_recom, 'aStatus'=>$status, 'withC'=>$withC]);
 	return $this->conn->lastInsertId();
@@ -708,7 +836,7 @@ public function delete_svcall($sv_call) {
 }
 
 public function add_pms_sched ($contract_id, $frequency, $s_date){
-	$sql = "INSERT INTO `schedule` (`schedule_id`, `schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES ('', '1', :contract_id, 0, :s_date, '0')";
+	$sql = "INSERT INTO `schedule` (`schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) VALUES ('1', :contract_id, 0, :s_date, '0')";
 	$stmt = $this->conn->prepare($sql);
 	$months  = ($frequency == '1') ? 3 : ($frequency == '2' ? 6 : 12);
 	$new_date = date('Y-m-d', strtotime("+$months month", strtotime($s_date)));
