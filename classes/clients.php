@@ -137,7 +137,8 @@ public function add_contract($client_id, $machine_type, $brand, $model, $frequen
         return json_encode([
             'status' => 'success',
             'contract_id' => $last_id,
-            'schedule_result' => $sched_result
+			'schedule_type' =>$type,
+            'schedule_result' => $sched_result,
         ]);
 
     } catch (PDOException $e) {
@@ -154,7 +155,7 @@ public function add_schedule_contract($last_id, $schedule_date, $type) {
     try {
         $sql = "INSERT INTO `schedule` 
                 (`schedule_type`, `contract_id`, `sv_id`, `schedule_date`, `status`) 
-                VALUES (:type, :last_id, NULL, :schedule_date, 0)";
+                VALUES (:type, :last_id, 0, :schedule_date, 0)";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([
@@ -165,7 +166,10 @@ public function add_schedule_contract($last_id, $schedule_date, $type) {
 
         return [
             'status' => 'success',
-            'schedule_id' => $this->conn->lastInsertId()
+            'schedule_id' => $this->conn->lastInsertId(),
+			'type' => $type,
+			'contract_id' => $last_id,
+			'schedule_data' => $schedule_date
         ];
 
     } catch (PDOException $e) {
