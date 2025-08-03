@@ -871,12 +871,21 @@ public function get_contract($id) {
 	}
 
 	public function udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverageInput, $pTurn_over, $pCoverage, $status, $newCount, $newTotal, $sv_count ) {
-		$sql = "Update contract SET brand = :brand, model = :model, frequency = :frequency, turn_over = :turn_over, coverage = :coverage, pTurn_over = :pTurn_over, pCoverage = :pCoverage,
+		try{
+$sql = "Update contract SET brand = :brand, model = :model, frequency = :frequency, turn_over = :turn_over, coverage = :coverage, pTurn_over = :pTurn_over, pCoverage = :pCoverage,
 		status = :status, count = :newCount, total = :newTotal, sv_call = :sv_count WHERE contract_id = :contract_id";
 		$stmt = $this->conn->prepare($sql);
 		$result = $stmt->execute(['brand'=>$brand, 'model'=>$model, 'frequency'=>$frequency, 'turn_over'=>$turn_over, 'coverage'=>$coverageInput, 'pTurn_over'=>$pTurn_over,
 	'pCoverage'=>$pCoverage, 'status'=>$status, 'newCount'=>$newCount, 'newTotal'=>$newTotal, 'sv_count'=>$sv_count, 'contract_id'=>$contract_id]);
 		return $result; 
+		}
+		catch (PDOException $e) {
+        return json_encode([
+            'status' => 'error',
+            'message' => 'Insert Contract Failed: ' . $e->getMessage()
+        ]);
+    }
+		
 	}
 public function expire_sched($contract_id){
 	$sql = "Update contract SET status = 3 where contract_id = :contract_id";

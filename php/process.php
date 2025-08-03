@@ -1926,7 +1926,7 @@ do {
 
             );
 			$client->add_schedule_contract($contract_id, $firstPm, 1);
-			$client->udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverage_input, $pTurn_over, $pCoverage_input, $cType, $newCount, $newTotal, $sv_count );
+			$response = $client->udpate_contract($contract_id, $brand, $model, $frequency, $turn_over, $coverage_input, $pTurn_over, $pCoverage_input, $cType, $newCount, $newTotal, $sv_count );
         }
 		echo json_encode($response);
     } catch (Exception $e) {
